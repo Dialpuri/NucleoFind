@@ -32,6 +32,15 @@ cd cartographer
 pip install .
 ```
 ## Usage
+Specifying the model path is not required if the package was installed with `pip install .`
+
+Example Usage:
+
+```
+cartographer -i PDB.mtz -o PDB.map -intensity FWT -phase PHWT
+```
+
+
 ```
 usage: cartographer [-h] [-m M] -i I -o O [-r [R]] [-intensity [INTENSITY]] [-phase [PHASE]]
 
