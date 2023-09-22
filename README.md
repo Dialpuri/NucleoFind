@@ -10,14 +10,25 @@ Clone the project
 git clone https://github.com/Dialpuri/Cartographer.git
 ```
 
-Change directories into Cartographer/cartographer
+Change directories into Cartographer
 
 ```
-cd Cartographer/cartographer
+cd Cartographer
 ```
-Ensure you are in a python virtual environment and install using pip
+
+Create a Python virtual environment and entire the environment
+
+MacOS - `python3 -m virtualenv pyenv`
+
+Ubuntu - `virtualenv pyenv` 
 
 ```
+source pyenv/bin/activate
+```
+Install using pip
+
+```
+cd cartographer
 pip install .
 ```
 ## Usage
