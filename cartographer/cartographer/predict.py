@@ -9,7 +9,7 @@ import gemmi
 from tqdm import tqdm
 import time
 import argparse
-
+import site 
 
 class Prediction:
     def __init__(self, model_dir: str, use_cache: bool = True):
@@ -116,7 +116,7 @@ class Prediction:
 
     def _load_mtz(self, mtz_path: str, resolution_cutoff: float, column_names: List[str] = ["FWT", "PHWT"]):
         mtz = gemmi.read_mtz_file(mtz_path)
-        print("Reading mtz file ", mtz_path)
+        logging.info("Reading mtz file ", mtz_path)
         self.raw_grid = mtz.transform_f_phi_to_map(*column_names)
         # "sfcalc.F_phi.F", "sfcalc.F_phi.phi"
         if resolution_cutoff:
@@ -295,20 +295,33 @@ class Prediction:
                 predicted_map[x: x + 32, y: y + 32, z: z + 32] += arg_max
 
             count_map[x: x + 32, y: y + 32, z: z + 32] += 1
+            
+        predicted_map = predicted_map[
+            0:(32 * self.na),
+            0:(32 * self.nb),
+            0:(32 * self.nc),
+        ]
 
+        count_map = count_map[
+            0:(32 * self.na),
+            0:(32 * self.nb),
+            0:(32 * self.nc),
+        ]
         logging.debug(f"Predicted map shape: {predicted_map.shape}")
         self.predicted_map = predicted_map / count_map
 
 
 def run():
+    model_path = find_model()
+
     logging.basicConfig(
-        level=logging.INFO, format="%(asctime)s %(levelname)s - %(message)s"
+        level=logging.CRITICAL, format="%(asctime)s %(levelname)s - %(message)s"
     )
 
     start = time.time()
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-m", "-model_path", help="Path to model", required=True)
+    parser.add_argument("-m", "-model_path", help="Path to model", required=False)
     parser.add_argument("-i", "-input", help="Input mtz", required=True)
     parser.add_argument("-o", "-output", help="Output map", required=True)
     parser.add_argument("-r", "-resolution", nargs='?', help="Resolution cutoff")
@@ -318,14 +331,18 @@ def run():
     args = vars(parser.parse_args())
     print(args)
 
-    if not args["m"] or not os.path.exists(args["m"]):
-        raise FileNotFoundError("Model path could not be found, check the supplied path")
+    if not model_path:
+        if not args["m"] or not os.path.exists(args["m"]):
+            raise FileNotFoundError("Model path could not be found, check the supplied path")
+        model_path = args["m"]
+    else:
+        print(f"Found model at path: {model_path}, continuing using this model...")
 
     if not os.path.isfile(args["i"]):
         raise FileNotFoundError(
             f"Input file has not been found, check path\nPath Supplied {args['i']} from {os.getcwd()}")
 
-    prediction = Prediction(model_dir=args["m"], use_cache=False)
+    prediction = Prediction(model_dir=model_path, use_cache=False)
 
     prediction.make_prediction(args["i"], [args["intensity"], args["phase"]])
 
@@ -336,9 +353,20 @@ def run():
     print(f"Time taken {end - start} seconds {(end - start) / 60} minutes")
 
 
-def install_dependencies():
-    if os.path.isfile(""):
-        ...
+def find_model() -> str:
+    found = False
+    for pkg in site.getsitepackages():
+        model_path = os.path.join(pkg, "cartographer_models/phos.hdf5")
+        if os.path.exists(model_path):
+            found = True
+            break
+
+    if found: 
+        return model_path
+    
+    print("Model path could not be located automatically, ensure one is specified in the command line arguments")
+
 
 if __name__ == "__main__":
+
     run()
