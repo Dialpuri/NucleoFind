@@ -9,10 +9,14 @@ def download_dependencies():
         model_dir = os.path.join(site_packages_dir[0], "cartographer_models")
         if not os.path.exists(model_dir):
             os.mkdir(model_dir)
+
         phos_model_path = os.path.join(model_dir, "phos.hdf5")
         if not os.path.exists(phos_model_path):
-            print("Downloading the Cartographer phosphate model into ", phos_model_path, " cancel now if you do not wish for this to happen")
             urllib.request.urlretrieve("https://github.com/Dialpuri/Cartographer/raw/master/models/phos.hdf5", phos_model_path)  
+
+        base_model_path = os.path.join(model_dir, "base.hdf5")
+        if not os.path.exists(base_model_path):
+            urllib.request.urlretrieve("https://github.com/Dialpuri/Cartographer/raw/master/models/base.hdf5", base_model_path)
 
     return [ 
         'tensorflow',

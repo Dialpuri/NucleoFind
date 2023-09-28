@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="ASCII" standalone="yes"?>
+<!-- refmac output -->
+ <REFMAC>
+Error <err_level>          0 </err_level> <br/>
+Message <err_message> normal termination </err_message> <br/>
+Job <job> refmac </job> <br/>
+ <Overall_stats>
+ <n_cycle>      2 </n_cycle> <br/>
+ <ml_esu>     0.4892 </ml_esu> <br/>
+ <n_reflections_all>         7148 </n_reflections_all> <br/>
+ <n_reflections_free>          349 </n_reflections_free> <br/>
+ <data_completeness>     87.695 </data_completeness> <br/>
+ <resolution_low>     58.914 </resolution_low> <br/>
+ <resolution_high>      2.670 </resolution_high> <br/>
+ <r2_weighted_factor_work>      0.571 </r2_weighted_factor_work> <br/>
+ <r2_weighted_factor_free>      0.603 </r2_weighted_factor_free> <br/>
+ <stats_vs_cycle>
+ <new_cycle>
+  <cycle>       0 </cycle>  <r_factor>      0.457 </r_factor>  <r_free>      0.475 </r_free>  <fscAver>     0.7085 </fscAver>  <fscAverFree>     0.8193 </fscAverFree>  <rmsBOND>     0.0063 </rmsBOND>  <rmsANGLE>      1.151 </rmsANGLE>  <rmsCHIRAL>      0.056 </rmsCHIRAL> <br />
+</new_cycle>
+ <new_cycle>
+  <cycle>       1 </cycle>  <r_factor>      0.452 </r_factor>  <r_free>      0.482 </r_free>  <fscAver>     0.7164 </fscAver>  <fscAverFree>     0.8134 </fscAverFree>  <rmsBOND>     0.0050 </rmsBOND>  <rmsANGLE>      0.925 </rmsANGLE>  <rmsCHIRAL>      0.070 </rmsCHIRAL> <br />
+</new_cycle>
+</stats_vs_cycle>
+ <bvalue_stats>
+ <overall>
+ <all>
+  <number>        961 </number>  <average>    72.7575 </average>  <sigma>    11.4727 </sigma> <br />
+</all>
+ <main_chain>
+  <number>        452 </number>  <average>    72.3200 </average>  <sigma>    10.4010 </sigma> <br />
+</main_chain>
+ <side_chain>
+  <number>        505 </number>  <average>    73.1679 </average>  <sigma>    12.3780 </sigma> <br />
+</side_chain>
+</overall>
+ <chain_by_chain>
+ <new_chain>
+ <chain_name> A </chain_name> <br/>
+ <all>
+  <number>        484 </number>  <average>    71.9063 </average>  <sigma>    11.9885 </sigma> <br />
+</all>
+ <main_chain>
+  <number>        228 </number>  <average>    71.4893 </average>  <sigma>    10.8764 </sigma> <br />
+</main_chain>
+ <side_chain>
+  <number>        256 </number>  <average>    72.2777 </average>  <sigma>    12.8869 </sigma> <br />
+</side_chain>
+</new_chain>
+ <new_chain>
+ <chain_name> B </chain_name> <br/>
+ <all>
+  <number>        473 </number>  <average>    73.6485 </average>  <sigma>    10.8962 </sigma> <br />
+</all>
+ <main_chain>
+  <number>        224 </number>  <average>    73.1655 </average>  <sigma>     9.8218 </sigma> <br />
+</main_chain>
+ <side_chain>
+  <number>        249 </number>  <average>    74.0831 </average>  <sigma>    11.7624 </sigma> <br />
+</side_chain>
+</new_chain>
+ <new_chain>
+ <chain_name> B </chain_name> <br/>
+ <all>
+  <number>          4 </number>  <average>    70.3938 </average>  <sigma>     2.3780 </sigma> <br />
+</all>
+ <main_chain>
+  <number>          0 </number>  <average>     0.0000 </average>  <sigma>     0.0000 </sigma> <br />
+</main_chain>
+ <side_chain>
+  <number>          0 </number>  <average>     0.0000 </average>  <sigma>     0.0000 </sigma> <br />
+</side_chain>
+</new_chain>
+</chain_by_chain>
+</bvalue_stats>
+</Overall_stats>
+ <solvent_info>
+ <params_rfree>
+  <vdw_probe_radius>     1.2000 </vdw_probe_radius>  <ion_probe_radius>     0.8000 </ion_probe_radius>  <shrinkage_radius>     0.8000 </shrinkage_radius> <br />
+</params_rfree>
+ <params_rfactor>
+  <vdw_probe_radius>     1.2000 </vdw_probe_radius>  <ion_probe_radius>     0.8000 </ion_probe_radius>  <shrinkage_radius>     0.8000 </shrinkage_radius> <br />
+</params_rfactor>
+</solvent_info>
+ <twin_info>
+ <ntwin_domain>     1 </ntwin_domain> <br/>
+</twin_info>
+ <input_pdb_file> ./bad_phase_test/8ejo/8ejo_removed_na_water_r1.cif </input_pdb_file> <br/>
+ <solution_file> ./bad_phase_test/8ejo/8ejo_removed_na_water_r1.cif </solution_file> <br/>
+ <input_mtz_file> bad_phase_test/8ejo/8ejo_phases.mtz </input_mtz_file> <br/>
+ <input_labin> LABIN FP=FP SIGFP=SIGFP FREE=FREE PHIB=PHIC FOM=FOM </input_labin> <br/>
+ <mtz_file> ./bad_phase_test/8ejo/8ejo_r1.mtz </mtz_file> <br/>
+</REFMAC>

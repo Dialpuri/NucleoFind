@@ -1,0 +1,4 @@
+pyenv
+*egg*
+.DS_Store
+build

@@ -10,6 +10,7 @@ from tqdm import tqdm
 import time
 import argparse
 import site 
+import glob
 
 class Prediction:
     def __init__(self, model_dir: str, use_cache: bool = True):
@@ -313,6 +314,7 @@ class Prediction:
 
 def run():
     model_path = find_model()
+    model_path = None
 
     logging.basicConfig(
         level=logging.CRITICAL, format="%(asctime)s %(levelname)s - %(message)s"
@@ -355,15 +357,35 @@ def run():
 
 def find_model() -> str:
     found = False
-    for pkg in site.getsitepackages():
-        model_path = os.path.join(pkg, "cartographer_models/phos.hdf5")
-        if os.path.exists(model_path):
-            found = True
-            break
 
-    if found: 
-        return model_path
+    possible_models = []
+
+    for pkg in site.getsitepackages():
+        model_path = os.path.join(pkg, "cartographer_models/*.hdf5")
+        for file_found in glob.glob(model_path):
+            possible_models.append(file_found)
     
+
+    if len(possible_models) > 1: 
+        print("Multiple models found")
+        for i, model in enumerate(possible_models):
+            print(f"{i+1}) - {model.split('/')[-1]}")
+        
+        while True: 
+            selection = input("Please choose from the list above. ")
+
+            try: 
+                select_index = int(selection)-1
+            except:
+                print("Not recognised, try again.")
+                continue
+            
+            if select_index < 0 or select_index >= len(possible_models):
+                print("Number not in list, try again.")
+                continue
+                
+            return possible_models[select_index]
+
     print("Model path could not be located automatically, ensure one is specified in the command line arguments")
 
 
