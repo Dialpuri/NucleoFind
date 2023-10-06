@@ -1,9 +1,48 @@
 # Cartographer
 
 ## Requirements
-The models used in this directory are hosted in GitHub large file storage, to download them as part of this directory you must have `git-lfs` installed. However, this is not required to use the package as they will be downloaded as part of the installation. 
+- python3
 
-## Installation
+## User Installation 
+```
+pip install xtal-cartographer
+cartographer-install -o site_packages --all
+```
+
+## Usage
+
+```
+cartographer -i PDB.mtz -o PDB.map -intensity FWT -phase PHWT
+```
+
+
+```
+usage: cartographer [-h] [-m M] -i I -o O [-r [R]] [-intensity [INTENSITY]] [-phase [PHASE]]
+
+options:
+  -h, --help              show this help message and exit
+  -m M, -model_path M     Path to model
+  -i I, -input I          Input mtz path
+  -o O, -output O         Output map path 
+  -r [R], -resolution [R] Resolution cutoff to apply to mtz
+  -intensity [INTENSITY]  Name of intensity column in MTZ
+  -phase [PHASE]          Name of phase column in MTZ
+```
+
+```
+usage: cartographer-install [-h] -m {phos,sugar,base} [-o {site_packages,ccp4}] [--all] [--reinstall]
+
+Cartographer Install
+
+options:
+  -h, --help            show this help message and exit
+  -m {phos,sugar,base}, --model {phos,sugar,base}
+  -o {site_packages,ccp4}, --output {site_packages,ccp4}
+  --all
+  --reinstall
+```
+
+## Developer Installation 
 Clone the project
 
 ```
@@ -28,25 +67,4 @@ Install using pip
 cd cartographer
 pip install .
 ```
-## Usage
-Specifying the model path is not required if the package was installed with `pip install .`
 
-Example Usage:
-
-```
-cartographer -i PDB.mtz -o PDB.map -intensity FWT -phase PHWT
-```
-
-
-```
-usage: cartographer [-h] [-m M] -i I -o O [-r [R]] [-intensity [INTENSITY]] [-phase [PHASE]]
-
-options:
-  -h, --help              show this help message and exit
-  -m M, -model_path M     Path to model
-  -i I, -input I          Input mtz path
-  -o O, -output O         Output map path 
-  -r [R], -resolution [R] Resolution cutoff to apply to mtz
-  -intensity [INTENSITY]  Name of intensity column in MTZ
-  -phase [PHASE]          Name of phase column in MTZ
-```
