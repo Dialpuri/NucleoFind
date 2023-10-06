@@ -10,6 +10,8 @@ from tqdm import tqdm
 import time
 import argparse
 import site 
+from glob import glob
+import sys
 
 class Prediction:
     def __init__(self, model_dir: str, use_cache: bool = True):
@@ -40,7 +42,14 @@ class Prediction:
     def make_prediction(self, file_path: str, column_labels: List[str] = ["FWT", "PHWT"],
                         resolution_cutoff: float = None, use_raw_values: bool = False):
         start = time.time()
-        self._load_model()
+        try:
+            self._load_model()
+        except OSError:
+            print("This model is corrupted, perhaps due to an incomplete download. Try downloading it again with cartographer-install -m TYPE --reinstall")
+            sys.exit()
+
+        if column_labels == [None, None]:
+            column_labels = ["FWT", "PHWT"]
 
         if ".mtz" in file_path:
             if resolution_cutoff:
@@ -276,7 +285,7 @@ class Prediction:
                 self.interpolated_grid.get_subarray(
                     start=translation, shape=[32, 32, 32]
                 )
-            ).reshape(1, 32, 32, 32, 1)
+            ).reshape((1, 32, 32, 32, 1))
 
             if np.sum(sub_array) == 0:
                 predicted_map[x: x + 32, y: y + 32, z: z + 32] += np.zeros(32, 32, 32)
@@ -312,8 +321,6 @@ class Prediction:
 
 
 def run():
-    model_path = find_model()
-
     logging.basicConfig(
         level=logging.CRITICAL, format="%(asctime)s %(levelname)s - %(message)s"
     )
@@ -321,7 +328,7 @@ def run():
     start = time.time()
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-m", "-model_path", help="Path to model", required=False)
+    parser.add_argument("-m", "-model", help="Model selection", required=False)
     parser.add_argument("-i", "-input", help="Input mtz", required=True)
     parser.add_argument("-o", "-output", help="Output map", required=True)
     parser.add_argument("-r", "-resolution", nargs='?', help="Resolution cutoff")
@@ -330,6 +337,10 @@ def run():
 
     args = vars(parser.parse_args())
     print(args)
+
+
+    model_path = find_model(args["m"])
+
 
     if not model_path:
         if not args["m"] or not os.path.exists(args["m"]):
@@ -350,21 +361,69 @@ def run():
 
     end = time.time()
 
-    print(f"Time taken {end - start} seconds {(end - start) / 60} minutes")
+    print(f"Time taken {end - start:.2f} seconds / {(end - start) / 60:.2f} minutes")
 
 
-def find_model() -> str:
-    found = False
+def model_not_found_err():
+    print("""
+            No models have been found in either site_packages or CCP4/lib/data.
+            You can install models using the command:
+            cartographer-install -o site_packages -m phos
+        """)
+
+def find_all_potential_models():
+
+    model_extension = "*.hdf5"
+
+    potential_models = []
+
+
     for pkg in site.getsitepackages():
-        model_path = os.path.join(pkg, "cartographer_models/phos.hdf5")
-        if os.path.exists(model_path):
-            found = True
-            break
+        models = glob(os.path.join(pkg, "cartographer_models" , model_extension))
+        potential_models += models
 
-    if found: 
-        return model_path
+    clibd = os.environ.get('CLIBD', "")
+    if not os.path.exists(clibd) and not potential_models:
+        print(
+            """CCP4 Environment Variable - CLIBD is not found. 
+            You can try sourcing it: 
+            Ubuntu - source /opt/xtal/ccp4-X.X/bin/ccp4.setup-sh
+            MacOS - source /Applications/ccp4-X.X/bin/ccp4.setup-sh
+            """
+            )
+        return
     
-    print("Model path could not be located automatically, ensure one is specified in the command line arguments")
+    
+    ccp4_model_path = os.path.join(clibd, "cartographer_models")
+    if not os.path.exists(ccp4_model_path) and not potential_models:
+        model_not_found_err()
+        return
+    
+    potential_models += glob(os.path.join(ccp4_model_path, model_extension))
+
+    if not potential_models:
+        model_not_found_err()
+
+    return potential_models
+
+
+def find_model(model_selection: str) -> str:
+
+    models = find_all_potential_models()
+
+    if model_selection:
+        for model in models: 
+            filename = model.split("/")[-1]
+            if model_selection in filename:
+                return model
+        
+    print(f"The specified model type '{model_selection}' could not be found, please add one of the following flags")
+    
+    filenames = set([x.split("/")[-1].rstrip(".hdf5") for x in models])
+    for name in filenames:
+        print(f"-m {name}")
+
+    exit()
 
 
 if __name__ == "__main__":

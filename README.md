@@ -18,11 +18,8 @@ cd Cartographer
 
 Create a Python virtual environment and entire the environment
 
-MacOS - `python3 -m virtualenv pyenv`
-
-Ubuntu - `virtualenv pyenv` 
-
 ```
+python3 -m virtualenv pyenv
 source pyenv/bin/activate
 ```
 Install using pip
