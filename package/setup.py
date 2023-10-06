@@ -10,7 +10,7 @@ setup(
     name="xtal-cartographer",
     author="Jordan Dialpuri",
     author_email="jsd523@york.ac.uk",
-    version="0.1.5",
+    version="0.1.6",
     entry_points={
         "console_scripts": [
             'cartographer=cartographer.predict:run',

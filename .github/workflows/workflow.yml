@@ -20,4 +20,4 @@ jobs:
         cd package
         pip install setuptools twine
         python3 setup.py sdist
-        twine upload dist/* -u {secrets.TWINE_USER} -p {secrets.TWINE_PASS}
+        twine upload dist/* -u ${{secrets.TWINE_USER}} -p ${{secrets.TWINE_PASS}}
