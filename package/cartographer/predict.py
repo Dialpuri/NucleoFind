@@ -334,13 +334,14 @@ def run():
     parser.add_argument("-r", "-resolution", nargs='?', help="Resolution cutoff")
     parser.add_argument("-intensity", nargs='?', help="Name of intensity column in MTZ")
     parser.add_argument("-phase", nargs='?', help="Name of phase column in MTZ")
+    parser.add_argument("-model_path", nargs='?', help="Path to model (development)")
 
     args = vars(parser.parse_args())
-    print(args)
 
-
-    model_path = find_model(args["m"])
-
+    if not args["model_path"]:
+        model_path = find_model(args["m"])
+    else:
+        model_path = args["model_path"]
 
     if not model_path:
         if not args["m"] or not os.path.exists(args["m"]):
@@ -410,6 +411,14 @@ def find_all_potential_models():
 def find_model(model_selection: str) -> str:
 
     models = find_all_potential_models()
+    if not models: 
+        print("""No models were found, please use 
+    cartographer-install -o site_packages --all
+to install all the models or
+    cartographer-install -m {phos,sugar,base} -o site_packages
+to install a single model (choose either phos, sugar or base)
+              """)
+        exit()
 
     if model_selection:
         for model in models: 
@@ -417,14 +426,17 @@ def find_model(model_selection: str) -> str:
             if model_selection in filename:
                 return model
         
+    if len(models) == 1:
+        print("Only found ", models[0], "- using that!")
+        return models[0]
+
     print(f"The specified model type '{model_selection}' could not be found, please add one of the following flags")
-    
+
     filenames = set([x.split("/")[-1].rstrip(".hdf5") for x in models])
     for name in filenames:
         print(f"-m {name}")
 
     exit()
-
 
 if __name__ == "__main__":
 
