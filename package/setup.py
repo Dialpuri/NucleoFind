@@ -25,5 +25,6 @@ setup(
         'tqdm' ],
     long_description=read_file('README.md'),
     long_description_content_type='text/markdown',
+    packages=['cartographer']
 
 )
