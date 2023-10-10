@@ -1,5 +1,7 @@
 # Cartographer
 
+[![PyPI version](https://badge.fury.io/py/xtal-cartographer.svg)](https://badge.fury.io/py/xtal-cartographer)
+
 Nucleic acid electron density interpretation remains a difficult problem for computer programs to deal with. Programs tend to rely on exhaustive searches to recognise characteristic features. Cartographer is a deep-learning-based approach to interpreting and segmenting electron density. Using a crystallographic map, the positions of the phosphate group, sugar ring and nitrogenous base group are able to be predicted with high accuracy. 
 
 ## Requirements
