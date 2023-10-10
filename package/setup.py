@@ -8,7 +8,7 @@ def read_file(filename):
 
 setup(
     name="xtal-cartographer",
-    description="Cartographer: A Deep-Learning Network for Interpreting Nucleic Acid Electron Density"
+    description="Cartographer: A Deep-Learning Network for Interpreting Nucleic Acid Electron Density",
     author="Jordan Dialpuri",
     author_email="jsd523@york.ac.uk",
     version='{{VERSION_PLACEHOLDER}}',
