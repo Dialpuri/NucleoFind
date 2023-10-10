@@ -26,12 +26,11 @@ jobs:
       run: >-
         sed -i "s/{{VERSION_PLACEHOLDER}}/${{ steps.tag.outputs.TAG_NAME }}/g" package/setup.py
     - name: Build a binary wheel
-      run: >-
-        cd package && 
-        python setup.py sdist bdist_wheel && 
-        ls dist
+      run: |
+        cd package
+        python setup.py sdist bdist_wheel 
+        cp dist ../
     - name: Publish distribution 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         password: ${{ secrets.PYPI_API_TOKEN }}
-        packages-dir: packages/dist/
