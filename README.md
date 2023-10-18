@@ -1,27 +1,27 @@
-# Cartographer
+# NucleoFind
 
-[![PyPI version](https://badge.fury.io/py/xtal-cartographer.svg)](https://badge.fury.io/py/xtal-cartographer)
+[![PyPI version](https://badge.fury.io/py/xtal-nucleofind.svg)](https://badge.fury.io/py/xtal-nucleofind)
 
-Nucleic acid electron density interpretation remains a difficult problem for computer programs to deal with. Programs tend to rely on exhaustive searches to recognise characteristic features. Cartographer is a deep-learning-based approach to interpreting and segmenting electron density. Using a crystallographic map, the positions of the phosphate group, sugar ring and nitrogenous base group are able to be predicted with high accuracy. 
+Nucleic acid electron density interpretation remains a difficult problem for computer programs to deal with. Programs tend to rely on exhaustive searches to recognise characteristic features. NucleoFind is a deep-learning-based approach to interpreting and segmenting electron density. Using a crystallographic map, the positions of the phosphate group, sugar ring and nitrogenous base group are able to be predicted with high accuracy. 
 
 ## Requirements
 - python3
 
 ## User Installation 
 ```
-pip install xtal-cartographer
-cartographer-install -o site_packages --all
+pip install nucleofind
+nucleofind-install -o site_packages --all
 ```
 
 ## Usage
 
 ```
-cartographer -i PDB.mtz -o PDB.map -intensity FWT -phase PHWT
+nucleofind -i PDB.mtz -o PDB.map -intensity FWT -phase PHWT
 ```
 
 
 ```
-usage: cartographer [-h] [-m M] -i I -o O [-r [R]] [-intensity [INTENSITY]] [-phase [PHASE]]
+usage: nucleofind [-h] [-m M] -i I -o O [-r [R]] [-intensity [INTENSITY]] [-phase [PHASE]]
 
 options:
   -h, --help              show this help message and exit
@@ -34,9 +34,9 @@ options:
 ```
 
 ```
-usage: cartographer-install [-h] -m {phos,sugar,base} [-o {site_packages,ccp4}] [--all] [--reinstall]
+usage: nucleofind-install [-h] -m {phos,sugar,base} [-o {site_packages,ccp4}] [--all] [--reinstall]
 
-Cartographer Install
+NucleoFind Install
 
 options:
   -h, --help            show this help message and exit
@@ -50,13 +50,13 @@ options:
 Clone the project
 
 ```
-git clone https://github.com/Dialpuri/Cartographer.git
+git clone https://github.com/Dialpuri/NucleoFind.git
 ```
 
-Change directories into Cartographer
+Change directories into NucleoFind
 
 ```
-cd Cartographer
+cd NucleoFind
 ```
 
 Create a Python virtual environment and entire the environment
@@ -68,7 +68,7 @@ source pyenv/bin/activate
 Install using pip
 
 ```
-cd cartographer
+cd nucleofind
 pip install .
 ```
 
