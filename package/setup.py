@@ -15,7 +15,8 @@ setup(
     entry_points={
         "console_scripts": [
             'nucleofind=nucleofind.predict:run',
-            'nucleofind-install=nucleofind.install:run'
+            'nucleofind-install=nucleofind.install:run',
+            'nucleofind-clean=nucleofind.clean:run'
         ]
     },
      install_requires=[ 
