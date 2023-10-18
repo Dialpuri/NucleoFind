@@ -6,7 +6,7 @@ import enum
 
 
 class ModelType(enum.Enum):
-    phos = 0
+    phosphate = 0
     sugar = 1
     base = 2
 
@@ -63,7 +63,7 @@ def install_model(type: ModelType, location: str, reinstall: bool) -> bool:
         return True
 
 def run():
-    model_list = ["phos", "sugar", "base"]
+    model_list = ["phosphate", "sugar", "base"]
     output_list = ["ccp4", "site_packages"]
 
     parser = argparse.ArgumentParser(description='nucleofind Install')
