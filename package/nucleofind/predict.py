@@ -3,7 +3,6 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 from typing import List, Tuple
 import tensorflow as tf
-import tensorflow_addons as tfa
 import numpy as np
 import gemmi
 from tqdm import tqdm
@@ -94,6 +93,38 @@ class Prediction:
         ccp4.write_ccp4_map(output_path)
 
     def _load_model(self):
+        
+        def sigmoid_focal_crossentropy(y_true, y_pred, alpha = 0.25, gamma = 2.0, from_logits: bool = False):
+            if gamma and gamma < 0:
+                raise ValueError("Value of gamma should be greater than or equal to zero.")
+
+            y_pred = tf.convert_to_tensor(y_pred)
+            y_true = tf.cast(y_true, dtype=y_pred.dtype)
+
+            # Get the cross_entropy for each entry
+            ce = tf.keras.backend.binary_crossentropy(y_true, y_pred, from_logits=from_logits)
+
+            # If logits are provided then convert the predictions into probabilities
+            if from_logits:
+                pred_prob = tf.sigmoid(y_pred)
+            else:
+                pred_prob = y_pred
+
+            p_t = (y_true * pred_prob) + ((1 - y_true) * (1 - pred_prob))
+            alpha_factor = 1.0
+            modulating_factor = 1.0
+
+            if alpha:
+                alpha = tf.cast(alpha, dtype=y_true.dtype)
+                alpha_factor = y_true * alpha + (1 - y_true) * (1 - alpha)
+
+            if gamma:
+                gamma = tf.cast(gamma, dtype=y_true.dtype)
+                modulating_factor = tf.pow((1.0 - p_t), gamma)
+
+            # compute the final loss and return
+            return tf.reduce_sum(alpha_factor * modulating_factor * ce, axis=-1)
+
         logging.info(f"Loading model from file/folder: {self.model_dir}")
         if os.path.isdir(self.model_dir):
             logging.info("Loading model from model folder")
@@ -101,7 +132,7 @@ class Prediction:
             self.model = tf.keras.models.load_model(
                 self.model_dir,
                 custom_objects={
-                    "sigmoid_focal_crossentropy": tfa.losses.sigmoid_focal_crossentropy
+                    "sigmoid_focal_crossentropy": sigmoid_focal_crossentropy
                 },
             )
         elif os.path.isfile(self.model_dir):
@@ -109,7 +140,7 @@ class Prediction:
             self.model = tf.keras.models.load_model(
                 self.model_dir,
                 custom_objects={
-                    "sigmoid_focal_crossentropy": tfa.losses.sigmoid_focal_crossentropy
+                    "sigmoid_focal_crossentropy": sigmoid_focal_crossentropy
                 },
                 compile=False,
             )
@@ -162,10 +193,6 @@ class Prediction:
         max_y = max(corner[1] for corner in corners)
         max_z = max(corner[2] for corner in corners)
 
-        # print(grid.unit_cell)
-        # print(corners)
-        # print(min_x, min_y, min_z, max_x, max_y, max_z)
-
         box = gemmi.PositionBox()
         box.minimum = gemmi.Position(min_x, min_y, min_z)
         box.maximum = gemmi.Position(max_x, max_y, max_z)
@@ -205,15 +232,11 @@ class Prediction:
         # logging.debug(np.unique(grid_to_interp, return_index=True))
         # Taken from https://github.com/paulsbond/densitydensenet/blob/main/predict.py - Paul Bond
 
-        print("Grid to interpret,", grid_to_interp.shape)
-
         dummy_structure = gemmi.Structure()
         dummy_structure.cell = self.raw_grid.unit_cell
         dummy_structure.spacegroup_hm = self.raw_grid.spacegroup.hm
         output_grid = gemmi.FloatGrid()
         output_grid.setup_from(dummy_structure, spacing=0.7)
-
-        print(f"{output_grid.unit_cell=}")
 
         size_x = grid_to_interp.shape[0] * 0.7
         size_y = grid_to_interp.shape[1] * 0.7
@@ -223,8 +246,6 @@ class Prediction:
 
         array_cell = gemmi.UnitCell(size_x, size_y, size_z, 90, 90, 90)
         array_grid = gemmi.FloatGrid(grid_to_interp, array_cell)
-
-        print(f"{array_grid=}, {array_cell=}")
 
         for point in output_grid.masked_asu():
             position = output_grid.point_to_position(point) - self.box_minimum
@@ -329,7 +350,7 @@ class Prediction:
 
 def run():
     logging.basicConfig(
-        level=logging.DEBUG, format="%(asctime)s %(levelname)s - %(message)s"
+        level=logging.CRITICAL, format="%(asctime)s %(levelname)s - %(message)s"
     )
 
     start = time.time()
@@ -355,7 +376,7 @@ def run():
             raise FileNotFoundError("Model path could not be found, check the supplied path")
         model_path = args["m"]
     else:
-        print(f"Found model at path: {model_path}, continuing using this model...")
+        logging.info(f"Found model at path: {model_path}, continuing using this model...")
 
     if not os.path.isfile(args["i"]):
         raise FileNotFoundError(
@@ -366,7 +387,6 @@ def run():
     prediction.make_prediction(args["i"], [args["intensity"], args["phase"]])
 
     prediction.save_predicted_map(args["o"])
-    prediction.save_interpolated_map(args["o"].replace(".map", 'interpolated.map'))
 
     end = time.time()
 
