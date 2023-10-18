@@ -67,12 +67,17 @@ def run():
     output_list = ["ccp4", "site_packages"]
 
     parser = argparse.ArgumentParser(description='nucleofind Install')
-    parser.add_argument("-m", "--model", choices=model_list, required=True)
+    parser.add_argument("-m", "--model", choices=model_list, required=False)
     parser.add_argument("-o", "--output", choices=[location.name for location in InstallLocation], required=False, default=output_list[1])
     parser.add_argument("--all", required=False, action='store_true')
     parser.add_argument("--reinstall", required=False, action='store_true')
 
     args = parser.parse_args()
+
+    if not args.all and not args.model:
+        print("Please specify a model you wish to download")
+        return
+
 
     if args.all:
         status = [install_model(type=type, location=args.output, reinstall=args.reinstall) for type in ModelType]

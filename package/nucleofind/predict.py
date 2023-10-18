@@ -441,10 +441,14 @@ def find_model(model_selection: str) -> str:
     models = find_all_potential_models()
     if not models: 
         print("""No models were found, please use 
-    nucleofind-install -o site_packages --all
+
+    nucleofind-install --all
+
 to install all the models or
-    nucleofind-install -m {phos,sugar,base} -o site_packages
-to install a single model (choose either phos, sugar or base)
+
+    nucleofind-install -m {phosphate,sugar,base}
+
+to install a single model (choose either phosphate, sugar or base)
               """)
         exit()
 
