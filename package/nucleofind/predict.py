@@ -45,7 +45,7 @@ class Prediction:
         try:
             self._load_model()
         except OSError:
-            print("This model is corrupted, perhaps due to an incomplete download. Try downloading it again with cartographer-install -m TYPE --reinstall")
+            print("This model is corrupted, perhaps due to an incomplete download. Try downloading it again with nucleofind-install -m TYPE --reinstall")
             sys.exit()
 
         if column_labels == [None, None]:
@@ -77,14 +77,14 @@ class Prediction:
 
         ccp4.write_ccp4_map(output_path)
 
-    def save_interpolated_map(self, output_dir: str, grid_spacing: float = 0.7):
+    def save_interpolated_map(self, output_path: str, grid_spacing: float = 0.7):
         logging.info("Saving interpolated map")
         ccp4 = gemmi.Ccp4Map()
         ccp4.grid = self.interpolated_grid
         ccp4.update_ccp4_header()
 
-        output_path = os.path.join(output_dir, f"{self.pdb_code}_interpolated.map")
         ccp4.write_ccp4_map(output_path)
+
 
     def save_raw_map(self, output_path: str):
         ccp4 = gemmi.Ccp4Map()
@@ -204,11 +204,16 @@ class Prediction:
         logging.info("Reinterpolating array")
         # logging.debug(np.unique(grid_to_interp, return_index=True))
         # Taken from https://github.com/paulsbond/densitydensenet/blob/main/predict.py - Paul Bond
+
+        print("Grid to interpret,", grid_to_interp.shape)
+
         dummy_structure = gemmi.Structure()
         dummy_structure.cell = self.raw_grid.unit_cell
         dummy_structure.spacegroup_hm = self.raw_grid.spacegroup.hm
         output_grid = gemmi.FloatGrid()
         output_grid.setup_from(dummy_structure, spacing=0.7)
+
+        print(f"{output_grid.unit_cell=}")
 
         size_x = grid_to_interp.shape[0] * 0.7
         size_y = grid_to_interp.shape[1] * 0.7
@@ -218,6 +223,8 @@ class Prediction:
 
         array_cell = gemmi.UnitCell(size_x, size_y, size_z, 90, 90, 90)
         array_grid = gemmi.FloatGrid(grid_to_interp, array_cell)
+
+        print(f"{array_grid=}, {array_cell=}")
 
         for point in output_grid.masked_asu():
             position = output_grid.point_to_position(point) - self.box_minimum
@@ -277,9 +284,9 @@ class Prediction:
 
         for translation in tqdm(self.translation_list, total=len(self.translation_list)):
             x, y, z = translation
-            logging.debug(
-                f"Predicting {x}, {y}, {z} -> {x + 32}, {y + 32}, {z + 32}, where final shape is {predicted_map.shape}"
-            )
+            # logging.debug(
+            #     f"Predicting {x}, {y}, {z} -> {x + 32}, {y + 32}, {z + 32}, where final shape is {predicted_map.shape}"
+            # )
 
             sub_array = np.array(
                 self.interpolated_grid.get_subarray(
@@ -322,7 +329,7 @@ class Prediction:
 
 def run():
     logging.basicConfig(
-        level=logging.CRITICAL, format="%(asctime)s %(levelname)s - %(message)s"
+        level=logging.DEBUG, format="%(asctime)s %(levelname)s - %(message)s"
     )
 
     start = time.time()
@@ -359,6 +366,7 @@ def run():
     prediction.make_prediction(args["i"], [args["intensity"], args["phase"]])
 
     prediction.save_predicted_map(args["o"])
+    prediction.save_interpolated_map(args["o"].replace(".map", 'interpolated.map'))
 
     end = time.time()
 
@@ -369,7 +377,7 @@ def model_not_found_err():
     print("""
             No models have been found in either site_packages or CCP4/lib/data.
             You can install models using the command:
-            cartographer-install -o site_packages -m phos
+            nucleofind-install -o site_packages -m phos
         """)
 
 def find_all_potential_models():
@@ -380,7 +388,7 @@ def find_all_potential_models():
 
 
     for pkg in site.getsitepackages():
-        models = glob(os.path.join(pkg, "cartographer_models" , model_extension))
+        models = glob(os.path.join(pkg, "nucleofind_models" , model_extension))
         potential_models += models
 
     clibd = os.environ.get('CLIBD', "")
@@ -395,7 +403,7 @@ def find_all_potential_models():
         return
     
     
-    ccp4_model_path = os.path.join(clibd, "cartographer_models")
+    ccp4_model_path = os.path.join(clibd, "nucleofind_models")
     if not os.path.exists(ccp4_model_path) and not potential_models:
         model_not_found_err()
         return
@@ -413,9 +421,9 @@ def find_model(model_selection: str) -> str:
     models = find_all_potential_models()
     if not models: 
         print("""No models were found, please use 
-    cartographer-install -o site_packages --all
+    nucleofind-install -o site_packages --all
 to install all the models or
-    cartographer-install -m {phos,sugar,base} -o site_packages
+    nucleofind-install -m {phos,sugar,base} -o site_packages
 to install a single model (choose either phos, sugar or base)
               """)
         exit()

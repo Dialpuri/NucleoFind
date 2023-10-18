@@ -27,11 +27,11 @@ def download_model(type: ModelType, folder: str, reinstall: bool):
     model_name = f"{type.name}.hdf5"
     url = f"http://www.ysbl.york.ac.uk/jsd523/{model_name}"
 
-    cartographer_model_dir = os.path.join(folder, "cartographer_models")
-    if not os.path.isdir(cartographer_model_dir):
-        os.makedirs(cartographer_model_dir)
+    nucleofind_model_dir = os.path.join(folder, "nucleofind_models")
+    if not os.path.isdir(nucleofind_model_dir):
+        os.makedirs(nucleofind_model_dir)
 
-    model_path = os.path.join(cartographer_model_dir, model_name )
+    model_path = os.path.join(nucleofind_model_dir, model_name )
 
     if os.path.exists(model_path) and not reinstall:
         print(f"Found {type.name} model in {model_path}, skipping.")
@@ -66,7 +66,7 @@ def run():
     model_list = ["phos", "sugar", "base"]
     output_list = ["ccp4", "site_packages"]
 
-    parser = argparse.ArgumentParser(description='Cartographer Install')
+    parser = argparse.ArgumentParser(description='nucleofind Install')
     parser.add_argument("-m", "--model", choices=model_list, required=True)
     parser.add_argument("-o", "--output", choices=[location.name for location in InstallLocation], required=False, default=output_list[1])
     parser.add_argument("--all", required=False, action='store_true')

@@ -1,17 +1,17 @@
 Install Models with:
 ```
-cartographer-install -m phos -o site_packages
+nucleofind-install -m phos -o site_packages
 ```
 
 Example Usage:
 
 ```
-cartographer -i PDB.mtz -o PDB.map -intensity FWT -phase PHWT
+nucleofind -i PDB.mtz -o PDB.map -intensity FWT -phase PHWT
 ```
 
 
 ```
-usage: cartographer [-h] [-m M] -i I -o O [-r [R]] [-intensity [INTENSITY]] [-phase [PHASE]]
+usage: nucleofind [-h] [-m M] -i I -o O [-r [R]] [-intensity [INTENSITY]] [-phase [PHASE]]
 
 options:
   -h, --help              show this help message and exit
@@ -24,9 +24,9 @@ options:
 ```
 
 ```
-usage: cartographer-install [-h] -m {phos,sugar,base} [-o {site_packages,ccp4}] [--all] [--reinstall]
+usage: nucleofind-install [-h] -m {phos,sugar,base} [-o {site_packages,ccp4}] [--all] [--reinstall]
 
-Cartographer Install
+nucleofind Install
 
 options:
   -h, --help            show this help message and exit
