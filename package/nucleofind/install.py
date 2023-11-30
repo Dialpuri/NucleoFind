@@ -24,7 +24,7 @@ def clibd_error_msg():
                 )
 
 def download_model(type: ModelType, folder: str, reinstall: bool):
-    model_name = f"{type.name}.hdf5"
+    model_name = f"{type.name}.onnx"
     url = f"http://www.ysbl.york.ac.uk/jsd523/{model_name}"
 
     nucleofind_model_dir = os.path.join(folder, "nucleofind_models")

@@ -11,7 +11,7 @@ setup(
     description="NucleoFind: A Deep-Learning Network for Interpreting Nucleic Acid Electron Density",
     author="Jordan Dialpuri",
     author_email="jsd523@york.ac.uk",
-    version='{{VERSION_PLACEHOLDER}}',
+    version='0.0.1',
     entry_points={
         "console_scripts": [
             'nucleofind=nucleofind.predict:run',
@@ -20,8 +20,7 @@ setup(
         ]
     },
      install_requires=[ 
-        'tensorflow',
-        'tensorflow_addons',
+        'onnxruntime',
         'gemmi',
         'tqdm' ],
     long_description=read_file('README.md'),

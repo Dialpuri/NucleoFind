@@ -1,7 +1,8 @@
-import site 
+import site
 import os
 
-def clean_models(): 
+
+def clean_models():
     site_packages_dir = site.getsitepackages()
 
     found_models = []
@@ -15,14 +16,13 @@ def clean_models():
     if not found_models:
         print("No models were found in site-packages. Finishing.")
         return
-    
+
     print("Pick an option to remove: ")
-    if len(found_models)>1:
+    if len(found_models) > 1:
         print(f"1) All")
 
     for index, model in enumerate(found_models):
-        print(f"{index+2}) {model.name}")
-
+        print(f"{index + 2}) {model.name}")
 
     option_selected = False
     while not option_selected:
@@ -30,10 +30,10 @@ def clean_models():
 
         try:
             choice = int(option)
-            if choice <= 0 or choice > len(found_models)+1:
+            if choice <= 0 or choice > len(found_models) + 1:
                 raise ValueError()
-            
-            model_to_remove = found_models[choice-2]
+
+            model_to_remove = found_models[choice - 2]
 
             if choice == 1:
                 print("Do you want to remove all the models?")
@@ -46,7 +46,7 @@ def clean_models():
                 y_or_n = input("Y/N ").lower()
                 if y_or_n not in ["y", "yes", "n", "no"]:
                     continue
-                
+
                 y_no_selected = True
 
                 if y_or_n == "y" or y_or_n == "yes":
@@ -60,14 +60,10 @@ def clean_models():
                 else:
                     os.remove(model_to_remove.path)
                     print("Removed", model_to_remove.name)
-            
 
             option_selected = True
-        except ValueError :
+        except ValueError:
             print("Invalid choice")
-
-
-
 
 
 def run():

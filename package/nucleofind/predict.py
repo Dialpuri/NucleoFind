@@ -2,7 +2,8 @@ import logging
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 from typing import List, Tuple
-import tensorflow as tf
+import onnxruntime as rt
+
 import numpy as np
 import gemmi
 from tqdm import tqdm
@@ -93,59 +94,8 @@ class Prediction:
         ccp4.write_ccp4_map(output_path)
 
     def _load_model(self):
-        
-        def sigmoid_focal_crossentropy(y_true, y_pred, alpha = 0.25, gamma = 2.0, from_logits: bool = False):
-            if gamma and gamma < 0:
-                raise ValueError("Value of gamma should be greater than or equal to zero.")
-
-            y_pred = tf.convert_to_tensor(y_pred)
-            y_true = tf.cast(y_true, dtype=y_pred.dtype)
-
-            # Get the cross_entropy for each entry
-            ce = tf.keras.backend.binary_crossentropy(y_true, y_pred, from_logits=from_logits)
-
-            # If logits are provided then convert the predictions into probabilities
-            if from_logits:
-                pred_prob = tf.sigmoid(y_pred)
-            else:
-                pred_prob = y_pred
-
-            p_t = (y_true * pred_prob) + ((1 - y_true) * (1 - pred_prob))
-            alpha_factor = 1.0
-            modulating_factor = 1.0
-
-            if alpha:
-                alpha = tf.cast(alpha, dtype=y_true.dtype)
-                alpha_factor = y_true * alpha + (1 - y_true) * (1 - alpha)
-
-            if gamma:
-                gamma = tf.cast(gamma, dtype=y_true.dtype)
-                modulating_factor = tf.pow((1.0 - p_t), gamma)
-
-            # compute the final loss and return
-            return tf.reduce_sum(alpha_factor * modulating_factor * ce, axis=-1)
-
-        logging.info(f"Loading model from file/folder: {self.model_dir}")
-        if os.path.isdir(self.model_dir):
-            logging.info("Loading model from model folder")
-            print(self.model_dir, type(self.model_dir))
-            self.model = tf.keras.models.load_model(
-                self.model_dir,
-                custom_objects={
-                    "sigmoid_focal_crossentropy": sigmoid_focal_crossentropy
-                },
-            )
-        elif os.path.isfile(self.model_dir):
-            logging.info("Loading model from weight file")
-            self.model = tf.keras.models.load_model(
-                self.model_dir,
-                custom_objects={
-                    "sigmoid_focal_crossentropy": sigmoid_focal_crossentropy
-                },
-                compile=False,
-            )
-        else:
-            raise RuntimeError(f"The model file was not found! {self.model_dir}")
+        providers = ['CPUExecutionProvider']
+        self.model = rt.InferenceSession(self.model_dir, providers=providers)
 
     def _load_map(self, map_path: str, normalise: bool = True):
         self.map: gemmi.Ccp4Map = gemmi.read_ccp4_map(map_path)
@@ -320,7 +270,8 @@ class Prediction:
                 count_map[x: x + 32, y: y + 32, z: z + 32] += 1
                 continue
 
-            predicted_sub = self.model.predict(sub_array, verbose=0).squeeze()
+            input_name = self.model.get_inputs()[0].name
+            predicted_sub = np.array(self.model.run(None, {input_name: sub_array})).squeeze()
             arg_max = np.argmax(predicted_sub, axis=-1)
 
             # Taken from https://github.com/paulsbond/densitydensenet/blob/main/predict.py
@@ -402,7 +353,7 @@ def model_not_found_err():
 
 def find_all_potential_models():
 
-    model_extension = "*.hdf5"
+    model_extension = "*.onnx"
 
     potential_models = []
 
