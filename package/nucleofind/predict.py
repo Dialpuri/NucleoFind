@@ -1,6 +1,7 @@
 import logging
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from typing import List, Tuple
 import onnxruntime as rt
 
@@ -9,9 +10,10 @@ import gemmi
 from tqdm import tqdm
 import time
 import argparse
-import site 
+import site
 from glob import glob
 import sys
+
 
 class Prediction:
     def __init__(self, model_dir: str, use_cache: bool = True):
@@ -45,7 +47,8 @@ class Prediction:
         try:
             self._load_model()
         except OSError:
-            print("This model is corrupted, perhaps due to an incomplete download. Try downloading it again with nucleofind-install -m TYPE --reinstall")
+            print(
+                "This model is corrupted, perhaps due to an incomplete download. Try downloading it again with nucleofind-install -m TYPE --reinstall")
             sys.exit()
 
         if column_labels == [None, None]:
@@ -84,7 +87,6 @@ class Prediction:
         ccp4.update_ccp4_header()
 
         ccp4.write_ccp4_map(output_path)
-
 
     def save_raw_map(self, output_path: str):
         ccp4 = gemmi.Ccp4Map()
@@ -283,20 +285,28 @@ class Prediction:
                 predicted_map[x: x + 32, y: y + 32, z: z + 32] += arg_max
 
             count_map[x: x + 32, y: y + 32, z: z + 32] += 1
-            
+
         predicted_map = predicted_map[
-            0:(32 * self.na),
-            0:(32 * self.nb),
-            0:(32 * self.nc),
-        ]
+                        0:(32 * self.na),
+                        0:(32 * self.nb),
+                        0:(32 * self.nc),
+                        ]
 
         count_map = count_map[
-            0:(32 * self.na),
-            0:(32 * self.nb),
-            0:(32 * self.nc),
-        ]
+                    0:(32 * self.na),
+                    0:(32 * self.nb),
+                    0:(32 * self.nc),
+                    ]
         logging.debug(f"Predicted map shape: {predicted_map.shape}")
         self.predicted_map = predicted_map / count_map
+
+
+def predict_map(model: str, input: str, output: str, resolution: float = 2.5, intensity: str = "FWT",
+                phase: str = "PHWT"):
+    model_path = find_model(model)
+    prediction = Prediction(model_dir=model_path, use_cache=False)
+    prediction.make_prediction(input, [intensity, phase])
+    prediction.save_predicted_map(output)
 
 
 def run():
@@ -351,15 +361,14 @@ def model_not_found_err():
             nucleofind-install -o site_packages -m phos
         """)
 
-def find_all_potential_models():
 
+def find_all_potential_models():
     model_extension = "*.onnx"
 
     potential_models = []
 
-
     for pkg in site.getsitepackages():
-        models = glob(os.path.join(pkg, "nucleofind_models" , model_extension))
+        models = glob(os.path.join(pkg, "nucleofind_models", model_extension))
         potential_models += models
 
     clibd = os.environ.get('CLIBD', "")
@@ -370,15 +379,14 @@ def find_all_potential_models():
             Ubuntu - source /opt/xtal/ccp4-X.X/bin/ccp4.setup-sh
             MacOS - source /Applications/ccp4-X.X/bin/ccp4.setup-sh
             """
-            )
+        )
         return
-    
-    
+
     ccp4_model_path = os.path.join(clibd, "nucleofind_models")
     if not os.path.exists(ccp4_model_path) and not potential_models:
         model_not_found_err()
         return
-    
+
     potential_models += glob(os.path.join(ccp4_model_path, model_extension))
 
     if not potential_models:
@@ -388,9 +396,8 @@ def find_all_potential_models():
 
 
 def find_model(model_selection: str) -> str:
-
     models = find_all_potential_models()
-    if not models: 
+    if not models:
         print("""No models were found, please use 
 
     nucleofind-install --all
@@ -404,11 +411,11 @@ to install a single model (choose either phosphate, sugar or base)
         exit()
 
     if model_selection:
-        for model in models: 
+        for model in models:
             filename = model.split("/")[-1]
             if model_selection in filename:
                 return model
-        
+
     if len(models) == 1:
         print("Only found ", models[0], "- using that!")
         return models[0]
@@ -421,6 +428,6 @@ to install a single model (choose either phosphate, sugar or base)
 
     exit()
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     run()
