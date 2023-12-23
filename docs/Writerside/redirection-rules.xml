@@ -22,4 +22,12 @@
         <description>Created after removal of "Usage" from NucleoFind</description>
         <accepts>Usage.html</accepts>
     </rule>
+    <rule id="18b2cd92">
+        <description>Created after removal of "Model Installation" from NucleoFind
+            Help IDs that are no longer available in build after removal:
+
+            Reference
+        </description>
+        <accepts>Model-Installation.html</accepts>
+    </rule>
 </rules>
