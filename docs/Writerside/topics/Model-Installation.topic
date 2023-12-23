@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+        SYSTEM "https://resources.jetbrains.com/writerside/1.0/xhtml-entities.dtd">
+<topic xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="https://resources.jetbrains.com/writerside/1.0/topic.v2.xsd"
+       title="Model Installation" id="Model-Installation" help-id="Reference">
+
+    <p>
+        NucleoFind uses a set of pre-trained machine learning models to predict where phosphate, sugar and base
+        positions could be in an electron density map. Before you use NucleoFind you must install one ore more of these
+        models. This is a simple step won't take very long.
+    </p>
+
+    <chapter title="Command" id="command">
+        <p>Syntax:</p>
+
+        <code-block lang="shell">
+            nucleofind-install [OPTIONS]
+        </code-block>
+    </chapter>
+
+    <chapter title="Example Usage" id="example">
+        <p>Syntax:</p>
+
+        <code-block lang="shell">
+            nucleofind-install -m phosphate
+        </code-block>
+    </chapter>
+
+    <chapter title="Options" id="options">
+
+        <deflist type="medium">
+            <def title="-m, --model">
+                Selects a model to download, choose one of:
+                <list>
+                    <li>phosphate</li>
+                    <li>sugar</li>
+                    <li>base</li>
+                </list>
+            </def>
+            <def title="-o, --output">
+                Select model download folder, default is site-packages.
+            </def>
+            <def title="--all">
+                Ignore -m flag and download all the models.
+            </def>
+            <def title="--reinstall">
+                Reinstall the models, in-case of a newer version or corrupt download.
+            </def>
+            <def title="-h, --help">
+                Displays help.
+            </def>
+        </deflist>
+    </chapter>
+
+    <seealso>
+        <!--Provide links to related how-to guides, overviews, and tutorials.-->
+    </seealso>
+</topic>

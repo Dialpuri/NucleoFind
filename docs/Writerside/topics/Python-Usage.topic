@@ -6,40 +6,25 @@
        title="Python Usage" id="Python-Usage">
 
     <p>
-        A reference article is information-oriented.
-        It provides a structured description of a product:
-        its APIs, classes, functions, configuration options, actions, and so on.
-        Start with a summary of what this reference article is about, and what the items you are describing are used for.
+        One the models for NucleoFind are installed, NucleoFind is ready to run. Use this Python syntax
+        to predict nucleic acid positions from electron density.
     </p>
 
     <chapter title="Command" id="command">
-        <p>Syntax:</p>
+        <p>Syntax to run a prediction:</p>
 
-        <code-block lang="shell">
-            cmd [OPTIONS]
+        <code-block lang="python">
+            import nucleofind as nf
+
+            nf.predict_map("phosphate", "data/ref.mtz", "data/pred.map")
+        </code-block>
+
+        <code-block lang="python">
+
+        def predict_map(model: str, input: str, output: str, resolution: float = 2.5, intensity: str = "FWT",
+        phase: str = "PHWT"):
         </code-block>
     </chapter>
 
-    <chapter title="Options" id="options">
-        <p>Describe what each option is used for:</p>
 
-        <deflist type="medium">
-            <def title="-o, --open">
-                Opens a file.
-            </def>
-            <def title="-c, --close">
-                Closes a file.
-            </def>
-            <def title="-v --version">
-                Displays version information.
-            </def>
-            <def title="-h, --help">
-                Displays help.
-            </def>
-        </deflist>
-    </chapter>
-
-    <seealso>
-        <!--Provide links to related how-to guides, overviews, and tutorials.-->
-    </seealso>
 </topic>

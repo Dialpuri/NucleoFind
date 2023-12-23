@@ -6,4 +6,20 @@
         <accepts>page.html</accepts>
     </rule>
     -->
+    <rule id="4f915b32">
+        <description>Created after removal of "About NucleoFind" from NucleoFind</description>
+        <accepts>nucleofind.html</accepts>
+    </rule>
+    <rule id="48074de2">
+        <description>Created after removal of "Usage" from NucleoFind</description>
+        <accepts>Usage.html</accepts>
+    </rule>
+    <rule id="15c2b64d">
+        <description>Created after removal of "Reference" from NucleoFind</description>
+        <accepts>Reference.html</accepts>
+    </rule>
+    <rule id="57bbc555">
+        <description>Created after removal of "Usage" from NucleoFind</description>
+        <accepts>Usage.html</accepts>
+    </rule>
 </rules>

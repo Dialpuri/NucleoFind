@@ -4,7 +4,12 @@
 
 <instance-profile id="n"
                  name="NucleoFind"
-                 start-page="nucleofind.md">
+                 start-page="About-NucleoFind.topic">
 
-    <toc-element topic="nucleofind.md"/>
+    <toc-element topic="About-NucleoFind.topic"/>
+    <toc-element topic="Installation.topic"/>
+    <toc-element topic="Model-Installation.topic"/>
+    <toc-element topic="Command-Line-Usage.topic"/>
+    <toc-element topic="Python-Usage.topic"/>
+    <toc-element topic="Model-Cleanup.topic"/>
 </instance-profile>

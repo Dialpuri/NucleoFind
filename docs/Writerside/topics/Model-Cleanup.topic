@@ -6,37 +6,23 @@
        title="Model Cleanup" id="Model-Cleanup">
 
     <p>
-        A reference article is information-oriented.
-        It provides a structured description of a product:
-        its APIs, classes, functions, configuration options, actions, and so on.
-        Start with a summary of what this reference article is about, and what the items you are describing are used for.
+        NucleoFind uses a set of pre-trained machine learning models to predict where phosphate, sugar and base
+        positions could be in an electron density map. If you want to delete the NucleoFind models you can use this tool.
     </p>
 
     <chapter title="Command" id="command">
         <p>Syntax:</p>
 
         <code-block lang="shell">
-            cmd [OPTIONS]
+            nucleofind-clean
         </code-block>
     </chapter>
 
     <chapter title="Options" id="options">
-        <p>Describe what each option is used for:</p>
+        <p>There are no command line options for nucleofind-clean. You will be presented with a selection to choose
+        which models you wish to rmeove. </p>
 
-        <deflist type="medium">
-            <def title="-o, --open">
-                Opens a file.
-            </def>
-            <def title="-c, --close">
-                Closes a file.
-            </def>
-            <def title="-v --version">
-                Displays version information.
-            </def>
-            <def title="-h, --help">
-                Displays help.
-            </def>
-        </deflist>
+
     </chapter>
 
     <seealso>

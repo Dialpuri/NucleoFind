@@ -6,17 +6,27 @@
        title="Command Line Usage" id="Command-Line-Usage">
 
     <p>
-        A reference article is information-oriented.
-        It provides a structured description of a product:
-        its APIs, classes, functions, configuration options, actions, and so on.
-        Start with a summary of what this reference article is about, and what the items you are describing are used for.
+        Once the models for NucleoFind are installed, NucleoFind is ready to run. Use this command line syntax
+        to predict nucleic acid positions from electron density.
     </p>
 
     <chapter title="Command" id="command">
         <p>Syntax:</p>
 
         <code-block lang="shell">
-            cmd [OPTIONS]
+            nucleofind [OPTIONS]
+        </code-block>
+    </chapter>
+
+    <chapter title="Example Usage" id="example">
+        <p>Simple Syntax:</p>
+        <code-block lang="shell">
+            nucleofind -m phosphate -i reflections.mtz -o predicted.map
+        </code-block>
+
+        <p>Advanced Syntax:</p>
+        <code-block lang="shell">
+            nucleofind -m phosphate -i reflections.mtz -o predicted.map -r 2.5 -intensity F -phase phi
         </code-block>
     </chapter>
 
@@ -24,14 +34,35 @@
         <p>Describe what each option is used for:</p>
 
         <deflist type="medium">
-            <def title="-o, --open">
-                Opens a file.
+            <def title="-i, -input">
+                Path to input file.
+                <p>Formats accepted: MTZ or CCP4 map</p>
+                <b>Required</b>
             </def>
-            <def title="-c, --close">
-                Closes a file.
+            <def title="-o, -output">
+                <p>Path to output .map file</p>
+                <b>Required</b>
             </def>
-            <def title="-v --version">
-                Displays version information.
+            <def title="-m ">
+                <p>Name of nucleic acid characteristic to predict, e.g. <code>phosphate</code></p>
+                <p>Optional if only one model is installed, otherwise required.</p>
+            </def>
+            <def title="-r, -resolution">
+                <p>Resolution cutoff off to use with reflection data</p>
+                <p>E.g. a value of <code>2.5</code> uses only the 2.5 Angstrom and greater reflctions in the map
+                calculation</p>
+            </def>
+            <def title="-intensity">
+                Column name of structure factors weights.
+                <p>Default: FWT</p>
+            </def>
+            <def title="-phase">
+                Column name of phase weights.
+                <p>Default: PHWT</p>
+            </def>
+            <def title="-model_path">
+                <p>Path to ONNX model for use with a custom model.</p>
+                <b>Advanced</b>
             </def>
             <def title="-h, --help">
                 Displays help.

@@ -3,7 +3,16 @@
         SYSTEM "https://resources.jetbrains.com/writerside/1.0/xhtml-entities.dtd">
 <topic xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:noNamespaceSchemaLocation="https://resources.jetbrains.com/writerside/1.0/topic.v2.xsd"
-       title="About NucleoFind" id="About-NucleoFind">
+       title="NucleoFind" id="About-NucleoFind">
 
-    <p>Start typing here...</p>
+    <p>
+        NucleoFind is a deep-learning based package to segment
+        nucleic acid electron density from X-ray crystallography.
+    </p>
+
+    <chapter title="Architecture">
+        NucleoFind uses a UNet-3D architecture.
+        <img src="unet_whitetext.png" alt="Unet Architecture" />
+    </chapter>
+
 </topic>
