@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+        SYSTEM "https://resources.jetbrains.com/writerside/1.0/xhtml-entities.dtd">
+<topic xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns=""
+       xsi:noNamespaceSchemaLocation="https://resources.jetbrains.com/writerside/1.0/topic.v2.xsd"
+       title="Package Installation" id="Installation">
+
+        <procedure title="Python Package" id="pip">
+            <p>To install <code>NucleoFind</code> as a Python package:</p>
+            <step>
+                <p>Create and source virtual environment</p>
+            </step>
+            <step>
+                <p>Run: </p>
+                <code-block>pip install nucleofind</code-block>
+            </step>
+        </procedure>
+
+        <procedure title="From GitHub" id="gh">
+            <p>To install <code>NucleoFind</code> from source:</p>
+            <step>
+                <p>Clone the repository</p>
+                <code-block>git clone https://github.com/Dialpuri/NucleoFind.git</code-block>
+            </step>
+            <step>
+                <p>Change directory into the new repo</p>
+                <code-block>cd NucleoFind</code-block>
+            </step>
+            <step>
+                <p>Create and source a virtual environment</p>
+                <code-block>python3 -m virtualenv pyenv</code-block>
+            </step>
+            <step>
+                <p>Go to package directory</p>
+                <code-block>cd package</code-block>
+            </step>
+            <step>
+                <p>Install the package locally</p>
+                <code-block>pip install .</code-block>
+            </step>
+        </procedure>
+
+    </topic>
