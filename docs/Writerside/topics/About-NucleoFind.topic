@@ -12,7 +12,7 @@
 
     <chapter title="Architecture">
         NucleoFind uses a UNet-3D architecture.
-        <img src="unet_whitetext.png" alt="Unet Architecture" />
+        <img src="unet_whitetext.png" alt="UNet Architecture" />
     </chapter>
 
 </topic>

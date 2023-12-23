@@ -5,3 +5,5 @@ __pycache__
 *.whl
 build
 data
+docs/.idea
+.idea
