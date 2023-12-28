@@ -1,4 +1,4 @@
-# NucleoFind
+# NucleoFind <img src="https://github.com/Dialpuri/NucleoFind/assets/44945647/a7c6c30c-a9fb-4f30-bdc0-3705ae9df36f" alt="logo" width="50"/> 
 
 [![PyPI version](https://badge.fury.io/py/nucleofind.svg)](https://badge.fury.io/py/nucleofind)
 ![GitHub Issues](https://img.shields.io/github/issues-raw/Dialpuri/NucleoFind)
