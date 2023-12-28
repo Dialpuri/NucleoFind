@@ -4,10 +4,12 @@ on:
   push:
     # To trigger the workflow once you push to the `main` branch
     # Replace `main` with your branch’s name
-    branches: ["main"]
+    branches: ["master"]
     paths: 
       - docs/**
 
+  # Specify to run a workflow manually from the Actions tab on GitHub
+  workflow_dispatch:
 
 permissions:
   id-token: write
