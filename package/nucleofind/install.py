@@ -43,7 +43,7 @@ def download_model(type: ModelType, folder: str, reinstall: bool):
         print("Something has gone wrong with the download. Aborting.")
 
 def install_model(type: ModelType, location: str, reinstall: bool) -> bool: 
-    print("Installing model of type", type.name, "to", location)
+    print(f"Installing {type.name} model to {location}")
     if InstallLocation[location] == InstallLocation.ccp4:
         clibd = os.environ.get("CLIBD", "")
         if not os.path.exists(clibd):
@@ -73,11 +73,10 @@ def run():
     parser.add_argument("--reinstall", required=False, action='store_true')
 
     args = parser.parse_args()
-
+        
     if not args.all and not args.model:
         print("Please specify a model you wish to download")
         return
-
 
     if args.all:
         status = [install_model(type=type, location=args.output, reinstall=args.reinstall) for type in ModelType]
