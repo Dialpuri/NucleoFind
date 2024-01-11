@@ -11,7 +11,7 @@ setup(
     description="NucleoFind: A Deep-Learning Network for Interpreting Nucleic Acid Electron Density",
     author="Jordan Dialpuri",
     author_email="jsd523@york.ac.uk",
-    version='0.4.6',
+    version='0.4.7',
     entry_points={
         "console_scripts": [
             'nucleofind=nucleofind.predict:run',

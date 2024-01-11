@@ -42,7 +42,7 @@ class Prediction:
         self.box_minimum: gemmi.PositionBox = None
 
     def make_prediction(self, file_path: str, column_labels: List[str] = ["FWT", "PHWT"],
-                        resolution_cutoff: float = None, use_raw_values: bool = False):
+                        resolution_cutoff: float = None, use_raw_values: bool = False, overlap: float = 16):
         start = time.time()
         try:
             self._load_model()
@@ -64,8 +64,8 @@ class Prediction:
             raise RuntimeError("The input file is not a mtz or map.")
 
         self._interpolate_grid()
-        self._calculate_translations(overlap=16)
-        self._predict(raw_values=use_raw_values, overlap=16)
+        self._calculate_translations(overlap=overlap)
+        self._predict(raw_values=use_raw_values, overlap=overlap)
 
         self.predicted_grid = self._reinterpolate_to_output(self.predicted_map)
 
@@ -302,10 +302,10 @@ class Prediction:
 
 
 def predict_map(model: str, input: str, output: str, resolution: float = 2.5, intensity: str = "FWT",
-                phase: str = "PHWT"):
+                phase: str = "PHWT", overlap: float = 16):
     model_path = find_model(model)
     prediction = Prediction(model_dir=model_path, use_cache=False)
-    prediction.make_prediction(input, [intensity, phase])
+    prediction.make_prediction(input, [intensity, phase], overlap=overlap)
     prediction.save_predicted_map(output)
 
 
@@ -323,6 +323,7 @@ def run():
     parser.add_argument("-r", "-resolution", nargs='?', help="Resolution cutoff")
     parser.add_argument("-intensity", nargs='?', help="Name of intensity column in MTZ")
     parser.add_argument("-phase", nargs='?', help="Name of phase column in MTZ")
+    parser.add_argument("-overlap", nargs='?', help="Amount of overlap to use")
     parser.add_argument("-model_path", nargs='?', help="Path to model (development)")
 
     args = vars(parser.parse_args())
@@ -345,7 +346,7 @@ def run():
 
     prediction = Prediction(model_dir=model_path, use_cache=False)
 
-    prediction.make_prediction(args["i"], [args["intensity"], args["phase"]])
+    prediction.make_prediction(args["i"], [args["intensity"], args["phase"]], overlap=args.overlap)
 
     prediction.save_predicted_map(args["o"])
 
