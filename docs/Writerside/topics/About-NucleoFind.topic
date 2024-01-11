@@ -10,9 +10,13 @@
         nucleic acid electron density from X-ray crystallography.
     </p>
 
-    <chapter title="Architecture">
+    <chapter>
+    Get started by installing nucleofind and the required models!
+    </chapter>
+    <!-- <chapter title="Architecture">
         NucleoFind uses a UNet-3D architecture.
 <!--        <img src="unet_whitetext.png" alt="UNet Architecture" />-->
-    </chapter>
+    </chapter> -->
+    
 
 </topic>

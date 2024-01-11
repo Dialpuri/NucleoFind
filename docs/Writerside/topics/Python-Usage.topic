@@ -16,13 +16,13 @@
         <code-block lang="python">
             import nucleofind as nf
 
-            nf.predict_map("phosphate", "data/ref.mtz", "data/pred.map")
+            nf.predict_map("phosphate", "data/ref.mtz", "data/pred.map", intensity = "FWT", phase = "PHWT", overlap=16)
         </code-block>
 
         <code-block lang="python">
 
         def predict_map(model: str, input: str, output: str, resolution: float = 2.5, intensity: str = "FWT",
-        phase: str = "PHWT"):
+        phase: str = "PHWT", overlap: float = 16):
         </code-block>
     </chapter>
 
