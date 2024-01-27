@@ -323,7 +323,7 @@ def run():
     parser.add_argument("-r", "-resolution", nargs='?', help="Resolution cutoff")
     parser.add_argument("-intensity", nargs='?', help="Name of intensity column in MTZ")
     parser.add_argument("-phase", nargs='?', help="Name of phase column in MTZ")
-    parser.add_argument("-overlap", nargs='?', help="Amount of overlap to use")
+    parser.add_argument("-overlap", nargs='?', help="Amount of overlap to use", const=16, default=16)
     parser.add_argument("-model_path", nargs='?', help="Path to model (development)")
 
     args = vars(parser.parse_args())
@@ -346,7 +346,7 @@ def run():
 
     prediction = Prediction(model_dir=model_path, use_cache=False)
 
-    prediction.make_prediction(args["i"], [args["intensity"], args["phase"]], overlap=args.overlap)
+    prediction.make_prediction(args["i"], [args["intensity"], args["phase"]], overlap=args["overlap"])
 
     prediction.save_predicted_map(args["o"])
 
