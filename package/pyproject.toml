@@ -43,6 +43,8 @@ wheel.py-api = "cp312"
 # Necessary to see build output from the actual compilation
 build-verbosity = 1
 before-all = "uname -a"
+skip = ["pp38-*"] # Skip CPython and PyPy 3.8
+archs = ["auto64"]          # Only target 64 bit architectures
 
 # Run pytest to ensure that the package was correctly built
 #test-command = "pytest {project}/tests"
