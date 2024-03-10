@@ -12,10 +12,6 @@ else
     tar xf clipper-gemmi-wrapper.tar.gz
     mv clipper-gemmi-wrapper clipper
 
-#    echo
-#    bzr checkout --lightweight  http://fg.oisin.rc-harwell.ac.uk/anonscm/bzr/clipper/trunk/ clipper
-
-    echo
 fi 
 
 if [ -d "gemmi" ]; then
@@ -33,7 +29,9 @@ if [ -d "mmdb2" ]; then
     echo "Found mmdb2"
 else
 echo "Checking out mmdb2"
-bzr checkout --lightweight  http://fg.oisin.rc-harwell.ac.uk/anonscm/bzr/mmdb2/trunk/ mmdb2
+curl -L http://ftp.ccp4.ac.uk/opensource/mmdb2-2.0.22.tar.gz -o mmdb2-2.0.22.tar.gz
+tar xf mmdb2-2.0.22.tar.gz
+ln -s mmdb2-2.0.22 mmdb2
 echo
 fi
 
@@ -41,7 +39,9 @@ if [ -d "libccp4" ]; then
     echo "Found libccp4"
 else
     echo "Checking out libccp4"
-    bzr checkout --lightweight  http://fg.oisin.rc-harwell.ac.uk/anonscm/bzr/libccp4/trunk/ libccp4
+curl -L http://ftp.ccp4.ac.uk/opensource/libccp4-8.0.0.tar.gz -o libccp4-8.0.0.tar.gz
+tar xf libccp4-8.0.0.tar.gz
+ln -s libccp4-8.0.0 libccp4
     echo
 fi 
 
