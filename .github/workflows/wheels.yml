@@ -50,7 +50,7 @@ jobs:
       with:
         submodules: true
 
-    - name: Move to correct directory
+    - name: Download dependencies
       run:  |
         cd package
         ./get_sources
