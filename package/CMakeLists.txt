@@ -4,9 +4,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 project(nautilus LANGUAGES CXX)
-#set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-#set(CMAKE_C_COMPILER "gcc")
-#set(CMAKE_CXX_COMPILER "/usr/bin/g++")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 if (NOT SKBUILD)
@@ -60,6 +57,7 @@ include_directories(
 link_directories(
         ${WRK_DIR}/mmdb2
         ${WRK_DIR}/clipper
+        ${WRK_DIR}/clipper/core
         ${WRK_DIR}/ccp4
         ${WRK_DIR}/src
 )
@@ -85,38 +83,37 @@ add_library(
 # target_compile_features(cnautilus INTERFACE cxx_std_17)
 
 # target_include_directories(cnautilus PUBLIC checkout/gemmi)
-# target_link_directories(cnautilus
-#         PUBLIC
-#         mmdb2
-#         clipper/mmdb
-#         clipper/cif
-#         clipper/core
-#         clipper/contrib
-#         clipper/ccp4
-#         clipper/gemmi
-#         clipper/minimol
-#         fftw
-#         rfftw
-#         ccp4
-# )
+target_link_directories(nautilus_lib
+        PUBLIC
+        mmdb2
+        clipper/mmdb
+        clipper/cif
+        clipper/core
+        clipper/contrib
+        clipper/ccp4
+        clipper/gemmi
+        clipper/minimol
+        fftw
+        rfftw
+        ccp4
+)
 
-# target_link_libraries(
-#         cnautilus
-#         PRIVATE
-#         gemmi_cpp
-#         nautilus_lib
-#         ccp4
-#         fftw
-#         rfftw
-#         mmdb2
-#         clipper-mmdb
-#         clipper-cif
-#         clipper-core
-#         clipper-contrib
-#         clipper-minimol
-#         clipper-ccp4
-#         clipper-gemmi
-# )
+target_link_libraries(
+         nautilus_lib
+         PRIVATE
+         gemmi_cpp
+         ccp4
+         fftw
+        rfftw
+        mmdb2
+        clipper-mmdb
+        clipper-cif
+        clipper-core
+        clipper-contrib
+        clipper-minimol
+        clipper-ccp4
+        clipper-gemmi
+)
 
 set(nautilus_HEADERS
         ${WRK_DIR}/src/cpp/nautilus-join.h
@@ -183,6 +180,8 @@ target_link_directories(nautilus_module
         ${WRK_DIR}/clipper/ccp4
         ${WRK_DIR}/clipper/gemmi
         ${WRK_DIR}/clipper/minimol
+        ${WRK_DIR}/clipper/cns
+        ${WRK_DIR}/clipper/phs
         ${WRK_DIR}/fftw
         ${WRK_DIR}/rfftw
         ${WRK_DIR}/ccp4
@@ -198,13 +197,15 @@ target_link_libraries(
         fftw
         rfftw
         mmdb2
+        clipper-core
         clipper-mmdb
         clipper-cif
-        clipper-core
         clipper-contrib
         clipper-minimol
         clipper-ccp4
         clipper-gemmi
+        clipper-cns
+        clipper-phs
 )
 # Install directive for scikit-build-core
 install(TARGETS nautilus_module LIBRARY DESTINATION nucleofind)
