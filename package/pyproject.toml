@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "nucleofind"
-version = "0.1"
+version = "0.5"
 description = "NucleoFind"
 readme = "README.md"
 requires-python = ">=3.8"
