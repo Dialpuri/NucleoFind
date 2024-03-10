@@ -21,6 +21,11 @@ jobs:
       with:
         submodules: true
 
+    - name: Move to correct directory
+      run: |
+        cd package 
+        ./get_sources
+
     - name: Build SDist
       run: pipx run build --sdist
 
@@ -41,14 +46,14 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
     - name: Move to correct directory
       run:  |
         cd package 
         ./get_sources
-
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
 
     - uses: pypa/cibuildwheel@v2.16
       env:
