@@ -5,6 +5,9 @@ on:
   pull_request:
     branches:
      - master
+  push:
+    branches:
+      - build-support
   release:
     types:
       - published
