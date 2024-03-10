@@ -7,6 +7,7 @@ project(nautilus LANGUAGES CXX)
 #set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 #set(CMAKE_C_COMPILER "gcc")
 #set(CMAKE_CXX_COMPILER "/usr/bin/g++")
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 if (NOT SKBUILD)
     message(WARNING "\
@@ -63,7 +64,6 @@ link_directories(
         ${WRK_DIR}/src
 )
 
-
 add_library(
         nautilus_lib
         ${WRK_DIR}/src/cpp/nautilus-join.cpp
@@ -80,45 +80,44 @@ add_library(
         ${WRK_DIR}/src/cpp/nautilus-findml.h
 )
 
+# add_executable(cnautilus ${WRK_DIR}/src/cpp/cnautilus.cpp)
+# set_target_properties(cnautilus PROPERTIES OUTPUT_NAME nautilus)
+# target_compile_features(cnautilus INTERFACE cxx_std_17)
 
-add_executable(cnautilus ${WRK_DIR}/src/cpp/cnautilus.cpp)
-set_target_properties(cnautilus PROPERTIES OUTPUT_NAME nautilus)
-target_compile_features(cnautilus INTERFACE cxx_std_17)
+# target_include_directories(cnautilus PUBLIC checkout/gemmi)
+# target_link_directories(cnautilus
+#         PUBLIC
+#         mmdb2
+#         clipper/mmdb
+#         clipper/cif
+#         clipper/core
+#         clipper/contrib
+#         clipper/ccp4
+#         clipper/gemmi
+#         clipper/minimol
+#         fftw
+#         rfftw
+#         ccp4
+# )
 
-target_include_directories(cnautilus PUBLIC checkout/gemmi)
-target_link_directories(cnautilus
-        PUBLIC
-        mmdb2
-        clipper/mmdb
-        clipper/cif
-        clipper/core
-        clipper/contrib
-        clipper/ccp4
-        clipper/gemmi
-        clipper/minimol
-        fftw
-        rfftw
-        ccp4
-)
+# target_link_libraries(
+#         cnautilus
+#         PRIVATE
+#         gemmi_cpp
+#         nautilus_lib
+#         ccp4
+#         fftw
+#         rfftw
+#         mmdb2
+#         clipper-mmdb
+#         clipper-cif
+#         clipper-core
+#         clipper-contrib
+#         clipper-minimol
+#         clipper-ccp4
+#         clipper-gemmi
+# )
 
-
-target_link_libraries(
-        cnautilus
-        PRIVATE
-        gemmi_cpp
-        nautilus_lib
-        ccp4
-        fftw
-        rfftw
-        mmdb2
-        clipper-mmdb
-        clipper-cif
-        clipper-core
-        clipper-contrib
-        clipper-minimol
-        clipper-ccp4
-        clipper-gemmi
-)
 set(nautilus_HEADERS
         ${WRK_DIR}/src/cpp/nautilus-join.h
         ${WRK_DIR}/src/cpp/nautilus-rebuild-bases.h
@@ -133,10 +132,10 @@ set(nautilus_HEADERS
         ${WRK_DIR}/src/python/nautilus-include.h
 
 )
-set_target_properties(cnautilus PROPERTIES PUBLIC_HEADER "${nautilus_HEADERS}")
-install(TARGETS cnautilus
-        LIBRARY DESTINATION lib
-        PUBLIC_HEADER DESTINATION ${WRK_DIR}/include/nautilus)
+# set_target_properties(cnautilus PROPERTIES PUBLIC_HEADER "${nautilus_HEADERS}")
+# install(TARGETS cnautilus
+#         LIBRARY DESTINATION lib
+#         PUBLIC_HEADER DESTINATION ${WRK_DIR}/include/nautilus)
 
 
 # Try to import all Python components potentially needed by nanobind
