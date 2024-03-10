@@ -52,7 +52,7 @@ jobs:
 
     - name: Move to correct directory
       run:  |
-        mv package/* .
+        cd package
         ./get_sources
 
     - uses: pypa/cibuildwheel@v2.16
@@ -63,6 +63,9 @@ jobs:
 
         # Temporary: use pre-release Python 3.12 for stable ABI builds
         CIBW_PRERELEASE_PYTHONS: True
+      with:
+        package-dir: 'package'
+        config-file: "{package}/pyproject.toml"
 
     - name: Verify clean directory
       run: git diff --exit-code
