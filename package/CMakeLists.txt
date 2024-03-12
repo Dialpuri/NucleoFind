@@ -136,22 +136,15 @@ set(nautilus_HEADERS
 
 
 # Try to import all Python components potentially needed by nanobind
-find_package(Python 3.8
-        REQUIRED COMPONENTS Interpreter Development.Module
-        OPTIONAL_COMPONENTS Development.SABIModule)
-
-# Import nanobind through CMake's find_package mechanism
-find_package(nanobind CONFIG REQUIRED)
+find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
+find_package(pybind11 CONFIG REQUIRED)
 
 # We are now ready to compile the actual extension module
-nanobind_add_module(
+python_add_library(
         nautilus_module
-
-        STABLE_ABI
-        NB_STATIC
-
-        # Python bound functions here
+        MODULE
         ${WRK_DIR}/src/python/nautilus.cpp
+        WITH_SOABI
 )
 
 target_include_directories(nautilus_module PUBLIC
@@ -191,6 +184,7 @@ target_link_directories(nautilus_module
 target_link_libraries(
         nautilus_module
         PRIVATE
+        pybind11::headers
         gemmi_cpp
         nautilus_lib
         ccp4
