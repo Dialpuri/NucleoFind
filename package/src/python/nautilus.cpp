@@ -1,19 +1,18 @@
 //
 // Created by Jordan Dialpuri on 16/02/2024.
 //
-#include <nanobind/nanobind.h>
-#include <nanobind/stl/string.h>
+#include <pybind11/pybind11.h>
 
 #include "nautilus-include.h"
 #include "nautilus-run.h"
 
-namespace nb = nanobind;
+namespace py = pybind11;
 
-using namespace nb::literals;
+using namespace pybind11::literals;
 
-NB_MODULE(nautilus_module, m) {
-nb::class_<NautilusInput>(m, "Input")
-            .def(nb::init< const std::string&, // mtzin
+PYBIND11_MODULE(nautilus_module, m) {
+py::class_<NautilusInput>(m, "Input")
+            .def(py::init< const std::string&, // mtzin
              const std::string&, // seqin
              const std::string&, // pdbin
              const std::string&, // phospredin
@@ -28,8 +27,8 @@ nb::class_<NautilusInput>(m, "Input")
              "colin_hl"_a, "colin_phifom"_a, "colin_fc"_a, "colinfree"_a, ""
              );
 
-nb::class_<NautilusOutput>(m, "Output")
-            .def(nb::init< const std::string& >()); // pdbout
+py::class_<NautilusOutput>(m, "Output")
+            .def(py::init< const std::string& >()); // pdbout
 
 m.def("run", &run, "input"_a, "output"_a, "cycles"_a, "Run nucleofind-build");
 }
