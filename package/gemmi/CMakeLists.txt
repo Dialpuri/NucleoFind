@@ -17,7 +17,7 @@ endif()
 include_directories("${gemmi_src}/include"
         "${gemmi_src}/third_party")
 
-add_library(gemmi_cpp
+add_library(gemmi_cpp STATIC
         ${gemmi_src}/src/assembly.cpp
         ${gemmi_src}/src/calculate.cpp
         ${gemmi_src}/src/crd.cpp
