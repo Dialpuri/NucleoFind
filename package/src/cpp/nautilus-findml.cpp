@@ -808,7 +808,7 @@ clipper::MiniMol FindML::find() {
         float max_score = -1e8f;
         NucleicAcidDB::ChainFull best_fragment;
 
-        for (int j = 0; j < nadb.size(); j++) {
+        for (int j = 0; j < nadb.size() - 2; j++) {
             NucleicAcidDB::ChainFull fragment = nadb.extract(j, 3);
 
             if (!fragment.is_continuous()) continue;
