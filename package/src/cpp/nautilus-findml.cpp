@@ -793,7 +793,7 @@ clipper::MiniMol FindML::find() {
     clipper::MiniMol phosphate_peaks = calculate_phosphate_peaks(0.01);
     TripletCoordinates phosphate_triplets = find_triplet_coordinates(phosphate_peaks);
     // TripletCoordinates symmetrised_triplets = symmetrise_phosphate_peaks(phosphate_triplets, phosphate_peaks);
-    NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
+//    NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
     std::map<std::pair<int, int>, std::vector<NucleicAcidDB::NucleicAcidFull>> placed_fragments;
 
     for (int i = 0; i < phosphate_triplets.size(); i++) {
