@@ -4,6 +4,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 project(nautilus LANGUAGES CXX)
+#set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+#set(CMAKE_C_COMPILER "gcc")
+#set(CMAKE_CXX_COMPILER "/usr/bin/g++")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 if (NOT SKBUILD)
@@ -31,11 +34,6 @@ endif()
 
 set(WRK_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
-add_subdirectory(${WRK_DIR}/fftw)
-add_subdirectory(${WRK_DIR}/rfftw)
-add_subdirectory(${WRK_DIR}/ccp4)
-add_subdirectory(${WRK_DIR}/mmdb2)
-add_subdirectory(${WRK_DIR}/gemmi)
 add_subdirectory(${WRK_DIR}/clipper/gemmi)
 add_subdirectory(${WRK_DIR}/clipper/minimol)
 add_subdirectory(${WRK_DIR}/clipper/core)
@@ -45,6 +43,13 @@ add_subdirectory(${WRK_DIR}/clipper/mmdb)
 add_subdirectory(${WRK_DIR}/clipper/cif)
 add_subdirectory(${WRK_DIR}/clipper/phs)
 add_subdirectory(${WRK_DIR}/clipper/ccp4)
+add_subdirectory(${WRK_DIR}/fftw)
+add_subdirectory(${WRK_DIR}/rfftw)
+add_subdirectory(${WRK_DIR}/ccp4)
+add_subdirectory(${WRK_DIR}/mmdb2)
+add_subdirectory(${WRK_DIR}/gemmi)
+
+message(CMAKE_BINARY_DIR="${CMAKE_BINARY_DIR}")
 
 include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}
@@ -57,13 +62,14 @@ include_directories(
 link_directories(
         ${WRK_DIR}/mmdb2
         ${WRK_DIR}/clipper
-        ${WRK_DIR}/clipper/core
         ${WRK_DIR}/ccp4
         ${WRK_DIR}/src
+        ${CMAKE_BINARY_DIR}
 )
 
 add_library(
         nautilus_lib
+        STATIC
         ${WRK_DIR}/src/cpp/nautilus-join.cpp
         ${WRK_DIR}/src/cpp/nautilus-rebuild-bases.cpp
         ${WRK_DIR}/src/cpp/nautilus-refine.cpp
@@ -83,37 +89,46 @@ add_library(
 # target_compile_features(cnautilus INTERFACE cxx_std_17)
 
 # target_include_directories(cnautilus PUBLIC checkout/gemmi)
+set(LINK_LIBS "gemmi_cpp nautilus_lib ccp4 fftw rfftw mmdb2 clipper-mmdb clipper-cif clipper-core clipper-contrib clipper-minimol clipper-ccp4 clipper-gemmi")
+
 target_link_directories(nautilus_lib
         PUBLIC
-        mmdb2
-        clipper/mmdb
-        clipper/cif
-        clipper/core
-        clipper/contrib
-        clipper/ccp4
-        clipper/gemmi
-        clipper/minimol
-        fftw
-        rfftw
-        ccp4
+        ${CMAKE_BINARY_DIR}/clipper/mmdb
+        ${CMAKE_BINARY_DIR}/clipper/cif
+        ${CMAKE_BINARY_DIR}/clipper/ccp4
+        ${CMAKE_BINARY_DIR}/clipper/gemmi
+        ${CMAKE_BINARY_DIR}/clipper/minimol
+        ${CMAKE_BINARY_DIR}/clipper/core
+        ${CMAKE_BINARY_DIR}/clipper/contrib
+        ${CMAKE_BINARY_DIR}/fftw
+        ${CMAKE_BINARY_DIR}/rfftw
+        ${CMAKE_BINARY_DIR}/ccp4
+        ${CMAKE_BINARY_DIR}/mmdb2
+        ${CMAKE_BINARY_DIR}/gemmi
 )
 
 target_link_libraries(
-         nautilus_lib
-         PRIVATE
-         gemmi_cpp
-         ccp4
-         fftw
-        rfftw
-        mmdb2
+        nautilus_lib
+        PUBLIC
         clipper-mmdb
         clipper-cif
-        clipper-core
-        clipper-contrib
-        clipper-minimol
         clipper-ccp4
         clipper-gemmi
+        clipper-minimol
+        clipper-core
+        clipper-contrib
+        rfftw
+        fftw
+        ccp4
+        mmdb2
+        gemmi_cpp
 )
+
+# target_link_libraries(
+#         cnautilus
+#         PRIVATE
+#         nautilus_lib
+# )
 
 set(nautilus_HEADERS
         ${WRK_DIR}/src/cpp/nautilus-join.h
@@ -167,45 +182,54 @@ target_include_directories(nautilus_module PUBLIC
         ${WRK_DIR}/fftw
         ${WRK_DIR}/rfftw
         ${WRK_DIR}/ccp4
+
 )
 
 
 target_link_directories(nautilus_module
         PUBLIC
-        ${WRK_DIR}/mmdb2
-        ${WRK_DIR}/clipper/mmdb
-        ${WRK_DIR}/clipper/cif
-        ${WRK_DIR}/clipper/core
-        ${WRK_DIR}/clipper/contrib
-        ${WRK_DIR}/clipper/ccp4
-        ${WRK_DIR}/clipper/gemmi
-        ${WRK_DIR}/clipper/minimol
-        ${WRK_DIR}/clipper/cns
-        ${WRK_DIR}/clipper/phs
-        ${WRK_DIR}/fftw
-        ${WRK_DIR}/rfftw
-        ${WRK_DIR}/ccp4
+        # ${WRK_DIR}/mmdb2
+        # ${WRK_DIR}/clipper/mmdb
+        # ${WRK_DIR}/clipper/cif
+        # ${WRK_DIR}/clipper/core
+        # ${WRK_DIR}/clipper/contrib
+        # ${WRK_DIR}/clipper/ccp4
+        # ${WRK_DIR}/clipper/gemmi
+        # ${WRK_DIR}/clipper/minimol
+        # ${WRK_DIR}/fftw
+        # ${WRK_DIR}/rfftw
+        # ${WRK_DIR}/ccp4
+        ${CMAKE_BINARY_DIR}/clipper/mmdb
+        ${CMAKE_BINARY_DIR}/clipper/cif
+        ${CMAKE_BINARY_DIR}/clipper/ccp4
+        ${CMAKE_BINARY_DIR}/clipper/gemmi
+        ${CMAKE_BINARY_DIR}/clipper/minimol
+        ${CMAKE_BINARY_DIR}/clipper/contrib
+        ${CMAKE_BINARY_DIR}/clipper/core
+        ${CMAKE_BINARY_DIR}/fftw
+        ${CMAKE_BINARY_DIR}/rfftw
+        ${CMAKE_BINARY_DIR}/ccp4
+        ${CMAKE_BINARY_DIR}/mmdb2
+        ${CMAKE_BINARY_DIR}/gemmi
 )
 
 
 target_link_libraries(
         nautilus_module
         PRIVATE
-        gemmi_cpp
         nautilus_lib
-        ccp4
-        fftw
-        rfftw
-        mmdb2
-        clipper-core
         clipper-mmdb
         clipper-cif
-        clipper-contrib
-        clipper-minimol
         clipper-ccp4
         clipper-gemmi
-        clipper-cns
-        clipper-phs
+        clipper-minimol
+        clipper-contrib
+        clipper-core
+        rfftw
+        fftw
+        ccp4
+        mmdb2
+        gemmi_cpp
 )
 # Install directive for scikit-build-core
 install(TARGETS nautilus_module LIBRARY DESTINATION nucleofind)
