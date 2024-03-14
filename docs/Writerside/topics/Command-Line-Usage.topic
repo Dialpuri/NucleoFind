@@ -31,7 +31,7 @@
     </chapter>
 
     <chapter title="Options" id="options">
-        <p>Describe what each option is used for:</p>
+        <p>Description of each option:</p>
 
         <deflist type="medium">
             <def title="-i, -input">
