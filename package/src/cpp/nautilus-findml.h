@@ -29,7 +29,7 @@ public:
     typedef std::vector<std::pair<int, clipper::Coord_orth>> TripletCoordinate;
     typedef std::vector<TripletCoordinate> TripletCoordinates;
     typedef std::map<std::pair<int, int>, std::vector<NucleicAcidDB::NucleicAcidFull>> PossibleFragments;
-
+    typedef std::vector<std::pair<std::vector<int>, std::vector<int>>> PairedChainIndices;
 private:
 
     /*
@@ -75,11 +75,18 @@ private:
 
     clipper::MiniMol remove_bases(clipper::MiniMol &mol);
 
-    clipper::MiniMol filter_and_form_chain(PossibleFragments &fragments) const;
+    clipper::MiniMol filter_and_form_single_chain(PossibleFragments &fragments) const;
+
+    clipper::MiniMol filter_and_form_bidirectional_chain(PossibleFragments& fragments) const;
+
+    clipper::MiniMol form_chain(PossibleFragments& fragments) const;
 
     clipper::MiniMol organise_to_chains(clipper::MiniMol &mol);
 
     static void find_chains(int current_index, std::map<int, std::vector<int>>& connections, ChainData& chain);
+
+    [[ nodiscard ]] PairedChainIndices organise_triplets_to_chains(TripletCoordinates&triplets);
+
     /*
      * PREDICTED POINTS TO MOLECULE END
      */
