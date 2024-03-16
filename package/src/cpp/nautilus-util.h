@@ -12,7 +12,7 @@
 class NautilusUtil {
  public:
   static void set_reference( clipper::String& pdb );
-    static void save_minimol(clipper::MiniMol& mol, const std::string& path) {
+    static void save_minimol(const clipper::MiniMol& mol, const std::string& path) {
         clipper::MMDBfile mfile;
         mfile.export_minimol(mol);
         mfile.write_file(path);
@@ -182,6 +182,8 @@ class NautilusUtil {
     }
 
     static int count_na(const clipper::MiniMol& mol);
+
+  static float calculate_rscc(const clipper::MiniMol& mol, const clipper::Xmap<float>& xmap, float res);
 };
 
 

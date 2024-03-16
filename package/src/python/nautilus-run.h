@@ -231,8 +231,10 @@ void run(NautilusInput& input, NautilusOutput& output, int cycles) {
   mol_wrk = na_bases.rebuild_bases( xwrk, mol_wrk );
   log.log( "BASES", mol_wrk, verbose >= 5 );
 
+  NautilusUtil::save_minimol(mol_wrk, "ml-built-model.pdb");
   clipper::MiniMol best_model = mol_wrk;
   int best_na_count = NautilusUtil::count_na(best_model);
+  float best_rscc = NautilusUtil::calculate_rscc(best_model, xwrk, hkls.resolution().limit());
 
   for ( int cyc = 0; cyc < cycles; cyc++ ) {
     std::cout << "Internal cycle " << clipper::String( cyc+1, 3 ) << std::endl << std::endl; // edited
@@ -284,16 +286,20 @@ void run(NautilusInput& input, NautilusOutput& output, int cycles) {
     // auto msg = log.log_info( mol_wrk, false ); // edited
     // std::cout << "Internal cycle " << clipper::String( cyc+1, 3 ) << std::endl << msg << std::endl ;
     prog.summary_end();
+
+    float rscc = NautilusUtil::calculate_rscc(mol_wrk, xwrk, hkls.resolution().limit());
+
     int current_count = NautilusUtil::count_na(mol_wrk);
-    if (current_count > best_na_count) {
-      best_na_count = current_count;
+    if (rscc > best_rscc) {
+      std::cout << "Overwriting\n";
+      best_rscc = rscc;
       best_model = mol_wrk;
     }
     // file output edited SWH Nov'17
     // if ( opxml != "NONE" ) log.xml( opxml ); //, mol_wrk );
   }
 
-  std::cout << "Taking best model from all cycles with " << best_na_count << " nucleic acids built." << std::endl;
+  std::cout << "Taking best model from all cycles with " << best_rscc << " nucleic acids built." << std::endl;
   mol_wrk = best_model;
   // move to match input model
   if ( mol_wrk_in.size() > 0 ){

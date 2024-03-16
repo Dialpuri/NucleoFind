@@ -4,6 +4,7 @@
 #include "nautilus-util.h"
 
 #include <fstream>
+#include <clipper/contrib/edcalc.h>
 
 
 extern "C" {
@@ -173,6 +174,58 @@ int NautilusUtil::count_na( const clipper::MiniMol& mol )
   return nna;
 }
 
+float NautilusUtil::calculate_rscc(const clipper::MiniMol& mol, const clipper::Xmap<float>& xmap, float res ) {
+  clipper::Cell cell = xmap.cell();
+  clipper::Spacegroup spg = xmap.spacegroup();
+  clipper::Atom_list atom_list = mol.atom_list();
+
+  clipper::Coord_grid g0( 0,0,0 );
+  clipper::Coord_grid g1( xmap.grid_sampling().nu(), xmap.grid_sampling().nv(), xmap.grid_sampling().nw() );
+
+  clipper::Resolution reso( res);
+  clipper::Grid_sampling grid( spg, cell, reso );
+  clipper::EDcalc_iso<float> maskcalc( res );
+  clipper::Xmap<float> calc_map = {spg, cell, grid };
+  maskcalc(calc_map, atom_list);
+
+  clipper::Xmap_base::Map_reference_coord i0, iu, iv, iw;
+  i0 = clipper::Xmap_base::Map_reference_coord( xmap, g0 );
+
+  double sum_obs = 0;
+  double sum_calc = 0;
+  double count_obs = 0;
+  double count_calc = 0;
+
+  for ( iu = i0; iu.coord().u() <= g1.u(); iu.next_u() )
+    for ( iv = iu; iv.coord().v() <= g1.v(); iv.next_v() )
+      for ( iw = iv; iw.coord().w() <= g1.w(); iw.next_w() ) {
+        sum_obs += xmap[iw];
+        count_obs += 1;
+
+        sum_calc += calc_map[iw];
+        count_calc += 1;
+      }
+
+  double avg_obs = sum_obs/count_obs;
+  double avg_calc = sum_calc/count_calc;
+
+  double sum_delta = 0;
+  double sum_delta_obs_sqrd = 0;
+  double sum_delta_calc_sqrd = 0;
+
+  for ( iu = i0; iu.coord().u() <= g1.u(); iu.next_u() )
+    for ( iv = iu; iv.coord().v() <= g1.v(); iv.next_v() )
+      for ( iw = iv; iw.coord().w() <= g1.w(); iw.next_w() ) {
+        sum_delta += (xmap[iw]-avg_obs)*(calc_map[iw]-avg_calc);
+
+        sum_delta_obs_sqrd += pow(xmap[iw]-avg_obs, 2);
+        sum_delta_calc_sqrd += pow(calc_map[iw]-avg_calc, 2);
+      }
+
+  double rscc = (sum_delta)/(sqrt(sum_delta_obs_sqrd*sum_delta_calc_sqrd));
+  std::cout << "RSCC=" << rscc << std::endl;
+  return rscc;
+}
 
 
 void NautilusLog::xml( const clipper::String& file ) const //, const clipper::MiniMol& mol )
