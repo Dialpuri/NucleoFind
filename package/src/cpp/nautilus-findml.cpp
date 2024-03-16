@@ -746,10 +746,16 @@ void FindML::find_chains(int current_index, std::map<int, std::vector<int>> &con
 FindML::PairedChainIndices FindML::organise_triplets_to_chains(TripletCoordinates&triplets) {
 
     std::vector<std::vector<int>> chains;
+    std::set<std::vector<int>> completed_triplets;
 
+    /**Go through each triplet and look to see whether there is a chain where it can be added to the front or back, if there is
+     * do so. If not, create a new chain for that triplet.
+     * Should create a large chain of triplets, but the output can be split depending on the start points.
+     ***/
     for (TripletCoordinate& triplet: triplets) {
         bool found_triplet = false;
         std::vector<int> triplet_ids = {triplet[0].first, triplet[1].first, triplet[2].first};
+        if (completed_triplets.find(triplet_ids) != completed_triplets.end()) {continue;}
 
         for (auto & chain : chains) {
             int chain_length = chain.size();
@@ -766,7 +772,35 @@ FindML::PairedChainIndices FindML::organise_triplets_to_chains(TripletCoordinate
         if (!found_triplet) {
             chains.push_back({triplet[0].first, triplet[1].first, triplet[2].first});
         }
+
+        completed_triplets.insert(triplet_ids);
     }
+
+    /*chains could have become split depending on starting point, bring them together*/
+    bool merging = true;
+    while (merging) {
+        merging = false;
+        for (auto it1 = chains.begin(); it1 != chains.end(); ++it1) {
+            for (auto it2 = it1+1; it2 != chains.end(); ++it2) {
+                if (std::equal((*it1).end()-3, (*it1).end(), (*it2).begin())) {
+                    (*it1).insert((*it1).end(), (*it2).begin() + 3, (*it2).end());
+                    it2 = chains.erase(it2);
+                    merging = true;
+                    break;
+                }
+                if (std::equal((*it1).begin(), (*it1).begin()+3, (*it2).end()-3)) {
+                    (*it2).insert((*it2).end(), (*it1).begin()+3, (*it1).end());
+                    it1 = chains.erase(it1);
+                    merging = true;
+                    break;
+                }
+            }
+            if (merging) {
+                    break;
+            }
+        }
+    }
+
     std::map<std::set<int>, int> paired_map = {};
     PairedChainIndices pairs;
 
@@ -830,9 +864,7 @@ clipper::MiniMol FindML::organise_to_chains(clipper::MiniMol &mol) {
         if (connection.second.empty()) {
             seed_points.emplace_back(connection.first);
         }
-
     }
-
     for (auto& seed: seed_points) {
         ChainData chain;
         find_chains(seed, connections_O3, chain);
@@ -853,12 +885,28 @@ clipper::MiniMol FindML::organise_to_chains(clipper::MiniMol &mol) {
 clipper::MiniMol FindML::find() {
     clipper::MiniMol phosphate_peaks = calculate_phosphate_peaks(0.1);
     TripletCoordinates phosphate_triplets = find_triplet_coordinates(phosphate_peaks);
-    draw_triplets(phosphate_triplets, phosphate_peaks, "triplets-ext.pdb");
-
+    // draw_triplets(phosphate_triplets, phosphate_peaks, "triplets-ext.pdb");
+    // NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
     std::cout << phosphate_triplets.size() << " phosphate triplets found\n";
     // TripletCoordinates symmetrised_triplets = symmetrise_phosphate_peaks(phosphate_triplets, phosphate_peaks);
 
     PairedChainIndices pairs = organise_triplets_to_chains(phosphate_triplets);
+    //
+    // for (const auto& pair : pairs) {
+    //     std::cout << "Pair:" << std::endl;
+    //     std::cout << "First vector: ";
+    //     for (const auto& element : pair.first) {
+    //         std::cout << element << " ";
+    //     }
+    //     std::cout << std::endl;
+    //
+    //     std::cout << "Second vector: ";
+    //     for (const auto& element : pair.second) {
+    //         std::cout << element << " ";
+    //     }
+    //     std::cout << std::endl << std::endl;
+    // }
+
     std::map<std::pair<int, int>, std::vector<NucleicAcidDB::NucleicAcidFull>> placed_fragments;
 
     for (const auto& [fwd, bck]: pairs) {
@@ -874,6 +922,7 @@ clipper::MiniMol FindML::find() {
             p1 = p1.coord_frac(mol.cell()).symmetry_copy_near(mol.spacegroup(), mol.cell(), p2.coord_frac(mol.cell())).coord_orth(mol.cell());
             p3 = p3.coord_frac(mol.cell()).symmetry_copy_near(mol.spacegroup(), mol.cell(), p2.coord_frac(mol.cell())).coord_orth(mol.cell());
             std::vector<clipper::Coord_orth> triplet_pos = {p1, p2, p3};
+
 
             float max_score = -1e8f;
             NucleicAcidDB::ChainFull best_fragment;
@@ -940,12 +989,25 @@ clipper::MiniMol FindML::find() {
             placed_fragments.insert(backward_placed_fragments.begin(), backward_placed_fragments.end());
         }
     }
+
+    clipper::MiniMol formed_chain = form_chain(placed_fragments);
+    NautilusUtil::save_minimol(formed_chain, "formed_chain.pdb");
+
+
     clipper::MiniMol filtered_chain = filter_and_form_bidirectional_chain(placed_fragments);
+    NautilusUtil::save_minimol(filtered_chain, "filtered_chain.pdb");
+
     clipper::MiniMol base_removed_mol = remove_bases(filtered_chain);
+    NautilusUtil::save_minimol(base_removed_mol, "base_removed_mol.pdb");
 
     clipper::MiniMol mol_ = organise_to_chains(base_removed_mol);
+    NautilusUtil::save_minimol(mol_, "mol_.pdb");
+
+
     for (int p = 0; p < mol_.size(); p++) {
         mol.insert(mol_[p]);
     }
+
+    NautilusUtil::save_minimol(mol, "mlfind.pdb");
     return mol;
 }
