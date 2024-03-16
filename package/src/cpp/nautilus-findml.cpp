@@ -628,15 +628,15 @@ clipper::MiniMol FindML::filter_and_form_bidirectional_chain(PossibleFragments& 
     clipper::MPolymer mp;
 
     int i = 0;
-    for (auto &frag: fragments) {
-        std::sort(frag.second.begin(), frag.second.end());
+    for (auto & [fst, snd]: fragments) {
+        std::sort(snd.begin(), snd.end());
 
-        auto f1 = frag.second[frag.second.size() - 1].get_mmonomer();
-        f1.set_type(frag.second[frag.second.size() - 1].get_type());
-        std::string id1 = "F" + std::to_string(frag.first.first) + std::to_string(frag.first.second);
+        auto f1 = snd[snd.size() - 1].get_mmonomer();
+        f1.set_type(snd[snd.size() - 1].get_type());
+        std::string id1 = "F" + std::to_string(fst.first) + std::to_string(fst.second);
 
-        f1.set_id(id1);
-        auto rounded_score = static_cast<float>(static_cast<int>(frag.second[frag.second.size() - 1].score * 10.0) /
+        // f1.set_id(i);
+        auto rounded_score = static_cast<float>(static_cast<int>(snd[snd.size() - 1].score * 10.0) /
                                                 10.0);
         for (int a = 0; a < f1.size(); a++) {
             f1[a].set_u_iso(rounded_score);
@@ -830,7 +830,7 @@ clipper::MiniMol FindML::organise_to_chains(clipper::MiniMol &mol) {
         int p = mol[c][0].lookup(" P  ", clipper::MM::UNIQUE);
         if (p == -1) continue;
 
-        clipper::MAtom P = mol[c][0].find(" P  ", clipper::MM::UNIQUE);
+        clipper::MAtom P = mol[c][0][p];
         std::vector<clipper::MAtomIndexSymmetry> atoms_near = nb(P.coord_orth(), 2.5);
 
         for (auto const &atom: atoms_near) {
@@ -843,7 +843,7 @@ clipper::MiniMol FindML::organise_to_chains(clipper::MiniMol &mol) {
         int o3 = mol[c][0].lookup(" O3'", clipper::MM::UNIQUE);
         if (o3 == -1) continue;
 
-        clipper::MAtom O3 = mol[c][0].find(" O3'", clipper::MM::UNIQUE);
+        clipper::MAtom O3 = mol[c][0][o3];
         std::vector<clipper::MAtomIndexSymmetry> atoms_near_o3 = nb(O3.coord_orth(), 2.5);
 
         for (auto const &atom: atoms_near_o3) {
@@ -870,13 +870,16 @@ clipper::MiniMol FindML::organise_to_chains(clipper::MiniMol &mol) {
         find_chains(seed, connections_O3, chain);
         clipper::MPolymer mp;
 
+        int i = 0;
         for (auto const& id: chain.ordered_chain) {
-            mp.insert(mol[id][0]);
+            clipper::MMonomer mon = mol[id][0];
+            mon.set_id(i++);
+            mp.insert(mon);
         }
         output_mol.insert(mp);
     }
     NucleicAcidTools::chain_label(output_mol, clipper::MMDBManager::PDB);
-//    NautilusUtil::save_minimol(output_mol, "debug/1u9s/chained_find.pdb");
+    // NautilusUtil::save_minimol(output_mol, "organised.pdb");
 
     return output_mol;
 }
@@ -990,24 +993,25 @@ clipper::MiniMol FindML::find() {
         }
     }
 
-    clipper::MiniMol formed_chain = form_chain(placed_fragments);
-    NautilusUtil::save_minimol(formed_chain, "formed_chain.pdb");
-
+    // clipper::MiniMol formed_chain = form_chain(placed_fragments);
+    // NautilusUtil::save_minimol(formed_chain, "formed_chain.pdb");
 
     clipper::MiniMol filtered_chain = filter_and_form_bidirectional_chain(placed_fragments);
-    NautilusUtil::save_minimol(filtered_chain, "filtered_chain.pdb");
+    // NautilusUtil::save_minimol(filtered_chain, "filtered_chain.pdb");
 
     clipper::MiniMol base_removed_mol = remove_bases(filtered_chain);
-    NautilusUtil::save_minimol(base_removed_mol, "base_removed_mol.pdb");
+    // NautilusUtil::save_minimol(base_removed_mol, "base_removed_mol.pdb");
 
     clipper::MiniMol mol_ = organise_to_chains(base_removed_mol);
-    NautilusUtil::save_minimol(mol_, "mol_.pdb");
-
+    // NautilusUtil::save_minimol(mol_, "mol_.pdb");
 
     for (int p = 0; p < mol_.size(); p++) {
+        for (int m = 0; m < mol_.size(); m++) {
+            mol_[p][m].set_id(m+1);
+        }
         mol.insert(mol_[p]);
     }
 
-    NautilusUtil::save_minimol(mol, "mlfind.pdb");
+    // NautilusUtil::save_minimol(mol, "mlfind.pdb");
     return mol;
 }

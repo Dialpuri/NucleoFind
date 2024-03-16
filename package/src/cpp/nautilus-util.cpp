@@ -144,6 +144,36 @@ clipper::String NautilusLog::log_info( const clipper::MiniMol& mol, bool summary
          clipper::String(nnc,3) + " chains.";
 }
 
+int NautilusUtil::count_na( const clipper::MiniMol& mol )
+{
+  //int nnc(0), nna(0);
+  // added by me
+  //clipper::MiniMol mol_wrk = mol;
+  int nmax, nseq, nnc, nna;
+  nnc = nna = nmax = nseq = 0;
+  // count aa and chains
+  // edited by SWH
+  for ( int c = 0; c < mol.size(); c++ )
+    if ( !mol[c].exists_property( "NON-NA" ) ) {
+      if ( mol[c].size() > nmax ) nmax = mol[c].size();
+      nnc += 1;
+      nna += mol[c].size();     //count all built with or without neucleobases - gives sugar-phosphate backbone
+      for ( int r = 0; r < mol[c].size(); r++ )
+      {
+        if ( mol[c][r].lookup( " C4 ", clipper::MM::ANY ) >= 0 ) // base ring
+        {
+          if ( mol[c][r].lookup( " O2 ", clipper::MM::ANY ) >= 0 ||
+                  mol[c][r].lookup( " N6 ", clipper::MM::ANY ) >= 0 ||
+                  mol[c][r].lookup( " O6 ", clipper::MM::ANY ) >= 0 ) nseq++;  // properly built nucleobases
+        }
+      }
+    }
+  // store every end of cycle, added SWH Nov'17
+
+  return nna;
+}
+
+
 
 void NautilusLog::xml( const clipper::String& file ) const //, const clipper::MiniMol& mol )
 {

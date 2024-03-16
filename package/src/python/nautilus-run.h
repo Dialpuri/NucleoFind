@@ -169,52 +169,82 @@ void run(NautilusInput& input, NautilusOutput& output, int cycles) {
   // initial phosphates from PDB
   // if ( mol_pho.size() > 0 ) mol_wrk = natools.phosphate( xwrk, mol_wrk, mol_pho );
 
+  clipper::Xmap<float> xphospred;
+  clipper::Xmap<float> xsugarpred;
+  clipper::Xmap<float> xbasepred;
+
+  if (input.get_phosphate_prediction_path().has_value()) {
+    clipper::CCP4MAPfile mapfile;
+    mapfile.open_read(input.get_phosphate_prediction_path().value());
+    mapfile.import_xmap(xphospred);
+  }
+
+  if (input.get_sugar_prediction_path().has_value()) {
+    clipper::CCP4MAPfile mapfile;
+    mapfile.open_read(input.get_sugar_prediction_path().value());
+    mapfile.import_xmap(xsugarpred);
+  }
+
+  if (input.get_base_prediction_path().has_value()) {
+    clipper::CCP4MAPfile mapfile;
+    mapfile.open_read(input.get_base_prediction_path().value());
+    mapfile.import_xmap(xbasepred);
+  }
+
+  mol_wrk = NucleicAcidTools::flag_chains( mol_wrk );
+  FindML find_ml = FindML(mol_wrk, xphospred, xsugarpred, xbasepred, xwrk);
+  find_ml.load_library_from_file(ippdb_ref);
+  mol_wrk = find_ml.find();
+  log.log( "FIND ML", mol_wrk, verbose >= 5 );
+  NautilusUtil::save_minimol(mol_wrk, "mlfind.pdb");
+
+  mol_wrk = natools.grow( xwrk, mol_wrk, 25, 0.01 );
+  log.log( "GROW", mol_wrk, verbose >= 5 );
+
+  // join
+  NucleicAcidJoin na_join;
+  mol_wrk = na_join.join( mol_wrk );
+  log.log( "JOIN", mol_wrk, verbose >= 5 );
+  //for ( int c = 0; c < mol_wrk.size(); c++ ) { for ( int r = 0; r < mol_wrk[c].size(); r++ ) std::cout << mol_wrk[c][r].type().trim(); std::cout << std::endl; }
+
+  // link
+  mol_wrk = natools.link( xwrk, mol_wrk );
+  log.log( "LINK", mol_wrk, verbose >= 5 );
+  //for ( int c = 0; c < mol_wrk.size(); c++ ) { for ( int r = 0; r < mol_wrk[c].size(); r++ ) std::cout << mol_wrk[c][r].type().trim(); std::cout << std::endl; }
+
+  // prune
+  mol_wrk = natools.prune( mol_wrk );
+  log.log( "PRUNE", mol_wrk, verbose >= 5 );
+
+  mol_wrk = natools.rebuild_chain( xwrk, mol_wrk );
+  log.log( "CHAIN", mol_wrk, verbose >= 5 );
+  //for ( int c = 0; c < mol_wrk.size(); c++ ) { for ( int r = 0; r < mol_wrk[c].size(); r++ ) std::cout << mol_wrk[c][r].type().trim(); std::cout << std::endl; }
+
+  // sequence
+  NucleicAcidSequence na_seqnc;
+  mol_wrk = na_seqnc.sequence( xwrk, mol_wrk, seq_wrk );
+  log.log( "SEQNC", mol_wrk, verbose >= 5 );
+  //for ( int c = 0; c < mol_wrk.size(); c++ ) { for ( int r = 0; r < mol_wrk[c].size(); r++ ) std::cout << mol_wrk[c][r].type().trim(); std::cout << std::endl; }
+
+  // rebuild
+  NucleicAcidRebuildBases na_bases;
+  mol_wrk = na_bases.rebuild_bases( xwrk, mol_wrk );
+  log.log( "BASES", mol_wrk, verbose >= 5 );
+
+  clipper::MiniMol best_model = mol_wrk;
+  int best_na_count = NautilusUtil::count_na(best_model);
+
   for ( int cyc = 0; cyc < cycles; cyc++ ) {
     std::cout << "Internal cycle " << clipper::String( cyc+1, 3 ) << std::endl << std::endl; // edited
 
     // adjust labels and label non-NA chains to keep
     mol_wrk = NucleicAcidTools::flag_chains( mol_wrk );
 
-    // find chains
-    // clipper::MMDBfile mfile;
-    // mfile.export_minimol(mol_wrk);
-    // mfile.write_file("find.pdb");
-
-    clipper::Xmap<float> xphospred;
-    clipper::Xmap<float> xsugarpred;
-    clipper::Xmap<float> xbasepred;
-
-    if (input.get_phosphate_prediction_path().has_value()) {
-      clipper::CCP4MAPfile mapfile;
-      mapfile.open_read(input.get_phosphate_prediction_path().value());
-      mapfile.import_xmap(xphospred);
-    }
-
-    if (input.get_sugar_prediction_path().has_value()) {
-      clipper::CCP4MAPfile mapfile;
-      mapfile.open_read(input.get_sugar_prediction_path().value());
-      mapfile.import_xmap(xsugarpred);
-    }
-
-    if (input.get_base_prediction_path().has_value()) {
-      clipper::CCP4MAPfile mapfile;
-      mapfile.open_read(input.get_base_prediction_path().value());
-      mapfile.import_xmap(xbasepred);
-    }
-
-    if (cyc == 0) {
-      FindML find_ml = FindML(mol_wrk, xphospred, xsugarpred, xbasepred, xwrk);
-      find_ml.load_library_from_file(ippdb_ref);
-      mol_wrk = find_ml.find();
-      log.log( "FIND ML", mol_wrk, verbose >= 5 );
-    }
-
     mol_wrk = natools.find( xwrk, mol_wrk, nhit/2, nhit/2, srchst );
     log.log( "FIND", mol_wrk, verbose >= 5 );
 
-
     // grow chains
-    mol_wrk = natools.grow( xwrk, mol_wrk, 25, 0.001 );
+    mol_wrk = natools.grow( xwrk, mol_wrk, 25, 0.01 );
     log.log( "GROW", mol_wrk, verbose >= 5 );
 
     // join
@@ -251,14 +281,20 @@ void run(NautilusInput& input, NautilusOutput& output, int cycles) {
     //for ( int c = 0; c < mol_wrk.size(); c++ ) { for ( int r = 0; r < mol_wrk[c].size(); r++ ) std::cout << mol_wrk[c][r].type().trim(); std::cout << std::endl; }
 
     prog.summary_beg();
-    // msg = log.log_info( mol_wrk, true ); // edited
+    // auto msg = log.log_info( mol_wrk, false ); // edited
     // std::cout << "Internal cycle " << clipper::String( cyc+1, 3 ) << std::endl << msg << std::endl ;
     prog.summary_end();
-
+    int current_count = NautilusUtil::count_na(mol_wrk);
+    if (current_count > best_na_count) {
+      best_na_count = current_count;
+      best_model = mol_wrk;
+    }
     // file output edited SWH Nov'17
     // if ( opxml != "NONE" ) log.xml( opxml ); //, mol_wrk );
   }
 
+  std::cout << "Taking best model from all cycles with " << best_na_count << " nucleic acids built." << std::endl;
+  mol_wrk = best_model;
   // move to match input model
   if ( mol_wrk_in.size() > 0 ){
     NucleicAcidTools::symm_match( mol_wrk, mol_wrk_in );

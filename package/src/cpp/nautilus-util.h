@@ -180,6 +180,8 @@ class NautilusUtil {
     static bool compare_grid(const clipper::Coord_grid& g1, const clipper::Coord_grid& g2) {
         return (g1.u() == g2.u() && g1.v() == g2.v() && g1.w() == g2.w());
     }
+
+    static int count_na(const clipper::MiniMol& mol);
 };
 
 
