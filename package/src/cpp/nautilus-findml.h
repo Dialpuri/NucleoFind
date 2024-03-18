@@ -12,6 +12,7 @@ struct ChainData {
     std::vector<int> ordered_chain;
     std::unordered_set<int> lookup_list;
 };
+struct PlacedFragmentResult;
 
 class FindML {
 public:
@@ -73,15 +74,21 @@ private:
 
     float score_base(NucleicAcidDB::NucleicAcidFull &chain);
 
-    clipper::MiniMol remove_bases(clipper::MiniMol &mol);
+    [[ nodiscard ]] clipper::MiniMol remove_bases(clipper::MiniMol &mol);
 
-    clipper::MiniMol filter_and_form_single_chain(PossibleFragments &fragments) const;
+    [[ nodiscard ]] clipper::MiniMol filter_and_form_single_chain(PossibleFragments &fragments) const;
 
-    clipper::MiniMol filter_and_form_bidirectional_chain(PossibleFragments& fragments) const;
+    [[ nodiscard ]] clipper::MiniMol filter_and_form_bidirectional_chain(PossibleFragments& fragments) const;
 
-    clipper::MiniMol form_chain(PossibleFragments& fragments) const;
+    [[ nodiscard ]] clipper::MiniMol form_chain(PossibleFragments& fragments) const;
 
-    clipper::MiniMol organise_to_chains(clipper::MiniMol &mol);
+    [[ nodiscard ]] clipper::MiniMol form_organised_chains(PossibleFragments& fragments, std::vector<std::vector<int>>& fragment_indices) const;
+
+    [[ nodiscard ]] clipper::MiniMol organise_to_chains(clipper::MiniMol &mol);
+
+    [[ nodiscard ]] clipper::MiniMol remove_clashing_protein(clipper::MiniMol& na_chain);
+
+    PlacedFragmentResult place_fragments(const clipper::MiniMol& phosphate_peaks, const std::vector<int>& positions);
 
     static void find_chains(int current_index, std::map<int, std::vector<int>>& connections, ChainData& chain);
 
@@ -149,5 +156,13 @@ private:
 
 
 };
+
+struct PlacedFragmentResult {
+    float score;
+    FindML::PossibleFragments fragments;
+
+    PlacedFragmentResult(const float score, const FindML::PossibleFragments& fragments) { this->score = score; this->fragments = fragments;}
+};
+
 
 #endif //NAUTILUS_FINDML_H

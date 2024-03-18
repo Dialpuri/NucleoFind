@@ -18,7 +18,7 @@
 
 void run(NautilusInput& input, NautilusOutput& output, int cycles) {
 
-  CCP4Program prog( "pynautilus", "0.5.4", "$Date: 2024/02/26" );
+  CCP4Program prog( "nucleofind-build", "0.1", "$Date: 2024/02/26" );
   prog.set_termination_message( "Failed" );
 
   std::cout << std::endl << "Copyright Jordan Dialpuri, Kevin Cowtan and University of York." << std::endl << std::endl;
@@ -201,20 +201,25 @@ void run(NautilusInput& input, NautilusOutput& output, int cycles) {
   mol_wrk = natools.grow( xwrk, mol_wrk, 25, 0.01 );
   log.log( "GROW", mol_wrk, verbose >= 5 );
 
+  NautilusUtil::save_minimol(mol_wrk, "grow.pdb");
+
   // join
   NucleicAcidJoin na_join;
   mol_wrk = na_join.join( mol_wrk );
   log.log( "JOIN", mol_wrk, verbose >= 5 );
   //for ( int c = 0; c < mol_wrk.size(); c++ ) { for ( int r = 0; r < mol_wrk[c].size(); r++ ) std::cout << mol_wrk[c][r].type().trim(); std::cout << std::endl; }
+  NautilusUtil::save_minimol(mol_wrk, "JOIN.pdb");
 
   // link
   mol_wrk = natools.link( xwrk, mol_wrk );
   log.log( "LINK", mol_wrk, verbose >= 5 );
   //for ( int c = 0; c < mol_wrk.size(); c++ ) { for ( int r = 0; r < mol_wrk[c].size(); r++ ) std::cout << mol_wrk[c][r].type().trim(); std::cout << std::endl; }
+  NautilusUtil::save_minimol(mol_wrk, "LINK.pdb");
 
   // prune
   mol_wrk = natools.prune( mol_wrk );
   log.log( "PRUNE", mol_wrk, verbose >= 5 );
+  NautilusUtil::save_minimol(mol_wrk, "PRUNE.pdb");
 
   mol_wrk = natools.rebuild_chain( xwrk, mol_wrk );
   log.log( "CHAIN", mol_wrk, verbose >= 5 );
@@ -232,6 +237,7 @@ void run(NautilusInput& input, NautilusOutput& output, int cycles) {
   log.log( "BASES", mol_wrk, verbose >= 5 );
 
   NautilusUtil::save_minimol(mol_wrk, "ml-built-model.pdb");
+
   clipper::MiniMol best_model = mol_wrk;
   int best_na_count = NautilusUtil::count_na(best_model);
   float best_rscc = NautilusUtil::calculate_rscc(best_model, xwrk, hkls.resolution().limit());

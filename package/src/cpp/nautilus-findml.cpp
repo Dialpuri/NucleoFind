@@ -252,82 +252,6 @@ clipper::MiniMol FindML::refine_phosphate_peaks(const clipper::MiniMol& phosphat
     return mol_;
 }
 
-FindML::TripletCoordinates FindML::symmetrise_phosphate_peaks(TripletCoordinates& triplet_coordinates, clipper::MiniMol& phosphate_peaks) const {
-
-    std::set<int> visited = {};
-    clipper::Coord_frac reference_point = triplet_coordinates[0][0].second.coord_frac(phosphate_peaks.cell());
-
-    for (int triplet_idx = 0; triplet_idx < triplet_coordinates.size(); triplet_idx++) {
-        TripletCoordinate triplet_coordinate = triplet_coordinates[triplet_idx];
-        for (int fragment_idx = 0; fragment_idx < triplet_coordinate.size(); fragment_idx++) {
-            auto data = triplet_coordinates[triplet_idx][fragment_idx];
-            int current_id = data.first;
-
-            if (visited.find(current_id) != visited.end()) {continue;}
-
-            clipper::Coord_orth current_point = data.second;
-            clipper::Coord_frac current_point_frac = current_point.coord_frac(phosphate_peaks.cell());
-            current_point_frac = current_point_frac.symmetry_copy_near(phosphate_peaks.spacegroup(), phosphate_peaks.cell(), reference_point);
-            triplet_coordinates[triplet_idx][fragment_idx].second = current_point_frac.coord_orth(phosphate_peaks.cell());
-            // reference_point = current_point_frac;
-            visited.insert(current_id);
-        }
-    }
-
-    return triplet_coordinates;
-
-
-
-    // for (int p = 0; p < phosphate_peaks.size(); p++) {
-    //     for (int m = 0; m < phosphate_peaks[p].size(); m++) {
-    //         for (int a = 0; a < phosphate_peaks[p][m].size(); a++) {
-    //             clipper::Coord_orth point = phosphate_peaks[p][m][a].coord_orth();
-    //             float distance = point.lengthsq();
-    //             float best_distance = distance;
-    //             clipper::Coord_orth best_coord = point;
-    //
-    //             for (int symop = 0; symop < phosphate_peaks.spacegroup().num_symops(); symop++) {
-    //                 clipper::Coord_orth new_point = point;
-    //                 clipper::RTop_orth new_point_rtop = phosphate_peaks.spacegroup().symop(symop).rtop_orth(phosphate_peaks.cell());
-    //                 clipper::Coord_orth transformed_point = new_point.transform(new_point_rtop);
-    //                 // if (transformed_point.x() < 0 || transformed_point.y() < 0 || transformed_point.z() < 0) {
-    //                 //     continue;
-    //                 // }
-    //                 float new_distance = transformed_point.lengthsq();
-    //                 if (new_distance < best_distance) {
-    //                     best_coord = transformed_point;
-    //                     best_distance = new_distance;
-    //                 }
-    //             }
-    //
-    //             if (best_distance != distance) {
-    //                 phosphate_peaks[p][m][a].set_coord_orth(best_coord);
-    //             }
-    //         }
-    //     }
-    // }
-    //
-    // return phosphate_peaks;
-
-    // for (int a = 0; a < phosphate_peaks[0][0].size(); a++) {
-    //     clipper::Coord_orth point = phosphate_peaks[0][0][a].coord_orth();
-    //     std::cout << point.format() << std::endl;
-    //     float distance = point.lengthsq();
-    //
-    //     for (int symop = 0; symop < phosphate_peaks.spacegroup().num_symops(); symop++) {
-    //         clipper::Coord_orth new_point = point;
-    //         clipper::RTop_orth new_point_rtop = phosphate_peaks.spacegroup().symop(symop).rtop_orth(phosphate_peaks.cell());
-    //         clipper::Coord_orth transformed_point = new_point.transform(new_point_rtop);
-    //         float new_distance = transformed_point.lengthsq();
-    //
-    //         // std::cout << "Distance = " << distance << " " << new_distance << std::endl;
-    //     }
-    // }
-
-
-
-}
-
 
 clipper::MiniMol FindML::calculate_phosphate_peaks(double value_threshold) {
     clipper::MiniMol phosphate_mol = generate_phosphate_molecule_from_gridpoints(value_threshold);
@@ -624,7 +548,7 @@ clipper::MiniMol FindML::remove_bases(clipper::MiniMol &mol) {
     return safe_mol;
 }
 clipper::MiniMol FindML::filter_and_form_bidirectional_chain(PossibleFragments& fragments) const {
-    clipper::MiniMol mol = clipper::MiniMol(xwrk.spacegroup(), xwrk.cell());
+    clipper::MiniMol mol_ = clipper::MiniMol(xwrk.spacegroup(), xwrk.cell());
     clipper::MPolymer mp;
 
     int i = 0;
@@ -647,9 +571,39 @@ clipper::MiniMol FindML::filter_and_form_bidirectional_chain(PossibleFragments& 
         mp.insert(f1);
     }
 
-    mol.model().insert(mp);
-    return mol;
+    mol_.model().insert(mp);
+    return mol_;
 }
+
+clipper::MiniMol FindML::form_organised_chains(PossibleFragments& fragments, std::vector<std::vector<int>>& fragment_indices) const {
+    clipper::MiniMol mol_ = clipper::MiniMol(xwrk.spacegroup(), xwrk.cell());
+
+    for (const auto& chain: fragment_indices) {
+        clipper::MPolymer mp;
+
+        for (int i = 0; i < chain.size()-1; i++) {
+            std::pair<int, int> pair = std::make_pair(chain[i], chain[i+1]);
+
+            if (fragments.find(pair) == fragments.end()) {
+                std::cout << "not found a pair for " << pair.first << " " << pair.second << std::endl;
+                continue;
+            }
+
+            std::vector<NucleicAcidDB::NucleicAcidFull> fragment_list = fragments[pair];
+            std::sort(fragment_list.begin(), fragment_list.end());
+            auto f1 = fragment_list[fragment_list.size() - 1].get_mmonomer();
+            f1.set_type(fragment_list[fragment_list.size() - 1].get_type());
+            f1.set_id(i);
+            mp.insert(f1);
+        }
+
+        mol_.insert(mp);
+    }
+
+    NucleicAcidTools::chain_label(mol_, clipper::MMDBManager::PDB );
+    return mol_;
+}
+
 
 clipper::MiniMol FindML::form_chain(PossibleFragments& fragments) const {
     clipper::MiniMol mol = clipper::MiniMol(xwrk.spacegroup(), xwrk.cell());
@@ -828,7 +782,7 @@ clipper::MiniMol FindML::organise_to_chains(clipper::MiniMol &mol) {
         connections[c] = {};
 
         int p = mol[c][0].lookup(" P  ", clipper::MM::UNIQUE);
-        if (p == -1) continue;
+        if (p == -1) {std::cout << "Couldn't find P" << std::endl; continue;}
 
         clipper::MAtom P = mol[c][0][p];
         std::vector<clipper::MAtomIndexSymmetry> atoms_near = nb(P.coord_orth(), 2.5);
@@ -865,6 +819,11 @@ clipper::MiniMol FindML::organise_to_chains(clipper::MiniMol &mol) {
             seed_points.emplace_back(connection.first);
         }
     }
+
+    if (seed_points.empty()) {
+        seed_points.emplace_back(connections.begin()->first);
+    }
+
     for (auto& seed: seed_points) {
         ChainData chain;
         find_chains(seed, connections_O3, chain);
@@ -885,133 +844,161 @@ clipper::MiniMol FindML::organise_to_chains(clipper::MiniMol &mol) {
 }
 
 
+clipper::MiniMol FindML::remove_clashing_protein(clipper::MiniMol& na_chain) {
+    clipper::MiniMol molwrk = mol;
+    clipper::MAtomNonBond nb = clipper::MAtomNonBond(molwrk, 1);
+
+    std::set<std::vector<std::string>> to_remove;
+
+    clipper::MiniMol mol_final = {mol.spacegroup(), mol.cell()};
+
+    for (int p = 0; p < na_chain.size(); p++) {
+        clipper::MPolymer mp;
+        mp.set_id(na_chain[p].id());
+        for (int m = 0; m < na_chain[p].size(); m++) {
+            for (int a = 0; a < na_chain[p][m].size(); a++) {
+                auto nearby_atoms = nb.atoms_near(na_chain[p][m][a].coord_orth(), 1);
+
+                for (const auto &nearby_atom: nearby_atoms) {
+                    clipper::MPolymer chain = molwrk[nearby_atom.polymer()];
+                    clipper::MMonomer residue = chain[nearby_atom.monomer()];
+                    NucleicAcidDB::NucleicAcid na = {residue};
+                    if (na.flag() == NucleicAcidDB::NucleicAcid::NONE) {
+                        to_remove.insert({
+                                                 chain.id(), residue.type(), std::to_string(residue.seqnum())
+                                         });
+                    }
+                }
+            }
+
+            mp.insert(na_chain[p][m]);
+        }
+        mol_final.insert(mp);
+    }
+
+    for (int p = 0; p < mol.size(); p++) {
+        clipper::MPolymer mp;
+        mp.set_id(mol[p].id());
+        int count = 0;
+        for (int m = 0; m < mol[p].size(); m++) {
+            clipper::MPolymer chain = mol[p];
+            clipper::MMonomer residue = mol[p][m];
+            std::vector<std::string> key = {chain.id(), residue.type(), std::to_string(residue.seqnum())};
+            if (to_remove.find(key) != to_remove.end()) {
+//                std::cout << key[0] << "-" << key[1] << "-" << key[2] << " found clashing with likely nucleic acid, removing. " << std::endl;
+                continue;
+            }
+            count += 1;
+            mp.insert(mol[p][m]);
+        }
+        if (count > 0) {
+            mol_final.insert(mp);
+
+        }
+    }
+
+
+    NautilusUtil::save_minimol(mol_final, "clash_mol.pdb");
+    // Need to flag chains so join knows which is protein and which is NA.
+    mol_final = NucleicAcidTools::flag_chains(mol_final);
+    return mol_final;
+}
+
+PlacedFragmentResult FindML::place_fragments(const clipper::MiniMol& phosphate_peaks, const std::vector<int>& positions) {
+    float score = 0;
+    std::map<std::pair<int, int>, std::vector<NucleicAcidDB::NucleicAcidFull>> placed_fragments;
+
+    for (int i = 0; i < positions.size()-2; i++) {
+        clipper::Coord_orth p1 = phosphate_peaks[0][0][positions[i]].coord_orth();
+        clipper::Coord_orth p2 = phosphate_peaks[0][0][positions[i+1]].coord_orth();
+        clipper::Coord_orth p3 = phosphate_peaks[0][0][positions[i+2]].coord_orth();
+        p1 = p1.coord_frac(mol.cell()).symmetry_copy_near(mol.spacegroup(), mol.cell(), p2.coord_frac(mol.cell())).coord_orth(mol.cell());
+        p3 = p3.coord_frac(mol.cell()).symmetry_copy_near(mol.spacegroup(), mol.cell(), p2.coord_frac(mol.cell())).coord_orth(mol.cell());
+
+        std::vector<clipper::Coord_orth> triplet_pos = {p1, p2, p3};
+
+        float max_score = -1e8f;
+        NucleicAcidDB::ChainFull best_fragment;
+
+        for (int j = 0; j < nadb.size() - 2; j++) {
+            NucleicAcidDB::ChainFull fragment = nadb.extract(j, 3);
+
+            if (!fragment.is_continuous()) continue;
+
+            std::vector<clipper::Coord_orth> fragment_pos = {fragment[0].P, fragment[1].P, fragment[2].P};
+            clipper::RTop_orth align = clipper::RTop_orth(fragment_pos, triplet_pos);
+
+            fragment.transform(align);
+            fragment.alignment = align;
+
+            float total_score = score_fragment(fragment, xwrk);
+            if (total_score > max_score) {
+                max_score = total_score;
+                best_fragment = fragment;
+            }
+        }
+        score += max_score;
+        placed_fragments[std::make_pair(positions[i], positions[i+1])].emplace_back(best_fragment[0]);
+        placed_fragments[std::make_pair(positions[i+1], positions[i+2])].emplace_back(best_fragment[1]);
+    }
+
+    return {score, placed_fragments};
+}
+
 clipper::MiniMol FindML::find() {
     clipper::MiniMol phosphate_peaks = calculate_phosphate_peaks(0.1);
     TripletCoordinates phosphate_triplets = find_triplet_coordinates(phosphate_peaks);
-    // draw_triplets(phosphate_triplets, phosphate_peaks, "triplets-ext.pdb");
-    // NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
+//    draw_triplets(phosphate_triplets, phosphate_peaks, "triplets-ext.pdb");
+//    NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
     std::cout << phosphate_triplets.size() << " phosphate triplets found\n";
-    // TripletCoordinates symmetrised_triplets = symmetrise_phosphate_peaks(phosphate_triplets, phosphate_peaks);
 
+    
     PairedChainIndices pairs = organise_triplets_to_chains(phosphate_triplets);
-    //
-    // for (const auto& pair : pairs) {
-    //     std::cout << "Pair:" << std::endl;
-    //     std::cout << "First vector: ";
-    //     for (const auto& element : pair.first) {
-    //         std::cout << element << " ";
-    //     }
-    //     std::cout << std::endl;
-    //
-    //     std::cout << "Second vector: ";
-    //     for (const auto& element : pair.second) {
-    //         std::cout << element << " ";
-    //     }
-    //     std::cout << std::endl << std::endl;
-    // }
+//
+//    for (const auto& pair : pairs) {
+//        std::cout << "Pair:" << std::endl;
+//        std::cout << "First vector: ";
+//        for (const auto& element : pair.first) {
+//            std::cout << element << " ";
+//        }
+//        std::cout << std::endl;
+//
+//        std::cout << "Second vector: ";
+//        for (const auto& element : pair.second) {
+//            std::cout << element << " ";
+//        }
+//        std::cout << std::endl << std::endl;
+//    }
 
     std::map<std::pair<int, int>, std::vector<NucleicAcidDB::NucleicAcidFull>> placed_fragments;
-
+    std::vector<std::vector<int>> placed_fragment_indices;
     for (const auto& [fwd, bck]: pairs) {
-        float forward_score = 0;
-        float backward_score = 0;
-        std::map<std::pair<int, int>, std::vector<NucleicAcidDB::NucleicAcidFull>> forward_placed_fragments;
-        std::map<std::pair<int, int>, std::vector<NucleicAcidDB::NucleicAcidFull>> backward_placed_fragments;
+        PlacedFragmentResult forward_result = place_fragments(phosphate_peaks, fwd);
+        PlacedFragmentResult backward_result = place_fragments(phosphate_peaks, bck);
 
-        for (int i = 0; i < fwd.size()-2; i++) {
-            clipper::Coord_orth p1 = phosphate_peaks[0][0][fwd[i]].coord_orth();
-            clipper::Coord_orth p2 = phosphate_peaks[0][0][fwd[i+1]].coord_orth();
-            clipper::Coord_orth p3 = phosphate_peaks[0][0][fwd[i+2]].coord_orth();
-            p1 = p1.coord_frac(mol.cell()).symmetry_copy_near(mol.spacegroup(), mol.cell(), p2.coord_frac(mol.cell())).coord_orth(mol.cell());
-            p3 = p3.coord_frac(mol.cell()).symmetry_copy_near(mol.spacegroup(), mol.cell(), p2.coord_frac(mol.cell())).coord_orth(mol.cell());
-            std::vector<clipper::Coord_orth> triplet_pos = {p1, p2, p3};
-
-
-            float max_score = -1e8f;
-            NucleicAcidDB::ChainFull best_fragment;
-
-            for (int j = 0; j < nadb.size() - 2; j++) {
-                NucleicAcidDB::ChainFull fragment = nadb.extract(j, 3);
-
-                if (!fragment.is_continuous()) continue;
-
-                std::vector<clipper::Coord_orth> fragment_pos = {fragment[0].P, fragment[1].P, fragment[2].P};
-                clipper::RTop_orth align = clipper::RTop_orth(fragment_pos, triplet_pos);
-
-                fragment.transform(align);
-                fragment.alignment = align;
-
-                float total_score = score_fragment(fragment, xwrk);
-                if (total_score > max_score) {
-                    max_score = total_score;
-                    best_fragment = fragment;
-                }
-            }
-            forward_score += max_score;
-            forward_placed_fragments[std::make_pair(fwd[i], fwd[i+1])].emplace_back(best_fragment[0]);
-            forward_placed_fragments[std::make_pair(fwd[i+1], fwd[i+2])].emplace_back(best_fragment[1]);
-        }
-
-        for (int i = 0; i < bck.size()-2; i++) {
-            clipper::Coord_orth p1 = phosphate_peaks[0][0][bck[i]].coord_orth();
-            clipper::Coord_orth p2 = phosphate_peaks[0][0][bck[i+1]].coord_orth();
-            clipper::Coord_orth p3 = phosphate_peaks[0][0][bck[i+2]].coord_orth();
-            p1 = p1.coord_frac(mol.cell()).symmetry_copy_near(mol.spacegroup(), mol.cell(), p2.coord_frac(mol.cell())).coord_orth(mol.cell());
-            p3 = p3.coord_frac(mol.cell()).symmetry_copy_near(mol.spacegroup(), mol.cell(), p2.coord_frac(mol.cell())).coord_orth(mol.cell());
-
-            std::vector<clipper::Coord_orth> triplet_pos = {p1, p2, p3};
-
-            float max_score = -1e8f;
-            NucleicAcidDB::ChainFull best_fragment;
-
-            for (int j = 0; j < nadb.size() - 2; j++) {
-                NucleicAcidDB::ChainFull fragment = nadb.extract(j, 3);
-
-                if (!fragment.is_continuous()) continue;
-
-                std::vector<clipper::Coord_orth> fragment_pos = {fragment[0].P, fragment[1].P, fragment[2].P};
-                clipper::RTop_orth align = clipper::RTop_orth(fragment_pos, triplet_pos);
-
-                fragment.transform(align);
-                fragment.alignment = align;
-
-                float total_score = score_fragment(fragment, xwrk);
-                if (total_score > max_score) {
-                    max_score = total_score;
-                    best_fragment = fragment;
-                }
-            }
-            backward_score += max_score;
-            backward_placed_fragments[std::make_pair(bck[i], bck[i+1])].emplace_back(best_fragment[0]);
-            backward_placed_fragments[std::make_pair(bck[i+1], bck[i+2])].emplace_back(best_fragment[1]);
-        }
-
-        if (forward_score > backward_score) {
-            placed_fragments.insert(forward_placed_fragments.begin(), forward_placed_fragments.end());
+        if (forward_result.score > backward_result.score) {
+            placed_fragments.insert(forward_result.fragments.begin(), forward_result.fragments.end());
+            placed_fragment_indices.emplace_back(fwd);
         } else {
-            placed_fragments.insert(backward_placed_fragments.begin(), backward_placed_fragments.end());
+            placed_fragments.insert(backward_result.fragments.begin(), backward_result.fragments.end());
+            placed_fragment_indices.emplace_back(bck);
         }
     }
 
     // clipper::MiniMol formed_chain = form_chain(placed_fragments);
     // NautilusUtil::save_minimol(formed_chain, "formed_chain.pdb");
-
-    clipper::MiniMol filtered_chain = filter_and_form_bidirectional_chain(placed_fragments);
-    // NautilusUtil::save_minimol(filtered_chain, "filtered_chain.pdb");
+    clipper::MiniMol filtered_chain = form_organised_chains(placed_fragments, placed_fragment_indices);
+//     NautilusUtil::save_minimol(organised_chain, "organised_chain.pdb");
+//
+//
+//    clipper::MiniMol filtered_chain = filter_and_form_bidirectional_chain(placed_fragments);
+    NautilusUtil::save_minimol(filtered_chain, "filtered_chain.pdb");
 
     clipper::MiniMol base_removed_mol = remove_bases(filtered_chain);
-    // NautilusUtil::save_minimol(base_removed_mol, "base_removed_mol.pdb");
+//    clipper::MiniMol organised_chains = organise_to_chains(base_removed_mol);
+//    NautilusUtil::save_minimol(organised_chains, "organised_chains.pdb");
 
-    clipper::MiniMol mol_ = organise_to_chains(base_removed_mol);
-    // NautilusUtil::save_minimol(mol_, "mol_.pdb");
+    clipper::MiniMol mol_ = remove_clashing_protein(base_removed_mol);
 
-    for (int p = 0; p < mol_.size(); p++) {
-        for (int m = 0; m < mol_.size(); m++) {
-            mol_[p][m].set_id(m+1);
-        }
-        mol.insert(mol_[p]);
-    }
-
-    // NautilusUtil::save_minimol(mol, "mlfind.pdb");
-    return mol;
+    return mol_;
 }

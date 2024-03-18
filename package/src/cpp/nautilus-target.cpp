@@ -582,14 +582,16 @@ const clipper::MiniMol NucleicAcidTargets::grow( const clipper::Xmap<float>& xma
   float scut = target_sugar().cutoff_sum( fcut );
   for ( int c = 0; c < mol_new.size(); c++ ) {
     if ( !mol_new[c].exists_property( "NON-NA" ) ) {
+
+    // find terminal and start monomer id in chain?
       NucleicAcidDB::NucleicAcid na;
-      for ( int i = 0; i < 25; i++ ) {
+      for ( int i = 0; i < ngrow; i++ ) {
         na = next_na_group( xmap, mol_new[c][mol_new[c].size()-1] );
         if ( score_sugar( xmap, na ) < scut ) break;
         na.set_type( '?' );
         mol_new[c].insert( na.mmonomer() );
       }
-      for ( int i = 0; i < 25; i++ ) {
+      for ( int i = 0; i < ngrow; i++ ) {
         na = prev_na_group( xmap, mol_new[c][0] );
         if ( score_sugar( xmap, na ) < scut ) break;
         na.set_type( '?' );
