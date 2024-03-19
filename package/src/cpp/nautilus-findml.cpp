@@ -519,8 +519,9 @@ clipper::MiniMol FindML::remove_bases(clipper::MiniMol &mol) {
 
 
     for (int poly = 0; poly < mol.model().size(); poly++) {
+        clipper::MPolymer mp;
+        mp.set_id(mol[poly].id());
         for (int mon = 0; mon < mol.model()[poly].size(); mon++) {
-            clipper::MPolymer mp;
             clipper::MMonomer return_monomer;
             return_monomer.set_type(mol.model()[poly][mon].type());
             return_monomer.set_id(mol.model()[poly][mon].id());
@@ -540,9 +541,9 @@ clipper::MiniMol FindML::remove_bases(clipper::MiniMol &mol) {
             }
 
             mp.insert(return_monomer);
-            safe_mol.model().insert(mp);
-
         }
+        safe_mol.model().insert(mp);
+
     }
 
     return safe_mol;
@@ -580,7 +581,7 @@ clipper::MiniMol FindML::form_organised_chains(PossibleFragments& fragments, std
 
     for (const auto& chain: fragment_indices) {
         clipper::MPolymer mp;
-
+        mp.set_id("");
         for (int i = 0; i < chain.size()-1; i++) {
             std::pair<int, int> pair = std::make_pair(chain[i], chain[i+1]);
 
@@ -898,7 +899,7 @@ clipper::MiniMol FindML::remove_clashing_protein(clipper::MiniMol& na_chain) {
     }
 
 
-    NautilusUtil::save_minimol(mol_final, "clash_mol.pdb");
+    // NautilusUtil::save_minimol(mol_final, "clash_mol.pdb");
     // Need to flag chains so join knows which is protein and which is NA.
     mol_final = NucleicAcidTools::flag_chains(mol_final);
     return mol_final;
@@ -948,11 +949,10 @@ PlacedFragmentResult FindML::place_fragments(const clipper::MiniMol& phosphate_p
 clipper::MiniMol FindML::find() {
     clipper::MiniMol phosphate_peaks = calculate_phosphate_peaks(0.1);
     TripletCoordinates phosphate_triplets = find_triplet_coordinates(phosphate_peaks);
-//    draw_triplets(phosphate_triplets, phosphate_peaks, "triplets-ext.pdb");
-//    NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
+    // draw_triplets(phosphate_triplets, phosphate_peaks, "triplets-ext.pdb");
+    // NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
     std::cout << phosphate_triplets.size() << " phosphate triplets found\n";
 
-    
     PairedChainIndices pairs = organise_triplets_to_chains(phosphate_triplets);
 //
 //    for (const auto& pair : pairs) {
@@ -988,17 +988,24 @@ clipper::MiniMol FindML::find() {
     // clipper::MiniMol formed_chain = form_chain(placed_fragments);
     // NautilusUtil::save_minimol(formed_chain, "formed_chain.pdb");
     clipper::MiniMol filtered_chain = form_organised_chains(placed_fragments, placed_fragment_indices);
-//     NautilusUtil::save_minimol(organised_chain, "organised_chain.pdb");
+     // NautilusUtil::save_minimol(filtered_chain, "filtered_chain.pdb");
 //
 //
 //    clipper::MiniMol filtered_chain = filter_and_form_bidirectional_chain(placed_fragments);
-    NautilusUtil::save_minimol(filtered_chain, "filtered_chain.pdb");
+    // NautilusUtil::save_minimol(filtered_chain, "filtered_chain.pdb");
 
     clipper::MiniMol base_removed_mol = remove_bases(filtered_chain);
 //    clipper::MiniMol organised_chains = organise_to_chains(base_removed_mol);
 //    NautilusUtil::save_minimol(organised_chains, "organised_chains.pdb");
 
     clipper::MiniMol mol_ = remove_clashing_protein(base_removed_mol);
+    // NautilusUtil::save_minimol(mol_, "mol_.pdb");
+
+    // for (int p = 0; p < base_removed_mol.size(); p++) {
+    //     for (int m = 0; base_removed_mol[p][m].size(); m++) {
+    //         std::cout << base_removed_mol[p].id() << p << "-" << m << " " << base_removed_mol[p][m].id() << std::endl;
+    //     }
+    // }
 
     return mol_;
 }
