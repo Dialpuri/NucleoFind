@@ -196,30 +196,24 @@ void run(NautilusInput& input, NautilusOutput& output, int cycles) {
   find_ml.load_library_from_file(ippdb_ref);
   mol_wrk = find_ml.find();
   log.log( "FIND ML", mol_wrk, verbose >= 5 );
-  NautilusUtil::save_minimol(mol_wrk, "mlfind.pdb");
 
-  mol_wrk = natools.grow( xwrk, mol_wrk, 25, 0.01 );
+  mol_wrk = natools.grow( xwrk, mol_wrk, 25, 0.001 );
   log.log( "GROW", mol_wrk, verbose >= 5 );
-
-  NautilusUtil::save_minimol(mol_wrk, "grow.pdb");
 
   // join
   NucleicAcidJoin na_join;
   mol_wrk = na_join.join( mol_wrk );
   log.log( "JOIN", mol_wrk, verbose >= 5 );
   //for ( int c = 0; c < mol_wrk.size(); c++ ) { for ( int r = 0; r < mol_wrk[c].size(); r++ ) std::cout << mol_wrk[c][r].type().trim(); std::cout << std::endl; }
-  NautilusUtil::save_minimol(mol_wrk, "JOIN.pdb");
 
   // link
   mol_wrk = natools.link( xwrk, mol_wrk );
   log.log( "LINK", mol_wrk, verbose >= 5 );
   //for ( int c = 0; c < mol_wrk.size(); c++ ) { for ( int r = 0; r < mol_wrk[c].size(); r++ ) std::cout << mol_wrk[c][r].type().trim(); std::cout << std::endl; }
-  NautilusUtil::save_minimol(mol_wrk, "LINK.pdb");
 
   // prune
   mol_wrk = natools.prune( mol_wrk );
   log.log( "PRUNE", mol_wrk, verbose >= 5 );
-  NautilusUtil::save_minimol(mol_wrk, "PRUNE.pdb");
 
   mol_wrk = natools.rebuild_chain( xwrk, mol_wrk );
   log.log( "CHAIN", mol_wrk, verbose >= 5 );
@@ -252,7 +246,7 @@ void run(NautilusInput& input, NautilusOutput& output, int cycles) {
     log.log( "FIND", mol_wrk, verbose >= 5 );
 
     // grow chains
-    mol_wrk = natools.grow( xwrk, mol_wrk, 25, 0.01 );
+    mol_wrk = natools.grow( xwrk, mol_wrk, 25, 0.001 );
     log.log( "GROW", mol_wrk, verbose >= 5 );
 
     // join
@@ -307,6 +301,8 @@ void run(NautilusInput& input, NautilusOutput& output, int cycles) {
 
   std::cout << "Taking best model from all cycles with " << best_rscc << " nucleic acids built." << std::endl;
   mol_wrk = best_model;
+
+
   // move to match input model
   if ( mol_wrk_in.size() > 0 ){
     NucleicAcidTools::symm_match( mol_wrk, mol_wrk_in );
