@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+        SYSTEM "https://resources.jetbrains.com/writerside/1.0/xhtml-entities.dtd">
+<topic xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="https://resources.jetbrains.com/writerside/1.0/topic.v2.xsd"
+       title="Model Building" id="Model-Building">
+
+    <p>
+       Using the predicted phosphate positions, NucleoFind is able to build nucleic acid into electron density.
+    </p>
+
+    <chapter title="Command" id="command">
+        <p>Syntax:</p>
+
+        <code-block lang="shell">
+            nucleofind-build [OPTIONS]
+        </code-block>
+    </chapter>
+
+    <chapter title="Example Usage" id="example">
+        <code-block lang="shell">
+            nucleofind-build -mtzin hkl.mtz
+                             -seqin sequence.fasta
+                             -pdbin xyz.pdb
+                             -pdbout output.pdb
+                             -predin phosphate.map
+                             -colin-fo FP,SIGFP
+                             -colin-fc FWT,PWHT
+                             -colin-free FREE
+                             -cycles 3
+        </code-block>
+
+
+    </chapter>
+
+    <chapter title="Options" id="options">
+        <p>Description of each option:</p>
+
+        <deflist type="medium">
+            <def title="-mtzin">
+                Path to MTZ file.
+            </def>
+            <def title="-seqin">
+                Path to sequence or FASTA file.
+            </def>
+            <def title="-pdbin">
+                Path to PDB model.
+            </def>
+            <def title="-pdbout">
+                Path of the output model
+            </def>
+            <def title="-predin">
+                Path to the predicted phosphate map
+            </def>
+            <def title="-colin-fo">
+                <p>Column name for observed structure factors</p>
+                <p>Example: FP,SIGFP</p>
+            </def>
+            <def title="-colin-fc">
+                <p>Column name for map coefficients</p>
+                <p>Example: FWT,PHWT</p>
+            </def>
+            <def title="-colin-free">
+                <p>Column name for free reflections</p>
+                <p>Example: FREE</p>
+            </def>
+            <def title="-cycles">
+                <p>Number of cycles to run</p>
+                <p>Default: 3</p>
+            </def>
+        </deflist>
+    </chapter>
+    <seealso>
+        <!--Provide links to related how-to guides, overviews, and tutorials.-->
+    </seealso>
+</topic>

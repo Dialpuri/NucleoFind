@@ -6,7 +6,7 @@ on:
     # Replace `main` with your branch’s name
     branches: ["master"]
     paths: 
-      - docs/**
+      - ../docs
 
   # Specify to run a workflow manually from the Actions tab on GitHub
   workflow_dispatch:

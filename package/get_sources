@@ -1,0 +1,62 @@
+#!/bin/sh
+
+mkdir -p checkout
+cd checkout
+
+if [ -d "clipper" ]; then
+    echo "Found clipper"
+else
+    echo "Checking out clipper"
+  curl -L http://www.ysbl.york.ac.uk/jsd523/clipper-gemmi-wrapper-20240123.tar.gz -o clipper-gemmi-wrapper.tar.gz
+    echo "Unpacking fftw-2.1.5"
+    tar xf clipper-gemmi-wrapper.tar.gz
+    mv clipper-gemmi-wrapper clipper
+
+fi 
+
+if [ -d "gemmi" ]; then
+  echo "Found gemmi"
+else
+    echo "Checking out gemmi"
+    git clone https://github.com/project-gemmi/gemmi.git gemmi
+    cd gemmi
+    git checkout v0.6.4
+    cd ..
+    echo
+fi
+
+if [ -d "mmdb2" ]; then
+    echo "Found mmdb2"
+else
+echo "Checking out mmdb2"
+curl -L http://ftp.ccp4.ac.uk/opensource/mmdb2-2.0.22.tar.gz -o mmdb2-2.0.22.tar.gz
+tar xf mmdb2-2.0.22.tar.gz
+ln -s mmdb2-2.0.22 mmdb2
+echo
+fi
+
+if [ -d "libccp4" ]; then
+    echo "Found libccp4"
+else
+    echo "Checking out libccp4"
+curl -L http://ftp.ccp4.ac.uk/opensource/libccp4-8.0.0.tar.gz -o libccp4-8.0.0.tar.gz
+tar xf libccp4-8.0.0.tar.gz
+ln -s libccp4-8.0.0 libccp4
+    echo
+fi 
+
+
+
+if [ -d "fftw-2.1.5" ]; then
+    echo "Found fftw-2.1.5"
+else
+
+echo "Downloading out fftw-2.1.5"
+curl -L http://www.fftw.org/fftw-2.1.5.tar.gz -o fftw-2.1.5.tar.gz
+echo
+echo "Unpacking fftw-2.1.5"
+tar xf fftw-2.1.5.tar.gz
+echo
+fi
+
+cd ..

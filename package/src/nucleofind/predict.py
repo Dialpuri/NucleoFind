@@ -1,10 +1,7 @@
 import logging
 import os
-
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-from typing import List, Tuple
+from typing import List
 import onnxruntime as rt
-
 import numpy as np
 import gemmi
 from tqdm import tqdm
@@ -22,17 +19,17 @@ class Prediction:
         self.model_name: str = model_dir.split("/")[-1]
 
         self.predicted_map: np.ndarray = None
+        self.variance_map: np.ndarray = None
 
         self.predicted_grid: gemmi.FloatGrid = None
-
-        self.pdb_code = ""
+        self.variance_grid: gemmi.FloatGrid = None
 
         self.na: float = 0
         self.nb: float = 0
         self.nc: float = 0
         self.translation_list: List[List[int]] = []
 
-        self.model: tf.keras.Model = None
+        self.model = None
 
         self.interpolated_grid: gemmi.FloatGrid = None
         self.raw_grid: gemmi.FloatGrid = None
@@ -68,6 +65,7 @@ class Prediction:
         self._predict(raw_values=use_raw_values, overlap=overlap)
 
         self.predicted_grid = self._reinterpolate_to_output(self.predicted_map)
+        self.variance_grid = self._reinterpolate_to_output(self.variance_map)
 
         end = time.time()
         delta = end - start
@@ -78,6 +76,12 @@ class Prediction:
         ccp4.grid = self.predicted_grid
         ccp4.update_ccp4_header()
 
+        ccp4.write_ccp4_map(output_path)
+
+    def save_variance_map(self, output_path: str):
+        ccp4 = gemmi.Ccp4Map()
+        ccp4.grid = self.variance_grid
+        ccp4.update_ccp4_header()
         ccp4.write_ccp4_map(output_path)
 
     def save_interpolated_map(self, output_path: str, grid_spacing: float = 0.7):
@@ -109,19 +113,18 @@ class Prediction:
     def _load_mtz(self, mtz_path: str, resolution_cutoff: float, column_names: List[str] = ["FWT", "PHWT"]):
         mtz = gemmi.read_mtz_file(mtz_path)
         logging.info("Reading mtz file ", mtz_path)
-        self.raw_grid = mtz.transform_f_phi_to_map(*column_names)
-        # "sfcalc.F_phi.F", "sfcalc.F_phi.phi"
+        res = mtz.resolution_high()
+        spacing = 0.7
+        sample_rate = res / spacing
+        self.raw_grid = mtz.transform_f_phi_to_map(*column_names, sample_rate=sample_rate)
+        self.raw_grid.normalize()
         if resolution_cutoff:
             data = np.array(mtz, copy=False)
             mtz.set_data(data[mtz.make_d_array() >= resolution_cutoff])
 
-        # self.raw_grid = mtz.transform_f_phi_to_map("FWT", "PHWT")
-
-    def _get_bounding_box(self, grid: gemmi.FloatGrid) -> gemmi.PositionBox:
+    @staticmethod
+    def _get_bounding_box(grid: gemmi.FloatGrid) -> gemmi.PositionBox:
         extent = gemmi.find_asu_brick(grid.spacegroup).get_extent()
-
-        # unit_cell = grid.unit_cell
-
         extent.maximum = gemmi.Fractional(1, 1, 1)
         extent.minimum = gemmi.Fractional(0, 0, 0)
 
@@ -155,7 +158,6 @@ class Prediction:
         size: gemmi.Position = box.get_size()
 
         logging.info(f"Raw unit cell is : {self.raw_grid.unit_cell}")
-
         logging.debug(f"Box size : {size}")
 
         num_x = int(size.x / grid_spacing)
@@ -181,7 +183,6 @@ class Prediction:
 
     def _reinterpolate_to_output(self, grid_to_interp: np.ndarray) -> gemmi.FloatGrid:
         logging.info("Reinterpolating array")
-        # logging.debug(np.unique(grid_to_interp, return_index=True))
         # Taken from https://github.com/paulsbond/densitydensenet/blob/main/predict.py - Paul Bond
 
         dummy_structure = gemmi.Structure()
@@ -235,7 +236,7 @@ class Prediction:
 
         logging.debug(f"Translation list size: {len(self.translation_list)}")
 
-    def _predict(self, raw_values: bool = True, overlap: int = 32):
+    def _predict(self, raw_values: bool = False, overlap: int = 32):
         logging.info("Predicting map")
 
         predicted_map = np.zeros(
@@ -250,10 +251,22 @@ class Prediction:
                 int(32 * self.nc) + (32 - overlap)),
             np.float32,
         )
+        variance_array_map = np.empty(
+            (
+                int(32 * self.na) + (32 - overlap),
+                int(32 * self.nb) + (32 - overlap),
+                int(32 * self.nc) + (32 - overlap),
+                ), object
+        )
+
+        for i in range(variance_array_map.shape[0]):
+            for j in range(variance_array_map.shape[1]):
+                for k in range(variance_array_map.shape[2]):
+                    variance_array_map[i, j, k] = []
+
+        print(variance_array_map.shape)
 
         logging.debug(f"Predicted map shape - {predicted_map.shape}")
-
-        # quit()
 
         for translation in tqdm(self.translation_list, total=len(self.translation_list)):
             x, y, z = translation
@@ -283,6 +296,11 @@ class Prediction:
                                                                   ]
             else:
                 predicted_map[x: x + 32, y: y + 32, z: z + 32] += arg_max
+                # x = np.append(variance_map[x: x + 32, y: y + 32, z: z + 32], arg_max.reshape(32,32,32,1), axis=-1)
+                for i, a in enumerate(range(x, x+32)):
+                    for j, b in enumerate(range(y, y+32)):
+                        for k, c in enumerate(range(z, z+32)):
+                            variance_array_map[a, b, c].append(arg_max[i, j, k])
 
             count_map[x: x + 32, y: y + 32, z: z + 32] += 1
 
@@ -297,9 +315,23 @@ class Prediction:
                     0:(32 * self.nb),
                     0:(32 * self.nc),
                     ]
+
+        variance_map = np.zeros(
+            (
+                int(32 * self.na),
+                int(32 * self.nb) ,
+                int(32 * self.nc)),
+                dtype=np.float32
+        )
+
         logging.debug(f"Predicted map shape: {predicted_map.shape}")
         self.predicted_map = predicted_map / count_map
 
+        for i in range(variance_map.shape[0]):
+            for j in range(variance_map.shape[1]):
+                for k in range(variance_map.shape[2]):
+                    variance_map[i, j, k] = np.var(variance_array_map[i,j,k])
+        self.variance_map = variance_map
 
 def predict_map(model: str, input: str, output: str, resolution: float = 2.5, intensity: str = "FWT",
                 phase: str = "PHWT", overlap: float = 16):
@@ -349,6 +381,7 @@ def run():
     prediction.make_prediction(args["i"], [args["intensity"], args["phase"]], overlap=args["overlap"])
 
     prediction.save_predicted_map(args["o"])
+    prediction.save_variance_map("1hr2/1hr2_variance.map")
 
     end = time.time()
 
