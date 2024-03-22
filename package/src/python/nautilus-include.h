@@ -31,14 +31,17 @@ public:
 
         if (mtzin.empty()) { throw std::runtime_error("MTZ Path must not be empty");}
         if (seqin.empty()) { throw std::runtime_error("SEQ Path must not be empty");}
-        if (pdbin.empty()) { throw std::runtime_error("PDB Path must not be empty");}
+        // if (pdbin.empty()) { throw std::runtime_error("PDB Path must not be empty");}
         if (phospredin.empty()) { throw std::runtime_error("Phosphate predicition Path must not be empty");}
 
     };
 
     [[nodiscard]] std::string get_mtz_path() const { return mtzin; }
     [[nodiscard]] std::string get_seq_path() const { return seqin; }
-    [[nodiscard]] std::string get_pdb_path() const { return pdbin; }
+    [[nodiscard]] std::optional<std::string> get_pdb_path() const {
+        if (pdbin.empty()) return std::nullopt;
+        return pdbin;
+    }
     [[nodiscard]] std::optional<std::string> get_phosphate_prediction_path() const {
         if (phospredin.empty()) return std::nullopt;
         return phospredin;

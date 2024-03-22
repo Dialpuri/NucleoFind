@@ -99,15 +99,15 @@ void run(NautilusInput& input, NautilusOutput& output, int cycles) {
 
   // Get model
   clipper::MiniMol mol_wrk( hkls.spacegroup(), hkls.cell() );
-
+  if (input.get_pdb_path().has_value()) {
     clipper::MiniMol mol_tmp;
     clipper::MMDBfile mmdb;
     mmdb.SetFlag( mmdbflags );
-    mmdb.read_file( input.get_pdb_path() );
+    mmdb.read_file( input.get_pdb_path().value() );
     mmdb.import_minimol( mol_tmp );
     std::cout << mol_tmp.spacegroup().symbol_hm() << " " << mol_tmp.cell().format() << " " << mol_tmp.atom_list().size() << std::endl;
     for ( int c = 0; c < mol_tmp.size(); c++ ) mol_wrk.insert( mol_tmp[c] );
-  
+  }
 
 //   // Get model phosphates
 //   clipper::MiniMol mol_pho( hkls.spacegroup(), hkls.cell() );
@@ -196,7 +196,7 @@ void run(NautilusInput& input, NautilusOutput& output, int cycles) {
   find_ml.load_library_from_file(ippdb_ref);
   mol_wrk = find_ml.find();
   log.log( "FIND ML", mol_wrk, verbose >= 5 );
-
+  NautilusUtil::save_minimol(mol_wrk, "findml.pdb");
   mol_wrk = natools.grow( xwrk, mol_wrk, 25, 0.001 );
   log.log( "GROW", mol_wrk, verbose >= 5 );
 
