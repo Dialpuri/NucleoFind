@@ -99,3 +99,15 @@ jobs:
       with:
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
+
+  debug:
+      needs: [build]
+      runs-on: ubuntu-latest
+      if: ${{ failure() }}
+      steps:
+        - uses: actions/checkout@v3
+        - name: Notify chat
+          uses: teknatha136/actions-google-chat-text-message@main
+          with:
+            google-chat-webhook: ${{ secrets.WEBHOOK_URL }}
+            text-message: ${{ github.actor }} attempted to merge a change into NucleoFind, but the automatic deployment failed.\nThis message was generated due to a ${{ github.event_name }}.\nLink ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} \n
