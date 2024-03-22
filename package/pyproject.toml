@@ -47,7 +47,7 @@ skip = ["pp*"] # Skip  PyPy 3.8
 archs = ["auto64"] # Only target 64 bit architectures
 
 # Run pytest to ensure that the package was correctly built
-test-command = "pytest {project}/tests"
+test-command = "pytest tests"
 test-requires = "pytest"
 
 # Needed for full C++17 support
