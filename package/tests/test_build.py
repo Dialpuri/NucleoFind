@@ -14,8 +14,9 @@ def data():
     colinfc = "FWT,PHWT"
     colinfree = "FREE"
     return {"mtzin": mtzin, "pdbin": pdbin,
-            "seqin": seqin, "pdbout": pdbout, "predin": predin, "colinfo": colinfo,
-            "colinfc": colinfc, "colinfree": colinfree,}
+            "seqin": seqin, "pdbout": pdbout,
+            "predin": predin, "colinfo": colinfo,
+            "colinfc": colinfc, "colinfree": colinfree}
 
 
 # mtzin: str, seqin: str, pdbin: str, predin: str, colin_fo: str, colin_fc: str, colin_free: str, pdbout: str

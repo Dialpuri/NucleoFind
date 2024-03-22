@@ -5,7 +5,7 @@ build-backend = "scikit_build_core.build"
 [project]
 name = "nucleofind"
 version = "0.5"
-description = "NucleoFind"
+description = "NucleoFind: A Deep-Learning Network for Interpreting Nucleic Acid Electron Density"
 readme = "README.md"
 requires-python = ">=3.8"
 authors = [
@@ -47,8 +47,8 @@ skip = ["pp*"] # Skip  PyPy 3.8
 archs = ["auto64"] # Only target 64 bit architectures
 
 # Run pytest to ensure that the package was correctly built
-#test-command = "pytest {project}/tests"
-#test-requires = "pytest"
+test-command = "pytest {project}/tests"
+test-requires = "pytest"
 
 # Needed for full C++17 support
 [tool.cibuildwheel.macos.environment]
