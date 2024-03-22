@@ -101,7 +101,7 @@ jobs:
         password: ${{ secrets.PYPI_API_TOKEN }}
 
   debug:
-      needs: [build]
+      needs: [build_wheels, upload_all]
       runs-on: ubuntu-latest
       if: ${{ failure() }}
       steps:
