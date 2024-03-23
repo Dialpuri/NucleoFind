@@ -35,6 +35,10 @@
                 <code-block>cd package</code-block>
             </step>
             <step>
+                <p>Gather the dependency source files</p>
+                <code-block>./get_sources</code-block>
+            </step>
+            <step>
                 <p>Install the package locally</p>
                 <code-block>pip install .</code-block>
             </step>
