@@ -2,12 +2,6 @@ name: Wheels
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches:
-     - master
-  push:
-    branches:
-      - build-support
   release:
     types:
       - published
@@ -16,7 +10,6 @@ jobs:
   build_sdist:
     name: Build SDist
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[Skip CI]')"
     steps:
     - uses: actions/checkout@v4
       with:
@@ -26,6 +19,7 @@ jobs:
       run: |
         mv package/* . 
         ./get_sources
+        
 
     - name: Build SDist
       run: pipx run build --sdist
@@ -41,7 +35,6 @@ jobs:
   build_wheels:
     name: Wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    if: "!contains(github.event.head_commit.message, '[Skip CI]')"
     strategy:
       fail-fast: false
       matrix:
