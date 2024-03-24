@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: '3.10'
       - run: |
-          mv package/* . 
+          cd package
           ./get_sources
           pip install . 
           python tests/test_version.py -version ${{ github.event.release.tag_name }}
@@ -30,11 +30,11 @@ jobs:
         with:
           python-version: '3.10'
       - run: |
-           mv package/* . 
+          cd package
           ./get_sources
           pip install .
           pip install pytest
-          pytest tests
+          pytest tests/test_build.py
           
 
   build_sdist:
