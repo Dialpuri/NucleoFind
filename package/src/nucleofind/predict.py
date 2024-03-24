@@ -10,7 +10,7 @@ import argparse
 import site
 from glob import glob
 import sys
-
+from .__version__ import __version__
 
 class Prediction:
     def __init__(self, model_dir: str, use_cache: bool = True):
@@ -357,6 +357,7 @@ def run():
     parser.add_argument("-phase", nargs='?', help="Name of phase column in MTZ")
     parser.add_argument("-overlap", nargs='?', help="Amount of overlap to use", const=16, default=16)
     parser.add_argument("-model_path", nargs='?', help="Path to model (development)")
+    parser.add_argument("-v", "--version", action="version", version=__version__)
 
     args = vars(parser.parse_args())
 
