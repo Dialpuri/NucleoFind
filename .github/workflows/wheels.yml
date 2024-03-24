@@ -22,7 +22,7 @@ jobs:
           python tests/test_version.py -version ${{ github.event.release.tag_name }}
 
   run_tests:
-    name: Run python tests
+    name: Run Python tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
