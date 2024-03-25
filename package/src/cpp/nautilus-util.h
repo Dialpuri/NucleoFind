@@ -183,7 +183,7 @@ class NautilusUtil {
 
     static int count_na(const clipper::MiniMol& mol);
 
-  static float calculate_rscc(const clipper::MiniMol& mol, const clipper::Xmap<float>& xmap, float res);
+  static float calculate_rscc(clipper::MiniMol&mol, const clipper::Xmap<float>& xmap, float res);
 };
 
 

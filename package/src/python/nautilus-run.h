@@ -194,9 +194,11 @@ void run(NautilusInput& input, NautilusOutput& output, int cycles) {
   mol_wrk = NucleicAcidTools::flag_chains( mol_wrk );
   FindML find_ml = FindML(mol_wrk, xphospred, xsugarpred, xbasepred, xwrk);
   find_ml.load_library_from_file(ippdb_ref);
+
   mol_wrk = find_ml.find();
   log.log( "FIND ML", mol_wrk, verbose >= 5 );
   NautilusUtil::save_minimol(mol_wrk, "findml.pdb");
+
   mol_wrk = natools.grow( xwrk, mol_wrk, 25, 0.001 );
   log.log( "GROW", mol_wrk, verbose >= 5 );
 

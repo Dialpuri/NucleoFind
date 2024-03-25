@@ -5,6 +5,7 @@
 
 #include <fstream>
 #include <clipper/contrib/edcalc.h>
+#include "nautilus-tools.h"
 
 
 extern "C" {
@@ -174,19 +175,46 @@ int NautilusUtil::count_na( const clipper::MiniMol& mol )
   return nna;
 }
 
-float NautilusUtil::calculate_rscc(const clipper::MiniMol& mol, const clipper::Xmap<float>& xmap, float res ) {
+float NautilusUtil::calculate_rscc(clipper::MiniMol&mol, const clipper::Xmap<float>& xmap, float res) {
   clipper::Cell cell = xmap.cell();
   clipper::Spacegroup spg = xmap.spacegroup();
-  clipper::Atom_list atom_list = mol.atom_list();
+  // clipper::Atom_list atom_list = mol.atom_list();
+  mol = NucleicAcidTools::flag_chains(mol);
 
-  clipper::Coord_grid g0( 0,0,0 );
-  clipper::Coord_grid g1( xmap.grid_sampling().nu(), xmap.grid_sampling().nv(), xmap.grid_sampling().nw() );
+  std::vector<clipper::Atom> atom_list = {};
+  for (int p = 0; p < mol.size(); p++) {
+    if (!mol[p].exists_property("NON-NA")) {
+      for (int m = 0; m < mol[p].size(); m++) {
+        for (int a = 0; a < mol[p][m].size(); a++) {
+          atom_list.emplace_back(mol[p][m][a]);
+        }
+      }
+    }
+  }
+
+  if (atom_list.empty()) {
+    std::cout << "No nucleic acid found, RSCC = 0" << std::endl;
+    return 0;
+  }
+  clipper::Range<clipper::ftype> urange, vrange, wrange;
+
+  for (const auto & atom : atom_list) {
+    clipper::Coord_frac cf = atom.coord_orth().coord_frac( cell );
+    urange.include( cf.u() );
+    vrange.include( cf.v() );
+    wrange.include( cf.w() );
+  }
+  clipper::Coord_frac cf0( urange.min(), vrange.min(), wrange.min() );
+  clipper::Coord_frac cf1( urange.max(), vrange.max(), wrange.max() );
 
   clipper::Resolution reso( res);
   clipper::Grid_sampling grid( spg, cell, reso );
   clipper::EDcalc_iso<float> maskcalc( res );
   clipper::Xmap<float> calc_map = {spg, cell, grid };
   maskcalc(calc_map, atom_list);
+
+  clipper::Coord_grid g0( cf0.coord_grid(grid).u(), cf0.coord_grid(grid).v(), cf0.coord_grid(grid).w() );
+  clipper::Coord_grid g1( cf1.coord_grid(grid).u(), cf1.coord_grid(grid).v(), cf1.coord_grid(grid).w() );
 
   clipper::Xmap_base::Map_reference_coord i0, iu, iv, iw;
   i0 = clipper::Xmap_base::Map_reference_coord( xmap, g0 );
@@ -223,7 +251,7 @@ float NautilusUtil::calculate_rscc(const clipper::MiniMol& mol, const clipper::X
       }
 
   double rscc = (sum_delta)/(sqrt(sum_delta_obs_sqrd*sum_delta_calc_sqrd));
-  std::cout << "RSCC=" << rscc << std::endl;
+  std::cout << "RSCC = " << rscc << std::endl;
   return rscc;
 }
 
