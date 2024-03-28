@@ -12,6 +12,7 @@ from glob import glob
 import sys
 from .__version__ import __version__
 
+
 class Prediction:
     def __init__(self, model_dir: str, use_cache: bool = True):
         self.use_cache: bool = use_cache
@@ -112,7 +113,7 @@ class Prediction:
 
     def _load_mtz(self, mtz_path: str, resolution_cutoff: float, column_names: List[str] = ["FWT", "PHWT"]):
         mtz = gemmi.read_mtz_file(mtz_path)
-        logging.info("Reading mtz file ", mtz_path)
+        logging.info(f"Reading mtz file {mtz_path}")
         res = mtz.resolution_high()
         spacing = 0.7
         sample_rate = res / spacing
@@ -256,15 +257,13 @@ class Prediction:
                 int(32 * self.na) + (32 - overlap),
                 int(32 * self.nb) + (32 - overlap),
                 int(32 * self.nc) + (32 - overlap),
-                ), object
+            ), object
         )
 
         for i in range(variance_array_map.shape[0]):
             for j in range(variance_array_map.shape[1]):
                 for k in range(variance_array_map.shape[2]):
                     variance_array_map[i, j, k] = []
-
-        print(variance_array_map.shape)
 
         logging.debug(f"Predicted map shape - {predicted_map.shape}")
 
@@ -297,9 +296,9 @@ class Prediction:
             else:
                 predicted_map[x: x + 32, y: y + 32, z: z + 32] += arg_max
                 # x = np.append(variance_map[x: x + 32, y: y + 32, z: z + 32], arg_max.reshape(32,32,32,1), axis=-1)
-                for i, a in enumerate(range(x, x+32)):
-                    for j, b in enumerate(range(y, y+32)):
-                        for k, c in enumerate(range(z, z+32)):
+                for i, a in enumerate(range(x, x + 32)):
+                    for j, b in enumerate(range(y, y + 32)):
+                        for k, c in enumerate(range(z, z + 32)):
                             variance_array_map[a, b, c].append(arg_max[i, j, k])
 
             count_map[x: x + 32, y: y + 32, z: z + 32] += 1
@@ -319,9 +318,9 @@ class Prediction:
         variance_map = np.zeros(
             (
                 int(32 * self.na),
-                int(32 * self.nb) ,
+                int(32 * self.nb),
                 int(32 * self.nc)),
-                dtype=np.float32
+            dtype=np.float32
         )
 
         logging.debug(f"Predicted map shape: {predicted_map.shape}")
@@ -330,8 +329,9 @@ class Prediction:
         for i in range(variance_map.shape[0]):
             for j in range(variance_map.shape[1]):
                 for k in range(variance_map.shape[2]):
-                    variance_map[i, j, k] = np.var(variance_array_map[i,j,k])
+                    variance_map[i, j, k] = np.var(variance_array_map[i, j, k])
         self.variance_map = variance_map
+
 
 def predict_map(model: str, input: str, output: str, resolution: float = 2.5, intensity: str = "FWT",
                 phase: str = "PHWT", overlap: float = 16):
@@ -342,10 +342,6 @@ def predict_map(model: str, input: str, output: str, resolution: float = 2.5, in
 
 
 def run():
-    logging.basicConfig(
-        level=logging.CRITICAL, format="%(asctime)s %(levelname)s - %(message)s"
-    )
-
     start = time.time()
 
     parser = argparse.ArgumentParser()
@@ -356,10 +352,20 @@ def run():
     parser.add_argument("-intensity", nargs='?', help="Name of intensity column in MTZ")
     parser.add_argument("-phase", nargs='?', help="Name of phase column in MTZ")
     parser.add_argument("-overlap", nargs='?', help="Amount of overlap to use", const=16, default=16)
+    parser.add_argument("-variance", action=argparse.BooleanOptionalAction, help="Output variance map")
+    parser.add_argument("-raw", action=argparse.BooleanOptionalAction, help="Output raw map (no argmax)")
+    parser.add_argument("-debug", action=argparse.BooleanOptionalAction, help="Turn on debug logging")
     parser.add_argument("-model_path", nargs='?', help="Path to model (development)")
     parser.add_argument("-v", "--version", action="version", version=__version__)
-
     args = vars(parser.parse_args())
+
+    log_level = logging.CRITICAL
+    if args["debug"]:
+        log_level = logging.DEBUG
+
+    logging.basicConfig(
+        level=log_level, format="%(asctime)s %(levelname)s - %(message)s"
+    )
 
     if not args["model_path"]:
         model_path = find_model(args["m"])
@@ -377,12 +383,19 @@ def run():
         raise FileNotFoundError(
             f"Input file has not been found, check path\nPath Supplied {args['i']} from {os.getcwd()}")
 
+    if args["raw"] and args["variance"]:
+        logging.info(
+            f"Supplying both raw and variance flags does not output a raw variance map, just the variance map.")
+
     prediction = Prediction(model_dir=model_path, use_cache=False)
 
-    prediction.make_prediction(args["i"], [args["intensity"], args["phase"]], overlap=args["overlap"])
+    prediction.make_prediction(args["i"], [args["intensity"], args["phase"]], overlap=args["overlap"],
+                               use_raw_values=True if args["raw"] else False)
 
-    prediction.save_predicted_map(args["o"])
-    prediction.save_variance_map("1hr2/1hr2_variance.map")
+    if not args["variance"]:
+        prediction.save_predicted_map(args["o"])
+    else:
+        prediction.save_variance_map(args["o"])
 
     end = time.time()
 

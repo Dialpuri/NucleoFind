@@ -202,21 +202,25 @@ void run(NautilusInput& input, NautilusOutput& output, int cycles) {
   mol_wrk = natools.grow( xwrk, mol_wrk, 25, 0.001 );
   log.log( "GROW", mol_wrk, verbose >= 5 );
 
+  // NautilusUtil::save_minimol(mol_wrk, "grow.pdb");
   // join
   NucleicAcidJoin na_join;
   mol_wrk = na_join.join( mol_wrk );
   log.log( "JOIN", mol_wrk, verbose >= 5 );
   //for ( int c = 0; c < mol_wrk.size(); c++ ) { for ( int r = 0; r < mol_wrk[c].size(); r++ ) std::cout << mol_wrk[c][r].type().trim(); std::cout << std::endl; }
 
+  // NautilusUtil::save_minimol(mol_wrk, "join.pdb");
   // link
   mol_wrk = natools.link( xwrk, mol_wrk );
   log.log( "LINK", mol_wrk, verbose >= 5 );
   //for ( int c = 0; c < mol_wrk.size(); c++ ) { for ( int r = 0; r < mol_wrk[c].size(); r++ ) std::cout << mol_wrk[c][r].type().trim(); std::cout << std::endl; }
 
+  // NautilusUtil::save_minimol(mol_wrk, "link.pdb");
   // prune
   mol_wrk = natools.prune( mol_wrk );
   log.log( "PRUNE", mol_wrk, verbose >= 5 );
 
+  // NautilusUtil::save_minimol(mol_wrk, "prune.pdb");
   mol_wrk = natools.rebuild_chain( xwrk, mol_wrk );
   log.log( "CHAIN", mol_wrk, verbose >= 5 );
   //for ( int c = 0; c < mol_wrk.size(); c++ ) { for ( int r = 0; r < mol_wrk[c].size(); r++ ) std::cout << mol_wrk[c][r].type().trim(); std::cout << std::endl; }

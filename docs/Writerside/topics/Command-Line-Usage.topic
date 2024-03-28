@@ -60,12 +60,26 @@
                 Column name of phase weights.
                 <p>Default: PHWT</p>
             </def>
+            <def title="-raw">
+                <p>Use raw predicted values to form the output map.</p>
+                <b>Advanced</b>
+            </def>
+            <def title="-variance">
+                <p>Use point-wise variance values to form the output map.</p>
+                <b>Advanced</b>
+            </def>
             <def title="-model_path">
                 <p>Path to ONNX model for use with a custom model.</p>
                 <b>Advanced</b>
             </def>
+            <def title="-debug">
+                <p>Enable debug logging.</p>
+            </def>
             <def title="-h, --help">
                 Displays help.
+            </def>
+            <def title="-v, --version">
+                Displays version and exits.
             </def>
         </deflist>
     </chapter>
