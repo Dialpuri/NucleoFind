@@ -35,7 +35,7 @@ jobs:
           pip install .
           pip install pytest
           pytest tests/test_build.py
-          
+          pytest tests/test_installation.py
 
   build_sdist:
     needs: [ check_versioning, run_tests ]
