@@ -14,16 +14,16 @@ def clean_models():
                 found_models.append(model)
 
     if not found_models:
-        print("No models were found in site-packages. Finishing.")
+        print("No models were found in site-packages.")
         return
 
     print("Pick an option to remove: ")
-    
+
     for index, model in enumerate(found_models):
         print(f"{index + 1}) {model.name.rstrip('.onnx')}")
 
     if len(found_models) > 1:
-            print(f"{len(found_models)+1}) All")
+        print(f"{len(found_models) + 1}) All")
 
     option_selected = False
     while not option_selected:
@@ -34,12 +34,11 @@ def clean_models():
             if choice <= 0 or choice > len(found_models) + 1:
                 raise ValueError()
 
-            model_to_remove = found_models[choice - 2]
-
             if choice == len(found_models) + 1:
                 print("Do you want to remove all the models?")
             else:
-                print(f"Confirm you want to remove the {found_models[choice]}?")
+                model_to_remove = found_models[choice - 1]
+                print(f"Confirm you want to remove {model_to_remove.name}?")
 
             y_no_selected = False
             confirm = False
@@ -54,11 +53,12 @@ def clean_models():
                     confirm = True
 
             if confirm:
-                if choice == len(found_models)+1:
+                if choice == len(found_models) + 1:
                     for model in found_models:
                         os.remove(model.path)
                         print("Removed", model.name)
                 else:
+                    model_to_remove = found_models[choice - 1]
                     os.remove(model_to_remove.path)
                     print("Removed", model_to_remove.name)
 
