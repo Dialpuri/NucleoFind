@@ -4,8 +4,8 @@ import nucleofind.build as nfb
 import nucleofind.install as nfi
 import re
 
-def main(args):
 
+def main(args):
     pattern = r'v(\d+\.\d+\.\d+)'
     match = re.search(pattern, args.version)
     version = args.version
@@ -18,6 +18,7 @@ def main(args):
     assert nfb.__version__ == version
     assert nfi.__version__ == version
     assert nfb.__version__ == nf.__version__
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
