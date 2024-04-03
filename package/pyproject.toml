@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "nucleofind"
-version = "0.5.3"
+version = "0.5.4"
 description = "NucleoFind: A Deep-Learning Network for Interpreting Nucleic Acid Electron Density"
 readme = "README.md"
 requires-python = ">=3.8"
