@@ -18,6 +18,8 @@
     </chapter>
 
     <chapter title="Example Usage" id="example">
+
+        <p>Run NucleoFind-build with predicted map:</p>
         <code-block lang="shell">
             nucleofind-build -mtzin hkl.mtz
                              -seqin sequence.fasta
@@ -29,7 +31,6 @@
                              -colin-free FREE
                              -cycles 3
         </code-block>
-
 
     </chapter>
 
@@ -51,6 +52,11 @@
             </def>
             <def title="-predin">
                 Path to the predicted phosphate map
+                <note>
+                    <p>Pass the auto argument instead of a path to run NucleoFind and output the predicted phosphate
+                        map to the current working directory.</p>
+                    <p>e.g. <code>-predin auto</code></p>
+                </note>
             </def>
             <def title="-colin-fo">
                 <p>Column name for observed structure factors</p>
