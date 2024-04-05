@@ -487,6 +487,27 @@ FindML::refine_fragment(NucleicAcidDB::ChainFull &original_fragment, float trans
     return best_chain;
 }
 
+NucleicAcidDB::ChainFull FindML::refine_fragment_coordinates(NucleicAcidDB::ChainFull &original_fragment) {
+
+
+    clipper::Coord_orth com = calculate_com(original_fragment);
+    clipper::RTop_orth com_rtop = {clipper::Mat33<>::identity(),-com};
+    NucleicAcidDB::ChainFull com_fragment = original_fragment;
+    com_fragment.transform(com_rtop);
+
+    RefineFragmentCoordinates refiner = RefineFragmentCoordinates(xwrk, xphospred, com_fragment, com);
+
+    clipper::RTop_orth refined_rtop = refiner.refine();
+
+    NucleicAcidDB::ChainFull new_fragment = com_fragment;
+    new_fragment.transform(refined_rtop);
+
+//    std::cout << "P1 Atom moved from " << original_fragment[0].P.format() << " to " << new_fragment[0].P.format() << std::endl;
+
+    return new_fragment;
+}
+
+
 clipper::MiniMol FindML::remove_bases(clipper::MiniMol &mol) {
 
     std::vector<std::string> safe_list_pyr = {
@@ -938,9 +959,13 @@ PlacedFragmentResult FindML::place_fragments(const clipper::MiniMol& phosphate_p
                 best_fragment = fragment;
             }
         }
+
+//        NucleicAcidDB::ChainFull refined_fragment = refine_fragment(best_fragment, 1, 0.2);
+        NucleicAcidDB::ChainFull refined_fragment = refine_fragment_coordinates(best_fragment);
+
         score += max_score;
-        placed_fragments[std::make_pair(positions[i], positions[i+1])].emplace_back(best_fragment[0]);
-        placed_fragments[std::make_pair(positions[i+1], positions[i+2])].emplace_back(best_fragment[1]);
+        placed_fragments[std::make_pair(positions[i], positions[i+1])].emplace_back(refined_fragment[0]);
+        placed_fragments[std::make_pair(positions[i+1], positions[i+2])].emplace_back(refined_fragment[1]);
     }
 
     return {score, placed_fragments};
@@ -949,7 +974,7 @@ PlacedFragmentResult FindML::place_fragments(const clipper::MiniMol& phosphate_p
 clipper::MiniMol FindML::find() {
     clipper::MiniMol phosphate_peaks = calculate_phosphate_peaks(0.1);
     TripletCoordinates phosphate_triplets = find_triplet_coordinates(phosphate_peaks);
-    // draw_triplets(phosphate_triplets, phosphate_peaks, "triplets-ext.pdb");
+//     draw_triplets(phosphate_triplets, phosphate_peaks, "triplets-ext.pdb");
     // NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
     std::cout << phosphate_triplets.size() << " phosphate triplets found\n";
 
@@ -985,27 +1010,9 @@ clipper::MiniMol FindML::find() {
         }
     }
 
-    // clipper::MiniMol formed_chain = form_chain(placed_fragments);
-    // NautilusUtil::save_minimol(formed_chain, "formed_chain.pdb");
     clipper::MiniMol filtered_chain = form_organised_chains(placed_fragments, placed_fragment_indices);
-     // NautilusUtil::save_minimol(filtered_chain, "filtered_chain.pdb");
-//
-//
-//    clipper::MiniMol filtered_chain = filter_and_form_bidirectional_chain(placed_fragments);
-    // NautilusUtil::save_minimol(filtered_chain, "filtered_chain.pdb");
-
     clipper::MiniMol base_removed_mol = remove_bases(filtered_chain);
-//    clipper::MiniMol organised_chains = organise_to_chains(base_removed_mol);
-//    NautilusUtil::save_minimol(organised_chains, "organised_chains.pdb");
-
     clipper::MiniMol mol_ = remove_clashing_protein(base_removed_mol);
-    // NautilusUtil::save_minimol(mol_, "mol_.pdb");
-
-    // for (int p = 0; p < base_removed_mol.size(); p++) {
-    //     for (int m = 0; base_removed_mol[p][m].size(); m++) {
-    //         std::cout << base_removed_mol[p].id() << p << "-" << m << " " << base_removed_mol[p][m].id() << std::endl;
-    //     }
-    // }
 
     return mol_;
 }

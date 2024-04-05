@@ -16,6 +16,43 @@
 #include "../cpp/nautilus-mlfind.h"
 #include "../cpp/nautilus-findml.h"
 
+clipper::MiniMol &
+run_cycle(int nhit, double srchst, int verbose, NucleicAcidTargets &natools, const clipper::MMoleculeSequence &seq_wrk,
+          clipper::MiniMol &mol_wrk, const clipper::Xmap<float> &xwrk, NautilusLog &log) {
+    // grow chains
+    mol_wrk = natools.grow( xwrk, mol_wrk, 25, 0.01 );
+    log.log( "GROW", mol_wrk, verbose >= 5 );
+
+    // join
+    NucleicAcidJoin na_join;
+    mol_wrk = na_join.join( mol_wrk );
+    log.log( "JOIN", mol_wrk, verbose >= 5 );
+
+    // link
+    mol_wrk = natools.link( xwrk, mol_wrk );
+    log.log( "LINK", mol_wrk, verbose >= 5 );
+
+    // prune
+    mol_wrk = natools.prune( mol_wrk );
+    log.log( "PRUNE", mol_wrk, verbose >= 5 );
+
+    // rebuild
+    mol_wrk = natools.rebuild_chain( xwrk, mol_wrk );
+    log.log( "CHAIN", mol_wrk, verbose >= 5 );
+
+    // sequence
+    NucleicAcidSequence na_seqnc;
+    mol_wrk = na_seqnc.sequence( xwrk, mol_wrk, seq_wrk );
+    log.log( "SEQNC", mol_wrk, verbose >= 5 );
+
+    // rebuild
+    NucleicAcidRebuildBases na_bases;
+    mol_wrk = na_bases.rebuild_bases( xwrk, mol_wrk );
+    log.log( "BASES", mol_wrk, verbose >= 5 );
+
+    return mol_wrk;
+}
+
 void run(NautilusInput& input, NautilusOutput& output, int cycles) {
 
   CCP4Program prog( "nucleofind-build", "0.1", "$Date: 2024/02/26" );
@@ -109,17 +146,6 @@ void run(NautilusInput& input, NautilusOutput& output, int cycles) {
     for ( int c = 0; c < mol_tmp.size(); c++ ) mol_wrk.insert( mol_tmp[c] );
   }
 
-//   // Get model phosphates
-//   clipper::MiniMol mol_pho( hkls.spacegroup(), hkls.cell() );
-//   if ( ippdb_pho != "NONE" ) {
-//     clipper::MiniMol mol_tmp;
-//     clipper::MMDBfile mmdb;
-//     mmdb.SetFlag( mmdbflags );
-//     mmdb.read_file( ippdb_pho );
-//     mmdb.import_minimol( mol_tmp );
-//     std::cout << mol_tmp.spacegroup().symbol_hm() << " " << mol_tmp.cell().format() << " " << mol_tmp.atom_list().size() << std::endl;
-//     for ( int c = 0; c < mol_tmp.size(); c++ ) mol_pho.insert( mol_tmp[c] );
-//   }
 
   // work map
   if ( !input.get_hl().has_value() )
@@ -192,122 +218,48 @@ void run(NautilusInput& input, NautilusOutput& output, int cycles) {
   }
 
   mol_wrk = NucleicAcidTools::flag_chains( mol_wrk );
+  clipper::MiniMol mol_wrk_original = mol_wrk;
+
   FindML find_ml = FindML(mol_wrk, xphospred, xsugarpred, xbasepred, xwrk);
   find_ml.load_library_from_file(ippdb_ref);
 
   mol_wrk = find_ml.find();
   log.log( "FIND ML", mol_wrk, verbose >= 5 );
-//  NautilusUtil::save_minimol(mol_wrk, "findml.pdb");
+  NautilusUtil::save_minimol(mol_wrk, "findml.pdb");
 
-  mol_wrk = natools.grow( xwrk, mol_wrk, 25, 0.001 );
-  log.log( "GROW", mol_wrk, verbose >= 5 );
+  mol_wrk = run_cycle(nhit, srchst, verbose, natools, seq_wrk, mol_wrk, xwrk, log);
 
-  // NautilusUtil::save_minimol(mol_wrk, "grow.pdb");
-  // join
-  NucleicAcidJoin na_join;
-  mol_wrk = na_join.join( mol_wrk );
-  log.log( "JOIN", mol_wrk, verbose >= 5 );
-  //for ( int c = 0; c < mol_wrk.size(); c++ ) { for ( int r = 0; r < mol_wrk[c].size(); r++ ) std::cout << mol_wrk[c][r].type().trim(); std::cout << std::endl; }
+    NautilusUtil::save_minimol(mol_wrk, "mlbuiltmodel.pdb");
 
-  // NautilusUtil::save_minimol(mol_wrk, "join.pdb");
-  // link
-  mol_wrk = natools.link( xwrk, mol_wrk );
-  log.log( "LINK", mol_wrk, verbose >= 5 );
-  //for ( int c = 0; c < mol_wrk.size(); c++ ) { for ( int r = 0; r < mol_wrk[c].size(); r++ ) std::cout << mol_wrk[c][r].type().trim(); std::cout << std::endl; }
-
-  // NautilusUtil::save_minimol(mol_wrk, "link.pdb");
-  // prune
-  mol_wrk = natools.prune( mol_wrk );
-  log.log( "PRUNE", mol_wrk, verbose >= 5 );
-
-  // NautilusUtil::save_minimol(mol_wrk, "prune.pdb");
-  mol_wrk = natools.rebuild_chain( xwrk, mol_wrk );
-  log.log( "CHAIN", mol_wrk, verbose >= 5 );
-  //for ( int c = 0; c < mol_wrk.size(); c++ ) { for ( int r = 0; r < mol_wrk[c].size(); r++ ) std::cout << mol_wrk[c][r].type().trim(); std::cout << std::endl; }
-
-  // sequence
-  NucleicAcidSequence na_seqnc;
-  mol_wrk = na_seqnc.sequence( xwrk, mol_wrk, seq_wrk );
-  log.log( "SEQNC", mol_wrk, verbose >= 5 );
-  //for ( int c = 0; c < mol_wrk.size(); c++ ) { for ( int r = 0; r < mol_wrk[c].size(); r++ ) std::cout << mol_wrk[c][r].type().trim(); std::cout << std::endl; }
-
-  // rebuild
-  NucleicAcidRebuildBases na_bases;
-  mol_wrk = na_bases.rebuild_bases( xwrk, mol_wrk );
-  log.log( "BASES", mol_wrk, verbose >= 5 );
-
-//  NautilusUtil::save_minimol(mol_wrk, "ml-built-model.pdb");
-
-  clipper::MiniMol best_model = mol_wrk;
+    clipper::MiniMol best_model = mol_wrk;
   int best_na_count = NautilusUtil::count_na(best_model);
   float best_rscc = NautilusUtil::calculate_rscc(best_model, xwrk, hkls.resolution().limit());
 
   for ( int cyc = 0; cyc < cycles; cyc++ ) {
     std::cout << "Internal cycle " << clipper::String( cyc+1, 3 ) << std::endl << std::endl; // edited
 
-    // adjust labels and label non-NA chains to keep
     mol_wrk = NucleicAcidTools::flag_chains( mol_wrk );
 
     mol_wrk = natools.find( xwrk, mol_wrk, nhit/2, nhit/2, srchst );
     log.log( "FIND", mol_wrk, verbose >= 5 );
 
-    // grow chains
-    mol_wrk = natools.grow( xwrk, mol_wrk, 25, 0.001 );
-    log.log( "GROW", mol_wrk, verbose >= 5 );
+    mol_wrk = run_cycle(nhit, srchst, verbose, natools, seq_wrk, mol_wrk, xwrk, log);
 
-    // join
-    NucleicAcidJoin na_join;
-    mol_wrk = na_join.join( mol_wrk );
-    log.log( "JOIN", mol_wrk, verbose >= 5 );
-    //for ( int c = 0; c < mol_wrk.size(); c++ ) { for ( int r = 0; r < mol_wrk[c].size(); r++ ) std::cout << mol_wrk[c][r].type().trim(); std::cout << std::endl; }
+    NautilusUtil::save_minimol(mol_wrk, std::to_string(cyc)+".pdb");
 
-    // link
-    mol_wrk = natools.link( xwrk, mol_wrk );
-    log.log( "LINK", mol_wrk, verbose >= 5 );
-    //for ( int c = 0; c < mol_wrk.size(); c++ ) { for ( int r = 0; r < mol_wrk[c].size(); r++ ) std::cout << mol_wrk[c][r].type().trim(); std::cout << std::endl; }
 
-    // prune
-    mol_wrk = natools.prune( mol_wrk );
-    log.log( "PRUNE", mol_wrk, verbose >= 5 );
-    //for ( int c = 0; c < mol_wrk.size(); c++ ) { for ( int r = 0; r < mol_wrk[c].size(); r++ ) std::cout << mol_wrk[c][r].type().trim(); std::cout << std::endl; }
-
-    // rebuild
-    mol_wrk = natools.rebuild_chain( xwrk, mol_wrk );
-    log.log( "CHAIN", mol_wrk, verbose >= 5 );
-    //for ( int c = 0; c < mol_wrk.size(); c++ ) { for ( int r = 0; r < mol_wrk[c].size(); r++ ) std::cout << mol_wrk[c][r].type().trim(); std::cout << std::endl; }
-
-    // sequence
-    NucleicAcidSequence na_seqnc;
-    mol_wrk = na_seqnc.sequence( xwrk, mol_wrk, seq_wrk );
-    log.log( "SEQNC", mol_wrk, verbose >= 5 );
-    //for ( int c = 0; c < mol_wrk.size(); c++ ) { for ( int r = 0; r < mol_wrk[c].size(); r++ ) std::cout << mol_wrk[c][r].type().trim(); std::cout << std::endl; }
-
-    // rebuild
-    NucleicAcidRebuildBases na_bases;
-    mol_wrk = na_bases.rebuild_bases( xwrk, mol_wrk );
-    log.log( "BASES", mol_wrk, verbose >= 5 );
-    //for ( int c = 0; c < mol_wrk.size(); c++ ) { for ( int r = 0; r < mol_wrk[c].size(); r++ ) std::cout << mol_wrk[c][r].type().trim(); std::cout << std::endl; }
-
-    prog.summary_beg();
-    // auto msg = log.log_info( mol_wrk, false ); // edited
-    // std::cout << "Internal cycle " << clipper::String( cyc+1, 3 ) << std::endl << msg << std::endl ;
-    prog.summary_end();
-
-    float rscc = NautilusUtil::calculate_rscc(mol_wrk, xwrk, hkls.resolution().limit());
+      float rscc = NautilusUtil::calculate_rscc(mol_wrk, xwrk, hkls.resolution().limit());
 
     int current_count = NautilusUtil::count_na(mol_wrk);
     if (rscc > best_rscc) {
-      std::cout << "Overwriting\n";
+      std::cout << "Taking model from old cycle " << cyc+1 << "\n";
       best_rscc = rscc;
       best_model = mol_wrk;
     }
-    // file output edited SWH Nov'17
-     if ( output.get_xml_out().has_value() ) log.xml( output.get_xml_out().value() ); //, mol_wrk );
   }
 
   std::cout << "Taking best model from all cycles with " << best_rscc << " nucleic acids built." << std::endl;
   mol_wrk = best_model;
-
 
   // move to match input model
   if ( mol_wrk_in.size() > 0 ){

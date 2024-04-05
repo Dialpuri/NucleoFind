@@ -64,6 +64,8 @@ private:
     NucleicAcidDB::ChainFull
     refine_fragment(NucleicAcidDB::ChainFull &original_fragment, float translation_range, float translation_step);
 
+    NucleicAcidDB::ChainFull refine_fragment_coordinates(NucleicAcidDB::ChainFull& original_fragment);
+
     static clipper::Coord_orth calculate_com(NucleicAcidDB::ChainFull &chain);
 
     float score_fragment(NucleicAcidDB::ChainFull &fragment, clipper::Xmap<float> &xmap);
