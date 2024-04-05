@@ -344,9 +344,98 @@ Target_fn_refine_fragment_trn::refine() {
 
     clipper::Vec3<> refined_trn = {args_refined[0], args_refined[1], args_refined[2]};
 
-    std::cout << m_translation.format() << "\t" << refined_trn.format() << std::endl;
+//    std::cout << m_translation.format() << "\t" << refined_trn.format() << std::endl;
 
     return {clipper::Mat33<>::identity(), refined_trn};
+
+}
+
+// REFINE FRAGMENT COORDINATES
+
+double RefineFragmentCoordinates::operator()(const std::vector<double> &args) const {
+
+    clipper::Vec3<> new_translation = {args[3], args[4], args[5]};
+
+    clipper::Euler_ccp4 refined_euler = {args[0], args[1], args[2]};
+    clipper::Rotation refined_rotation(refined_euler);
+    clipper::Mat33<> refined_rotation_matrix = refined_rotation.matrix();
+
+    clipper::RTop_orth rtop = {refined_rotation_matrix, new_translation};
+
+    NucleicAcidDB::ChainFull test_fragment = m_chain;
+    test_fragment.transform(rtop);
+
+    int total_count = 0;
+    float total_score = 0.0f;
+    for (int i = 0; i < test_fragment.size(); i++) {
+
+        float score = 0.0f;
+        auto chain = test_fragment[i];
+
+        if (!chain.O5p1.is_null()) score += m_xmap->interp<clipper::Interp_cubic>(chain.O5p1.coord_frac(m_xmap->cell()));
+        if (!chain.C5p1.is_null()) score += m_xmap->interp<clipper::Interp_cubic>(chain.C5p1.coord_frac(m_xmap->cell()));
+        if (!chain.C4p1.is_null()) score += m_xmap->interp<clipper::Interp_cubic>(chain.C4p1.coord_frac(m_xmap->cell()));
+        if (!chain.O4p1.is_null()) score += m_xmap->interp<clipper::Interp_cubic>(chain.O4p1.coord_frac(m_xmap->cell()));
+        if (!chain.C3p1.is_null()) score += m_xmap->interp<clipper::Interp_cubic>(chain.C3p1.coord_frac(m_xmap->cell()));
+        if (!chain.O3p1.is_null()) score += m_xmap->interp<clipper::Interp_cubic>(chain.O3p1.coord_frac(m_xmap->cell()));
+        if (!chain.C2p1.is_null()) score += m_xmap->interp<clipper::Interp_cubic>(chain.C2p1.coord_frac(m_xmap->cell()));
+        if (!chain.C1p1.is_null()) score += m_xmap->interp<clipper::Interp_cubic>(chain.C1p1.coord_frac(m_xmap->cell()));
+        if (!chain.C2_1.is_null()) score += m_xmap->interp<clipper::Interp_cubic>(chain.C2_1.coord_frac(m_xmap->cell()));
+        if (!chain.C4_1.is_null()) score += m_xmap->interp<clipper::Interp_cubic>(chain.C4_1.coord_frac(m_xmap->cell()));
+        if (!chain.C5_1.is_null()) score += m_xmap->interp<clipper::Interp_cubic>(chain.C5_1.coord_frac(m_xmap->cell()));
+        if (!chain.C6_1.is_null()) score += m_xmap->interp<clipper::Interp_cubic>(chain.C6_1.coord_frac(m_xmap->cell()));
+        if (!chain.C8_1.is_null()) score += m_xmap->interp<clipper::Interp_cubic>(chain.C8_1.coord_frac(m_xmap->cell()));
+        if (!chain.N1_1.is_null()) score += m_xmap->interp<clipper::Interp_cubic>(chain.N1_1.coord_frac(m_xmap->cell()));
+        if (!chain.N2_1.is_null()) score += m_xmap->interp<clipper::Interp_cubic>(chain.N2_1.coord_frac(m_xmap->cell()));
+        if (!chain.N3_1.is_null()) score += m_xmap->interp<clipper::Interp_cubic>(chain.N3_1.coord_frac(m_xmap->cell()));
+        if (!chain.N4_1.is_null()) score += m_xmap->interp<clipper::Interp_cubic>(chain.N4_1.coord_frac(m_xmap->cell()));
+        if (!chain.N6_1.is_null()) score += m_xmap->interp<clipper::Interp_cubic>(chain.N6_1.coord_frac(m_xmap->cell()));
+        if (!chain.N7_1.is_null()) score += m_xmap->interp<clipper::Interp_cubic>(chain.N7_1.coord_frac(m_xmap->cell()));
+        if (!chain.N9_1.is_null()) score += m_xmap->interp<clipper::Interp_cubic>(chain.N9_1.coord_frac(m_xmap->cell()));
+        if (!chain.O2_1.is_null()) score += m_xmap->interp<clipper::Interp_cubic>(chain.O2_1.coord_frac(m_xmap->cell()));
+        if (!chain.O6_1.is_null()) score += m_xmap->interp<clipper::Interp_cubic>(chain.O6_1.coord_frac(m_xmap->cell()));
+        if (!chain.P.is_null()) score += m_xmap->interp<clipper::Interp_cubic>(chain.P.coord_frac(m_xmap->cell()));
+        if (!chain.P.is_null()) {
+            float density_predicted_score = m_phosphate_map->interp<clipper::Interp_cubic>(chain.P.coord_frac(m_xmap->cell()));
+            if (density_predicted_score < 0.1) {
+                score -= 100;
+            }
+        }
+
+        test_fragment[i].score = score;
+        total_score += score;
+        total_count += chain.get_mmonomer().size();
+    }
+
+    //    std::cout << new_translation.format() << "\t" << refined_euler.format()<< std::endl;
+
+    return -total_score/total_count;
+}
+
+clipper::RTop_orth RefineFragmentCoordinates::refine() {
+    std::vector<double> args = {0, 0, 0, m_translation[0], m_translation[1], m_translation[2]};
+
+    std::vector<std::vector<double>> args_init;
+
+    args_init.push_back( args );
+    args_init.push_back({args[0]+m_rotation_step, args[1], args[2], args[3], args[4], args[5] });
+    args_init.push_back({args[0], args[1]+m_rotation_step, args[2], args[3], args[4], args[5] });
+    args_init.push_back({args[0], args[1], args[2]+m_rotation_step, args[3], args[4], args[5] });
+    args_init.push_back({args[0], args[1], args[2], args[3]+m_translation_step, args[4], args[5] });
+    args_init.push_back({args[0], args[1], args[2], args[3], args[4]+m_translation_step, args[5] });
+    args_init.push_back({args[0], args[1], args[2], args[3], args[4], args[5]+m_translation_step });
+
+    double tol = 0.0005 * (*this)( args_init[0] );
+    Optimiser_simplex optimiser_simplex(tol, 20, Optimiser_simplex::NORMAL, false );
+    std::vector<double> args_refined = optimiser_simplex(*this, args_init);
+
+    clipper::Euler_ccp4 refined_euler = {args_refined[0], args_refined[1], args_refined[2]};
+    clipper::Rotation refined_rotation(refined_euler);
+    clipper::Mat33<> refined_rotation_matrix = refined_rotation.matrix();
+
+    clipper::Vec3<> refined_translation = {args_refined[3], args_refined[4], args_refined[5]};
+
+    return {refined_rotation_matrix, refined_translation};
 
 }
 
