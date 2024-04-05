@@ -144,4 +144,29 @@ private:
     float m_step = clipper::Util::d2rad(1);
 };
 
+class RefineFragmentCoordinates: Target_fn_order_zero {
+public:
+    RefineFragmentCoordinates() = default;
+
+    RefineFragmentCoordinates(const clipper::Xmap<float>& xmap,
+                              const clipper::Xmap<float>& phosphate_map,
+                              NucleicAcidDB::ChainFull& chain_at_origin,
+                              clipper::Vec3<> center_of_mass):
+                              m_xmap(&xmap), m_phosphate_map(&phosphate_map), m_translation(center_of_mass), m_chain(chain_at_origin) {}
+
+    inline int num_params() const override {return 6;}
+
+    double operator()(const std::vector<double>& args) const;
+
+    clipper::RTop_orth refine();
+
+private:
+    const clipper::Xmap<float> *m_xmap{};
+    const clipper::Xmap<float> *m_phosphate_map{};
+    const clipper::Vec3<> m_translation;
+    const NucleicAcidDB::ChainFull m_chain;
+    float m_rotation_step = clipper::Util::d2rad(2);
+    float m_translation_step = 0.05;
+};
+
 #endif //NAUTILUS_NAUTILUS_REFINE_H
