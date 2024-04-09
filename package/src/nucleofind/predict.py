@@ -83,7 +83,7 @@ class Prediction:
 
     def save_variance_map(self, output_path: str):
         if not self.compute_variance:
-            logging.warn("Attempting to output a variance map without specifying compute_variance=True")
+            logging.warning("Attempting to output a variance map without specifying compute_variance=True")
             return
         ccp4 = gemmi.Ccp4Map()
         ccp4.grid = self.variance_grid
@@ -418,7 +418,7 @@ def model_not_found_err():
     print("""
             No models have been found in either site_packages or CCP4/lib/data.
             You can install models using the command:
-            nucleofind-install -o site_packages -m phos
+            nucleofind-install -m phosphate
         """)
 
 
