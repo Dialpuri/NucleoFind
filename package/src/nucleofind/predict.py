@@ -14,9 +14,10 @@ from .__version__ import __version__
 
 
 class Prediction:
-    def __init__(self, model_dir: str,  use_gpu: bool = False):
+    def __init__(self, model_dir: str,  use_gpu: bool = False, compute_variance: bool = False):
         self.model_dir: str = model_dir
         self.use_gpu: bool = use_gpu
+        self.compute_variance: bool = compute_variance
         self.model_name: str = model_dir.split("/")[-1]
 
         self.predicted_map: np.ndarray = None
@@ -66,7 +67,8 @@ class Prediction:
         self._predict(raw_values=use_raw_values, overlap=overlap)
 
         self.predicted_grid = self._reinterpolate_to_output(self.predicted_map)
-        self.variance_grid = self._reinterpolate_to_output(self.variance_map)
+        if self.compute_variance:
+            self.variance_grid = self._reinterpolate_to_output(self.variance_map)
 
         end = time.time()
         delta = end - start
@@ -80,6 +82,9 @@ class Prediction:
         ccp4.write_ccp4_map(output_path)
 
     def save_variance_map(self, output_path: str):
+        if not self.compute_variance:
+            logging.warn("Attempting to output a variance map without specifying compute_variance=True")
+            return
         ccp4 = gemmi.Ccp4Map()
         ccp4.grid = self.variance_grid
         ccp4.update_ccp4_header()
@@ -103,7 +108,8 @@ class Prediction:
     def _load_model(self):
         providers = ['CPUExecutionProvider']
         if self.use_gpu:
-            providers.append('GPUExecutionProvider')
+            providers.insert(0, 'CUDAExecutionProvider')
+            
         self.model = rt.InferenceSession(self.model_dir, providers=providers)
 
     def _load_map(self, map_path: str, normalise: bool = True):
@@ -317,22 +323,23 @@ class Prediction:
                     0:(32 * self.nc),
                     ]
 
-        variance_map = np.zeros(
+      
+        logging.debug(f"Predicted map shape: {predicted_map.shape}")
+        self.predicted_map = predicted_map / count_map
+
+        if self.compute_variance:
+            variance_map = np.zeros(
             (
                 int(32 * self.na),
                 int(32 * self.nb),
                 int(32 * self.nc)),
-            dtype=np.float32
-        )
+            dtype=np.float32)
 
-        logging.debug(f"Predicted map shape: {predicted_map.shape}")
-        self.predicted_map = predicted_map / count_map
-
-        for i in range(variance_map.shape[0]):
-            for j in range(variance_map.shape[1]):
-                for k in range(variance_map.shape[2]):
-                    variance_map[i, j, k] = np.var(variance_array_map[i, j, k])
-        self.variance_map = variance_map
+            for i in range(variance_map.shape[0]):
+                for j in range(variance_map.shape[1]):
+                    for k in range(variance_map.shape[2]):
+                        variance_map[i, j, k] = np.var(variance_array_map[i, j, k])
+            self.variance_map = variance_map
 
 
 def predict_map(model: str, input: str, output: str, resolution: float = 2.5, intensity: str = "FWT",
@@ -390,7 +397,9 @@ def run():
         logging.info(
             f"Supplying both raw and variance flags does not output a raw variance map, just the variance map.")
 
-    prediction = Prediction(model_dir=model_path, use_gpu=True if args["gpu"] else False)
+    prediction = Prediction(model_dir=model_path, 
+                            use_gpu=True if args["gpu"] else False, 
+                            compute_variance=True if args["variance"] else False)
 
     prediction.make_prediction(args["i"], [args["intensity"], args["phase"]], overlap=args["overlap"],
                                use_raw_values=True if args["raw"] else False)
