@@ -1,22 +1,30 @@
+import argparse
 import logging
 import os
-from typing import List
-import onnxruntime as rt
-import numpy as np
-import gemmi
-from tqdm import tqdm
-import time
-import argparse
 import site
-from glob import glob
 import sys
+import time
+from glob import glob
+from typing import List
+import platform
+
+import gemmi
+import numpy as np
+import onnxruntime as rt
+from tqdm import tqdm
+
 from .__version__ import __version__
 
 
 class Prediction:
-    def __init__(self, model_dir: str,  use_gpu: bool = False, compute_variance: bool = False):
+    def __init__(self, model_dir: str, use_gpu: bool = False, compute_variance: bool = False):
         self.model_dir: str = model_dir
         self.use_gpu: bool = use_gpu
+        print(platform.system())
+        if use_gpu and platform.system() == "Darwin":
+            logging.warning("GPU acceleration was specified but is not supported on MacOS, continuing with CPU only")
+            self.use_gpu = False
+
         self.compute_variance: bool = compute_variance
         self.model_name: str = model_dir.split("/")[-1]
 
@@ -47,7 +55,8 @@ class Prediction:
             self._load_model()
         except OSError:
             print(
-                "This model is corrupted, perhaps due to an incomplete download. Try downloading it again with nucleofind-install -m TYPE --reinstall")
+                "This model is corrupted, perhaps due to an incomplete download. Try downloading it again with "
+                "nucleofind-install -m TYPE --reinstall")
             sys.exit()
 
         if column_labels == [None, None]:
@@ -369,7 +378,7 @@ def run():
     parser.add_argument("-v", "--version", action="version", version=__version__)
     args = vars(parser.parse_args())
 
-    log_level = logging.CRITICAL
+    log_level = logging.WARNING
     if args["debug"]:
         log_level = logging.DEBUG
 
