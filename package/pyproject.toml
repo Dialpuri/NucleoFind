@@ -15,9 +15,10 @@ classifiers = [
     "License :: OSI Approved :: BSD License",
 ]
 dependencies=[
-    "onnxruntime",
-    "tqdm",
-    "gemmi"
+    'onnxruntime-gpu; platform_system != "Darwin"',
+    'onnxruntime; platform_system == "Darwin"',
+    'tqdm',
+    'gemmi'
 ]
 [project.urls]
 Homepage = "https://github.com/Dialpuri/NucleoFind"

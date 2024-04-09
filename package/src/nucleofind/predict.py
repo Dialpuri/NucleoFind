@@ -14,9 +14,9 @@ from .__version__ import __version__
 
 
 class Prediction:
-    def __init__(self, model_dir: str, use_cache: bool = True):
-        self.use_cache: bool = use_cache
+    def __init__(self, model_dir: str,  use_gpu: bool = False):
         self.model_dir: str = model_dir
+        self.use_gpu: bool = use_gpu
         self.model_name: str = model_dir.split("/")[-1]
 
         self.predicted_map: np.ndarray = None
@@ -102,6 +102,8 @@ class Prediction:
 
     def _load_model(self):
         providers = ['CPUExecutionProvider']
+        if self.use_gpu:
+            providers.append('GPUExecutionProvider')
         self.model = rt.InferenceSession(self.model_dir, providers=providers)
 
     def _load_map(self, map_path: str, normalise: bool = True):
@@ -336,7 +338,7 @@ class Prediction:
 def predict_map(model: str, input: str, output: str, resolution: float = 2.5, intensity: str = "FWT",
                 phase: str = "PHWT", overlap: float = 16):
     model_path = find_model(model)
-    prediction = Prediction(model_dir=model_path, use_cache=False)
+    prediction = Prediction(model_dir=model_path)
     prediction.make_prediction(input, [intensity, phase], overlap=overlap)
     prediction.save_predicted_map(output)
 
@@ -354,6 +356,7 @@ def run():
     parser.add_argument("-overlap", nargs='?', help="Amount of overlap to use", const=16, default=16)
     parser.add_argument("-variance", action=argparse.BooleanOptionalAction, help="Output variance map")
     parser.add_argument("-raw", action=argparse.BooleanOptionalAction, help="Output raw map (no argmax)")
+    parser.add_argument("-gpu", action=argparse.BooleanOptionalAction, help="Use GPU (experimental)")
     parser.add_argument("-debug", action=argparse.BooleanOptionalAction, help="Turn on debug logging")
     parser.add_argument("-model_path", nargs='?', help="Path to model (development)")
     parser.add_argument("-v", "--version", action="version", version=__version__)
@@ -387,7 +390,7 @@ def run():
         logging.info(
             f"Supplying both raw and variance flags does not output a raw variance map, just the variance map.")
 
-    prediction = Prediction(model_dir=model_path, use_cache=False)
+    prediction = Prediction(model_dir=model_path, use_gpu=True if args["gpu"] else False)
 
     prediction.make_prediction(args["i"], [args["intensity"], args["phase"]], overlap=args["overlap"],
                                use_raw_values=True if args["raw"] else False)
