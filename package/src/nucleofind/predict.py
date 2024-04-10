@@ -20,7 +20,7 @@ class Prediction:
     def __init__(self, model_dir: str, use_gpu: bool = False, compute_variance: bool = False):
         self.model_dir: str = model_dir
         self.use_gpu: bool = use_gpu
-        print(platform.system())
+
         if use_gpu and platform.system() == "Darwin":
             logging.warning("GPU acceleration was specified but is not supported on MacOS, continuing with CPU only")
             self.use_gpu = False
@@ -54,7 +54,7 @@ class Prediction:
         try:
             self._load_model()
         except OSError:
-            print(
+            logging.critical(
                 "This model is corrupted, perhaps due to an incomplete download. Try downloading it again with "
                 "nucleofind-install -m TYPE --reinstall")
             sys.exit()
@@ -403,7 +403,7 @@ def run():
             f"Input file has not been found, check path\nPath Supplied {args['i']} from {os.getcwd()}")
 
     if args["raw"] and args["variance"]:
-        logging.info(
+        logging.warning(
             f"Supplying both raw and variance flags does not output a raw variance map, just the variance map.")
 
     prediction = Prediction(model_dir=model_path, 
@@ -420,7 +420,7 @@ def run():
 
     end = time.time()
 
-    print(f"Time taken {end - start:.2f} seconds / {(end - start) / 60:.2f} minutes")
+    logging.info(f"Time taken {end - start:.2f} seconds / {(end - start) / 60:.2f} minutes")
 
 
 def model_not_found_err():
