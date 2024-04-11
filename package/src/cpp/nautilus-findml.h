@@ -26,6 +26,8 @@ public:
 
     clipper::MiniMol find();
 
+    void set_resolution(double resolution) { m_resolution = resolution;}
+
 public:
     typedef std::vector<std::pair<int, clipper::Coord_orth>> TripletCoordinate;
     typedef std::vector<TripletCoordinate> TripletCoordinates;
@@ -89,6 +91,8 @@ private:
     [[ nodiscard ]] clipper::MiniMol organise_to_chains(clipper::MiniMol &mol);
 
     [[ nodiscard ]] clipper::MiniMol remove_clashing_protein(clipper::MiniMol& na_chain);
+
+    [[ nodiscard ]] clipper::MiniMol remove_low_confidence(clipper::MiniMol& mol);
 
     PlacedFragmentResult place_fragments(const clipper::MiniMol& phosphate_peaks, const std::vector<int>& positions);
 
@@ -156,6 +160,7 @@ private:
     clipper::MiniMol mol;
     NucleicAcidDB::ChainFull nadb;
 
+    double m_resolution = 2;
 
 };
 

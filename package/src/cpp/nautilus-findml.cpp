@@ -502,7 +502,9 @@ NucleicAcidDB::ChainFull FindML::refine_fragment_coordinates(NucleicAcidDB::Chai
     NucleicAcidDB::ChainFull new_fragment = com_fragment;
     new_fragment.transform(refined_rtop);
 
-//    std::cout << "P1 Atom moved from " << original_fragment[0].P.format() << " to " << new_fragment[0].P.format() << std::endl;
+//    for (int i = 0; i < new_fragment.size(); i++) {
+//        std::cout << "P Atom moved  " << (original_fragment[i].P-new_fragment[i].P).lengthsq()<< std::endl;
+//    }
 
     return new_fragment;
 }
@@ -926,6 +928,38 @@ clipper::MiniMol FindML::remove_clashing_protein(clipper::MiniMol& na_chain) {
     return mol_final;
 }
 
+clipper::MiniMol FindML::remove_low_confidence(clipper::MiniMol & mol) {
+    std::map<std::pair<int, int>, double> rsrs = NautilusUtil::per_residue_rsrz(mol, xwrk, m_resolution);
+    double rsr_threshold = -1.5;
+    clipper::MiniMol mol_final = {mol.spacegroup(), mol.cell()};
+
+    for (int p = 0; p < mol.size(); p++) {
+        clipper::MPolymer mp;
+        mp.set_id(mol[p].id());
+        int count = 0;
+        for (int m = 0; m < mol[p].size(); m++) {
+            std::pair<int, int> residue_key = std::make_pair(p, m);
+            if (rsrs.find(residue_key) != rsrs.end()) {
+                double rsrz = rsrs[residue_key];
+                if (rsrz < rsr_threshold) {continue;}
+            }
+            else {
+                std::cout << "Residue found that was not in the RSR calculation" << p << " " << m << std::endl;
+                continue;
+            }
+
+            clipper::MPolymer chain = mol[p];
+            clipper::MMonomer residue = mol[p][m];
+            std::vector<std::string> key = {chain.id(), residue.type(), std::to_string(residue.seqnum())};
+            count += 1;
+            mp.insert(mol[p][m]);
+        }
+        if (count > 0)
+            mol_final.insert(mp);
+    }
+    return mol_final;
+}
+
 PlacedFragmentResult FindML::place_fragments(const clipper::MiniMol& phosphate_peaks, const std::vector<int>& positions) {
     float score = 0;
     std::map<std::pair<int, int>, std::vector<NucleicAcidDB::NucleicAcidFull>> placed_fragments;
@@ -1012,7 +1046,8 @@ clipper::MiniMol FindML::find() {
 
     clipper::MiniMol filtered_chain = form_organised_chains(placed_fragments, placed_fragment_indices);
     clipper::MiniMol base_removed_mol = remove_bases(filtered_chain);
-    clipper::MiniMol mol_ = remove_clashing_protein(base_removed_mol);
-
-    return mol_;
+    clipper::MiniMol low_confidence_removed_model = remove_low_confidence(base_removed_mol);
+    NautilusUtil::save_minimol(low_confidence_removed_model, "lowconfidencemodl.pdb");
+    clipper::MiniMol clash_removed_mol = remove_clashing_protein(low_confidence_removed_model);
+    return clash_removed_mol;
 }
