@@ -184,6 +184,14 @@ class NautilusUtil {
     static int count_na(const clipper::MiniMol& mol);
 
   static float calculate_rscc(clipper::MiniMol&mol, const clipper::Xmap<float>& xmap, float res);
+
+  static float per_residue_rscc(clipper::MiniMol& mol, const clipper::Xmap<float>& xmap, float res);
+
+    static std::map<std::pair<int, int>, double>
+    per_residue_rsrz(clipper::MiniMol& mol, const clipper::Xmap<float>& xmap, float res);
+
+    static int count_well_modelled_nas(clipper::MiniMol& mol, clipper::Xmap<float>& xwrk, float res);
+
 };
 
 
