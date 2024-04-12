@@ -29,7 +29,7 @@ if [ -d "mmdb2" ]; then
     echo "Found mmdb2"
 else
 echo "Checking out mmdb2"
-curl -L http://ftp.ccp4.ac.uk/opensource/mmdb2-2.0.22.tar.gz -o mmdb2-2.0.22.tar.gz
+curl -L http://www.ysbl.york.ac.uk/jsd523/mmdb2-2.0.22.tar.gz -o mmdb2-2.0.22.tar.gz
 tar xf mmdb2-2.0.22.tar.gz
 ln -s mmdb2-2.0.22 mmdb2
 echo
@@ -39,7 +39,7 @@ if [ -d "libccp4" ]; then
     echo "Found libccp4"
 else
     echo "Checking out libccp4"
-curl -L http://ftp.ccp4.ac.uk/opensource/libccp4-8.0.0.tar.gz -o libccp4-8.0.0.tar.gz
+curl -L http://www.ysbl.york.ac.uk/jsd523/libccp4-8.0.0.tar.gz -o libccp4-8.0.0.tar.gz
 tar xf libccp4-8.0.0.tar.gz
 ln -s libccp4-8.0.0 libccp4
     echo
