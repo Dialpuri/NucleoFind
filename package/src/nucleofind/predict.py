@@ -7,7 +7,6 @@ import time
 from glob import glob
 from typing import List
 import platform
-import psutil
 
 import gemmi
 import numpy as np
@@ -289,8 +288,6 @@ class Prediction:
 
         for translation in tqdm(self.translation_list, total=len(self.translation_list)):
             x, y, z = translation
-            print('RAM memory % used:', psutil.virtual_memory()[2])
-            print('RAM Used (GB):', psutil.virtual_memory()[3] / 1000000000)
 
             sub_array = np.array(
                 self.interpolated_grid.get_subarray(
