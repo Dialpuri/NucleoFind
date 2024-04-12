@@ -68,6 +68,10 @@
                 <p>Use point-wise variance values to form the output map.</p>
                 <b>Advanced</b>
             </def>
+            <def title="-gpu">
+                <p>Use GPU acceleration. (Linux only)</p>
+                <b>Advanced</b>
+            </def>
             <def title="-model_path">
                 <p>Path to ONNX model for use with a custom model.</p>
                 <b>Advanced</b>
