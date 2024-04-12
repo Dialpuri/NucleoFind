@@ -7,6 +7,7 @@ import time
 from glob import glob
 from typing import List
 import platform
+import psutil
 
 import gemmi
 import numpy as np
@@ -269,26 +270,27 @@ class Prediction:
                 int(32 * self.nc) + (32 - overlap)),
             np.float32,
         )
-        variance_array_map = np.empty(
-            (
-                int(32 * self.na) + (32 - overlap),
-                int(32 * self.nb) + (32 - overlap),
-                int(32 * self.nc) + (32 - overlap),
-            ), object
-        )
 
-        for i in range(variance_array_map.shape[0]):
-            for j in range(variance_array_map.shape[1]):
-                for k in range(variance_array_map.shape[2]):
-                    variance_array_map[i, j, k] = []
+        if self.compute_variance:
+            variance_array_map = np.empty(
+                (
+                    int(32 * self.na) + (32 - overlap),
+                    int(32 * self.nb) + (32 - overlap),
+                    int(32 * self.nc) + (32 - overlap),
+                ), object
+            )
+
+            for i in range(variance_array_map.shape[0]):
+                for j in range(variance_array_map.shape[1]):
+                    for k in range(variance_array_map.shape[2]):
+                        variance_array_map[i, j, k] = []
 
         logging.debug(f"Predicted map shape - {predicted_map.shape}")
 
         for translation in tqdm(self.translation_list, total=len(self.translation_list)):
             x, y, z = translation
-            # logging.debug(
-            #     f"Predicting {x}, {y}, {z} -> {x + 32}, {y + 32}, {z + 32}, where final shape is {predicted_map.shape}"
-            # )
+            print('RAM memory % used:', psutil.virtual_memory()[2])
+            print('RAM Used (GB):', psutil.virtual_memory()[3] / 1000000000)
 
             sub_array = np.array(
                 self.interpolated_grid.get_subarray(
@@ -313,10 +315,12 @@ class Prediction:
             else:
                 predicted_map[x: x + 32, y: y + 32, z: z + 32] += arg_max
                 # x = np.append(variance_map[x: x + 32, y: y + 32, z: z + 32], arg_max.reshape(32,32,32,1), axis=-1)
-                for i, a in enumerate(range(x, x + 32)):
-                    for j, b in enumerate(range(y, y + 32)):
-                        for k, c in enumerate(range(z, z + 32)):
-                            variance_array_map[a, b, c].append(arg_max[i, j, k])
+
+                if self.compute_variance:
+                    for i, a in enumerate(range(x, x + 32)):
+                        for j, b in enumerate(range(y, y + 32)):
+                            for k, c in enumerate(range(z, z + 32)):
+                                variance_array_map[a, b, c].append(arg_max[i, j, k])
 
             count_map[x: x + 32, y: y + 32, z: z + 32] += 1
 
