@@ -79,6 +79,9 @@
             <def title="-debug">
                 <p>Enable debug logging.</p>
             </def>
+            <def title="-silent">
+                <p>Disable progress bar.</p>
+            </def>
             <def title="-h, --help">
                 Displays help.
             </def>

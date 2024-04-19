@@ -70,6 +70,9 @@
                 <p>Column name for free reflections</p>
                 <p>Example: FREE</p>
             </def>
+            <def title="-xmlout">
+                <p>Path to XML summary</p>
+            </def>
             <def title="-cycles">
                 <p>Number of cycles to run</p>
                 <p>Default: 3</p>
