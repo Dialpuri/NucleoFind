@@ -128,6 +128,13 @@ clipper::String NautilusLog::log_info( const clipper::MiniMol& mol, bool summary
       }
     }
   // store every end of cycle, added SWH Nov'17
+    cycdat dat;
+    dat.nmax = nmax;
+    dat.nchns = nnc;
+    dat.nres = nna;
+    dat.nseq = nseq;
+    data.push_back( dat );
+
   if ( summary )
   {
     cycdat dat;

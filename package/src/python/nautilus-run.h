@@ -197,7 +197,7 @@ void run(NautilusInput& input, NautilusOutput& output, int cycles) {
 
   mol_wrk = find_ml.find();
   log.log( "FIND ML", mol_wrk, verbose >= 5 );
-  NautilusUtil::save_minimol(mol_wrk, "findml.pdb");
+//  NautilusUtil::save_minimol(mol_wrk, "findml.pdb");
 
   mol_wrk = natools.grow( xwrk, mol_wrk, 25, 0.001 );
   log.log( "GROW", mol_wrk, verbose >= 5 );
@@ -236,7 +236,7 @@ void run(NautilusInput& input, NautilusOutput& output, int cycles) {
   mol_wrk = na_bases.rebuild_bases( xwrk, mol_wrk );
   log.log( "BASES", mol_wrk, verbose >= 5 );
 
-  NautilusUtil::save_minimol(mol_wrk, "ml-built-model.pdb");
+//  NautilusUtil::save_minimol(mol_wrk, "ml-built-model.pdb");
 
   clipper::MiniMol best_model = mol_wrk;
   int best_na_count = NautilusUtil::count_na(best_model);
@@ -302,7 +302,7 @@ void run(NautilusInput& input, NautilusOutput& output, int cycles) {
       best_model = mol_wrk;
     }
     // file output edited SWH Nov'17
-    // if ( opxml != "NONE" ) log.xml( opxml ); //, mol_wrk );
+     if ( output.get_xml_out().has_value() ) log.xml( output.get_xml_out().value() ); //, mol_wrk );
   }
 
   std::cout << "Taking best model from all cycles with " << best_rscc << " nucleic acids built." << std::endl;

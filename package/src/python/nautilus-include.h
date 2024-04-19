@@ -108,13 +108,20 @@ private:
 
 class NautilusOutput { 
 public: 
-    NautilusOutput(const std::string& pdbout) { 
+    NautilusOutput(const std::string& pdbout, const std::string& xmlout) {
         this->pdbout = pdbout; 
-
+        this->xmlout = xmlout;
         if (pdbout == "") {throw std::runtime_error("PDB Out must not be empty");}
     }; 
 
-    std::string get_pdb_out() const { return pdbout; }
+    [[ nodiscard ]] std::string get_pdb_out() const { return pdbout; }
+    [[ nodiscard ]] std::optional<std::string> get_xml_out() const {
+        if (xmlout.empty()) {
+            return std::nullopt;
+        }
+        return xmlout;
+    }
 private:
     std::string pdbout; 
+    std::string xmlout;
 };

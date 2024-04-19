@@ -13,6 +13,7 @@ def main():
     parser.add_argument("-colin-fo", required=True)
     parser.add_argument("-colin-fc", required=True)
     parser.add_argument("-colin-free", required=False, default="")
+    parser.add_argument("-xmlout", required=False, default="")
     parser.add_argument("-cycles", required=False, default=3)
     parser.add_argument("-v", "--version", action="version", version=__version__)
 
@@ -46,15 +47,14 @@ def main():
                   args.colin_fc,
                   args.colin_free)
 
-    output = Output(args.pdbout)
+    output = Output(args.pdbout, args.xmlout)
 
     run(input, output, args.cycles)
 
 
-def build(mtzin: str, seqin: str, pdbin: str, predin: str, colin_fo: str, colin_fc: str, colin_free: str, pdbout: str):
-
-
+def build(mtzin: str, seqin: str, pdbin: str, predin: str, colin_fo: str, colin_fc: str, colin_free: str, pdbout: str,
+          xmlout):
     input = Input(mtzin, seqin, pdbin, predin, "", "", colin_fo, "", "", colin_fc,
                   colin_free)
-    output = Output(pdbout)
+    output = Output(pdbout, xmlout)
     run(input, output, 1)
