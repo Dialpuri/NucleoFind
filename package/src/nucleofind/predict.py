@@ -17,9 +17,10 @@ from .__version__ import __version__
 
 
 class Prediction:
-    def __init__(self, model_dir: str, use_gpu: bool = False, compute_variance: bool = False):
+    def __init__(self, model_dir: str, use_gpu: bool = False, compute_variance: bool = False, disable_progress_bar: bool = False):
         self.model_dir: str = model_dir
         self.use_gpu: bool = use_gpu
+        self.disable_progress_bar: bool = disable_progress_bar
 
         if use_gpu and platform.system() == "Darwin":
             logging.warning("GPU acceleration was specified but is not supported on MacOS, continuing with CPU only")
@@ -286,7 +287,9 @@ class Prediction:
 
         logging.debug(f"Predicted map shape - {predicted_map.shape}")
 
-        for translation in tqdm(self.translation_list, total=len(self.translation_list)):
+        for translation in tqdm(self.translation_list, total=len(self.translation_list),
+                                miniters=1000 if len(self.translation_list) > 10_000 else 1,
+                                disable=self.disable_progress_bar):
             x, y, z = translation
 
             sub_array = np.array(
@@ -375,6 +378,7 @@ def run():
     parser.add_argument("-raw", action=argparse.BooleanOptionalAction, help="Output raw map (no argmax)")
     parser.add_argument("-gpu", action=argparse.BooleanOptionalAction, help="Use GPU (experimental)")
     parser.add_argument("-debug", action=argparse.BooleanOptionalAction, help="Turn on debug logging")
+    parser.add_argument("-silent", action=argparse.BooleanOptionalAction, help="Turn off progress bar")
     parser.add_argument("-model_path", nargs='?', help="Path to model (development)")
     parser.add_argument("-v", "--version", action="version", version=__version__)
     args = vars(parser.parse_args())
@@ -409,7 +413,8 @@ def run():
 
     prediction = Prediction(model_dir=model_path, 
                             use_gpu=True if args["gpu"] else False, 
-                            compute_variance=True if args["variance"] else False)
+                            compute_variance=True if args["variance"] else False,
+                            disable_progress_bar = True if args["silent"] else False)
 
     prediction.make_prediction(args["i"], [args["intensity"], args["phase"]], overlap=args["overlap"],
                                use_raw_values=True if args["raw"] else False)
@@ -492,7 +497,7 @@ to install a single model (choose either phosphate, sugar or base)
 
     print(f"The specified model type '{model_selection}' could not be found, please add one of the following flags")
 
-    filenames = set([x.split("/")[-1].rstrip(".hdf5") for x in models])
+    filenames = set([x.split("/")[-1].rstrip(".onnx") for x in models])
     for name in filenames:
         print(f"-m {name}")
 
