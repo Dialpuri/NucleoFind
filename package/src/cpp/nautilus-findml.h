@@ -14,13 +14,36 @@ struct ChainData {
 };
 struct PlacedFragmentResult;
 
+class PredictedMaps {
+public:
+    PredictedMaps(const clipper::Xmap<float> &phosphate_map, const clipper::Xmap<float> &sugar_map,
+                  const clipper::Xmap<float> &base_map)
+            : phosphate(phosphate_map), sugar(sugar_map), base(base_map) {}
+
+    [[nodiscard]] std::optional<clipper::Xmap<float>> get_phosphate_map() const {
+        if (!phosphate.cell().is_null()) {return phosphate;}
+        return std::nullopt;
+    }
+
+    [[nodiscard]] std::optional<clipper::Xmap<float>> get_sugar_map() const {
+        if (!sugar.cell().is_null()) {return sugar;}
+        return std::nullopt;
+    }
+
+    [[nodiscard]] std::optional<clipper::Xmap<float>> get_base_map() const {
+        if (!base.cell().is_null()) {return base;}
+        return std::nullopt;
+    }
+
+private:
+    clipper::Xmap<float> phosphate;
+    clipper::Xmap<float> sugar;
+    clipper::Xmap<float> base;
+};
+
 class FindML {
 public:
-    explicit FindML(const clipper::MiniMol& mol,
-                    const clipper::Xmap<float>& xphospred,
-                    const clipper::Xmap<float>& xsugarpred,
-                    const clipper::Xmap<float>& xbasepred,
-                    const clipper::Xmap<float>& xwrk);
+    explicit FindML(const clipper::MiniMol &mol, const clipper::Xmap<float> &xwrk, PredictedMaps predictions);
 
     void load_library_from_file(const std::string& path) {nadb.add_pdb(path);}
 
@@ -153,9 +176,8 @@ private:
 
 private:
     clipper::Xmap<float> xwrk;
+    PredictedMaps predictions;
     clipper::Xmap<float> xphospred;
-    clipper::Xmap<float> xsugarpred;
-    clipper::Xmap<float> xbasepred;
 
     clipper::MiniMol mol;
     NucleicAcidDB::ChainFull nadb;

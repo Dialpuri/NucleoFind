@@ -300,9 +300,10 @@ NautilusUtil::per_residue_rsrz(clipper::MiniMol& mol, const clipper::Xmap<float>
 
     for (int p = 0; p < mol.size(); p++) {
         clipper::MPolymer mp;
-        mp.set_id(mol[p].id());
+        mp.set_id(p);
         if (!mol[p].exists_property("NON-NA")) {
             for (int m = 0; m < mol[p].size(); m++) {
+                mol[p][m].set_id(m);
                 mp.insert(mol[p][m]);
                 for (int a = 0; a < mol[p][m].size(); a++) {
                     atom_list.emplace_back(mol[p][m][a]);
@@ -311,6 +312,7 @@ NautilusUtil::per_residue_rsrz(clipper::MiniMol& mol, const clipper::Xmap<float>
         }
         na_only.insert(mp);
     }
+    NautilusUtil::save_minimol(na_only, "na-only.pdb");
 
     clipper::MAtomNonBond neighbour_search = clipper::MAtomNonBond(na_only, 1.5);
     clipper::Coord_frac cf0( 0,0,0 );
@@ -334,18 +336,22 @@ NautilusUtil::per_residue_rsrz(clipper::MiniMol& mol, const clipper::Xmap<float>
         for ( iv = iu; iv.coord().v() <= g1.v(); iv.next_v() )
             for ( iw = iv; iw.coord().w() <= g1.w(); iw.next_w() ) {
                 clipper::Coord_orth co = iw.coord().coord_frac(xmap.grid_sampling()).coord_orth(cell);
-                auto nearby = neighbour_search.atoms_near(co, 1.5);
+                clipper::Coord_frac cf = co.coord_frac(xmap.cell());
+                auto nearby = neighbour_search(co, 2);
 
                 double min_distance = 1e5;
                 clipper::MAtomIndexSymmetry min_atom;
                 for (const auto& a: nearby) {
-                    double distance = (co - na_only[a.polymer()][a.monomer()][a.atom()].coord_orth()).lengthsq();
+
+                    clipper::Coord_frac f = na_only[a.polymer()][a.monomer()][a.atom()].coord_orth().coord_frac(xmap.cell());
+                    f = f.symmetry_copy_near(xmap.spacegroup(), xmap.cell(), cf);
+
+                    double distance = (cf-f).lengthsq(xmap.cell());
                     if (distance < min_distance) {
                         min_distance = distance;
                         min_atom = a;
                     }
                 }
-
                 if (!nearby.empty()) {
                     std::pair<int, int> residue_key = std::make_pair(min_atom.polymer(), min_atom.monomer());
                     std::pair<double, double> point_pair = std::make_pair(xmap[iw], calc_map[iw]);

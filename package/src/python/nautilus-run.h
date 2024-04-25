@@ -17,9 +17,9 @@
 
 clipper::MiniMol &
 run_cycle(int nhit, double srchst, int verbose, NucleicAcidTargets &natools, const clipper::MMoleculeSequence &seq_wrk,
-          clipper::MiniMol &mol_wrk, const clipper::Xmap<float> &xwrk, NautilusLog &log) {
+          clipper::MiniMol &mol_wrk, const clipper::Xmap<float> &xwrk, NautilusLog &log, PredictedMaps& predictions) {
     // grow chains
-    mol_wrk = natools.grow(xwrk, mol_wrk, 25, 0.01);
+    mol_wrk = natools.grow(xwrk, mol_wrk, 25, 0.001, predictions);
     log.log("GROW", mol_wrk, verbose >= 5);
 
     // join
@@ -223,10 +223,12 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
         mapfile.import_xmap(xbasepred);
     }
 
+    PredictedMaps predictions = {xphospred, xsugarpred, xbasepred};
+
     mol_wrk = NucleicAcidTools::flag_chains(mol_wrk);
     clipper::MiniMol mol_wrk_original = mol_wrk;
 
-    FindML find_ml = FindML(mol_wrk, xphospred, xsugarpred, xbasepred, xwrk);
+    FindML find_ml = FindML(mol_wrk, xwrk, predictions);
     find_ml.load_library_from_file(ippdb_ref);
     find_ml.set_resolution(hkls.resolution().limit()); // Needed for the RSRZ calculation, but if not set defaults to 2
     mol_wrk = find_ml.find();
@@ -234,14 +236,14 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
     log.log("FIND ML", mol_wrk, verbose >= 5);
     ModelTidy::chain_renumber(mol_wrk, seq_wrk);
 
-//    NautilusUtil::save_minimol(mol_wrk, "findml.pdb");*/
+    NautilusUtil::save_minimol(mol_wrk, "findml.pdb");
 
     for (int cyc = 0; cyc < cycles; cyc++) {
         std::cout << "ML Based cycle " << clipper::String(cyc + 1, 3) << std::endl << std::endl;
-        mol_wrk = run_cycle(nhit, srchst, verbose, natools, seq_wrk, mol_wrk, xwrk, log);
+        mol_wrk = run_cycle(nhit, srchst, verbose, natools, seq_wrk, mol_wrk, xwrk, log, predictions);
     }
 
-//    NautilusUtil::save_minimol(mol_wrk, "mlbuiltmodel.pdb");
+    NautilusUtil::save_minimol(mol_wrk, "mlbuiltmodel.pdb");
     clipper::MiniMol best_model = mol_wrk;
 
     int best_na_count = NautilusUtil::count_well_modelled_nas(best_model, xwrk, hkls.resolution().limit());
@@ -256,7 +258,7 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
         mol_wrk = natools.find(xwrk, mol_wrk, nhit / 2, nhit / 2, srchst);
         log.log("FIND", mol_wrk, verbose >= 5);
 
-        mol_wrk = run_cycle(nhit, srchst, verbose, natools, seq_wrk, mol_wrk, xwrk, log);
+        mol_wrk = run_cycle(nhit, srchst, verbose, natools, seq_wrk, mol_wrk, xwrk, log, predictions);
 
         float rscc = NautilusUtil::calculate_rscc(mol_wrk, xwrk, hkls.resolution().limit());
         int current_count = NautilusUtil::count_well_modelled_nas(mol_wrk, xwrk, hkls.resolution().limit());
@@ -326,4 +328,4 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
     log.profile();
     prog.set_termination_message("Normal termination");
 
-}; 
+};

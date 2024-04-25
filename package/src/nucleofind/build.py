@@ -9,7 +9,9 @@ def main():
     parser.add_argument("-seqin", required=True)
     parser.add_argument("-pdbin", required=False, default="")
     parser.add_argument("-pdbout", required=True)
-    parser.add_argument("-predin", required=True)
+    parser.add_argument("-phosin", required=True)
+    parser.add_argument("-sugarin", required=False, default="")
+    parser.add_argument("-basein", required=False, default="")
     parser.add_argument("-colin-fo", required=True)
     parser.add_argument("-colin-fc", required=True)
     parser.add_argument("-colin-free", required=False, default="")
@@ -19,7 +21,7 @@ def main():
 
     args = parser.parse_args()
 
-    if args.predin == "auto":
+    if args.phosin == "auto":
         print("Before building, NucleoFind will predict a phosphate map and output it into the current working directory")
         split_calculated_sf = args.colin_fc.split(",")
 
@@ -38,9 +40,9 @@ def main():
     input = Input(args.mtzin,
                   args.seqin,
                   args.pdbin,
-                  args.predin,
-                  "",
-                  "",
+                  args.phosin,
+                  args.sugarin,
+                  args.basein,
                   args.colin_fo,
                   "",
                   "",
