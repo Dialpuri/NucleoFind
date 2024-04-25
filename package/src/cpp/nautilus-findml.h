@@ -5,6 +5,7 @@
 #ifndef NAUTILUS_FINDML_H
 #define NAUTILUS_FINDML_H
 #include <clipper/clipper-minimol.h>
+#include <optional>
 
 #include "nucleicacid_db.h"
 //
