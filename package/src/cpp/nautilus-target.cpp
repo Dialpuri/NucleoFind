@@ -228,12 +228,12 @@ void NucleicAcidTargets::superpose_sugar( NucleicAcidDB::Chain& frag, int posn, 
 
 float NucleicAcidTargets::score_sugar( const clipper::Xmap<float>& xmap, const NucleicAcidDB::NucleicAcid& na ) const
 {
-  std::vector<clipper::Coord_orth>vf(3);
-  vf[0] = na.coord_c3();
-  vf[1] = na.coord_c1();
-  vf[2] = na.coord_c4();
+  std::vector<clipper::Coord_orth> vf;
+  vf.push_back(na.coord_c3());
+  vf.push_back( na.coord_c1());
+  vf.push_back(na.coord_c4());
   const clipper::RTop_orth rtop( target_s.standard(), vf );
-  return target_s.score_sum( xmap, rtop );
+    return target_s.score_sum( xmap, rtop );
 }
 
 

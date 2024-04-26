@@ -289,7 +289,7 @@ float NautilusUtil::per_residue_rscc(clipper::MiniMol& mol, const clipper::Xmap<
     }
 }
 
-std::map<std::pair<int, int>, double>
+std::map<std::pair<std::string, std::string>, double>
 NautilusUtil::per_residue_rsrz(clipper::MiniMol& mol, const clipper::Xmap<float>& xmap, float res) {
     clipper::Cell cell = xmap.cell();
     clipper::Spacegroup spg = xmap.spacegroup();
@@ -300,10 +300,9 @@ NautilusUtil::per_residue_rsrz(clipper::MiniMol& mol, const clipper::Xmap<float>
 
     for (int p = 0; p < mol.size(); p++) {
         clipper::MPolymer mp;
-        mp.set_id(p);
+        mp.set_id(mol[p].id());
         if (!mol[p].exists_property("NON-NA")) {
             for (int m = 0; m < mol[p].size(); m++) {
-                mol[p][m].set_id(m);
                 mp.insert(mol[p][m]);
                 for (int a = 0; a < mol[p][m].size(); a++) {
                     atom_list.emplace_back(mol[p][m][a]);
@@ -312,14 +311,13 @@ NautilusUtil::per_residue_rsrz(clipper::MiniMol& mol, const clipper::Xmap<float>
         }
         na_only.insert(mp);
     }
-    NautilusUtil::save_minimol(na_only, "na-only.pdb");
 
     clipper::MAtomNonBond neighbour_search = clipper::MAtomNonBond(na_only, 1.5);
     clipper::Coord_frac cf0( 0,0,0 );
     clipper::Coord_frac cf1( 1,1,1 );
 
     clipper::Resolution reso( res);
-    clipper::Grid_sampling grid( spg, cell, reso );
+    clipper::Grid_sampling grid = xmap.grid_sampling();
     clipper::EDcalc_iso<float> maskcalc( res );
     clipper::Xmap<float> calc_map = {spg, cell, grid };
     maskcalc(calc_map, atom_list);
@@ -330,37 +328,25 @@ NautilusUtil::per_residue_rsrz(clipper::MiniMol& mol, const clipper::Xmap<float>
     clipper::Xmap_base::Map_reference_coord i0, iu, iv, iw;
     i0 = clipper::Xmap_base::Map_reference_coord( xmap, g0 );
 
-    std::map<std::pair<int, int>, std::vector<std::pair<double, double>>> residue_pairs = {};
+    std::map<std::pair<std::string, std::string>, std::vector<std::pair<double, double>>> residue_pairs = {};
 
     for ( iu = i0; iu.coord().u() <= g1.u(); iu.next_u() )
         for ( iv = iu; iv.coord().v() <= g1.v(); iv.next_v() )
             for ( iw = iv; iw.coord().w() <= g1.w(); iw.next_w() ) {
-                clipper::Coord_orth co = iw.coord().coord_frac(xmap.grid_sampling()).coord_orth(cell);
-                clipper::Coord_frac cf = co.coord_frac(xmap.cell());
-                auto nearby = neighbour_search(co, 2);
+                clipper::Coord_frac cf = iw.coord().coord_frac(xmap.grid_sampling());
+                clipper::Coord_orth co = cf.coord_orth(cell);
+                auto nearby = neighbour_search(co, 1);
 
-                double min_distance = 1e5;
-                clipper::MAtomIndexSymmetry min_atom;
+//                Any residues within 1A of the gridpoint, add the x and c map to. This is required, rather than lookng at the shortest,
+//                because the previous steps could create two overlapping fragments. E.g. 1->2->3 and 1->2->4 creates two fragments between 1 and 2.
                 for (const auto& a: nearby) {
-
-                    clipper::Coord_frac f = na_only[a.polymer()][a.monomer()][a.atom()].coord_orth().coord_frac(xmap.cell());
-                    f = f.symmetry_copy_near(xmap.spacegroup(), xmap.cell(), cf);
-
-                    double distance = (cf-f).lengthsq(xmap.cell());
-                    if (distance < min_distance) {
-                        min_distance = distance;
-                        min_atom = a;
-                    }
-                }
-                if (!nearby.empty()) {
-                    std::pair<int, int> residue_key = std::make_pair(min_atom.polymer(), min_atom.monomer());
+                    std::pair<std::string, std::string> residue_key = std::make_pair(na_only[a.polymer()].id().trim(), na_only[a.polymer()][a.monomer()].id().trim());
                     std::pair<double, double> point_pair = std::make_pair(xmap[iw], calc_map[iw]);
-
                     residue_pairs[residue_key].emplace_back(point_pair);
                 }
             }
 
-    std::map<std::pair<int, int>, double> rsrs = {};
+    std::map<std::pair<std::string, std::string>, double> rsrs = {};
 
     for (const auto &residue_pair: residue_pairs) {
         const std::vector<std::pair<double, double>> &points = residue_pair.second;
@@ -374,7 +360,6 @@ NautilusUtil::per_residue_rsrz(clipper::MiniMol& mol, const clipper::Xmap<float>
 
             numerator += (obs-calc);
             denominator += (obs+calc);
-
         }
 
         double rsr = numerator/denominator;
@@ -393,7 +378,7 @@ NautilusUtil::per_residue_rsrz(clipper::MiniMol& mol, const clipper::Xmap<float>
     }
     double rsr_std_dev = std::sqrt(squared_rsr_sum / rsrs.size());
 
-    std::map<std::pair<int, int>, double> rsrzs = {};
+    std::map<std::pair<std::string, std::string>, double> rsrzs = {};
 
     for (const auto& rsr_pair: rsrs) {
         double rsrz = (rsr_pair.second-rsr_mean)/rsr_std_dev;
@@ -404,6 +389,7 @@ NautilusUtil::per_residue_rsrz(clipper::MiniMol& mol, const clipper::Xmap<float>
 }
 
 int NautilusUtil::count_well_modelled_nas(clipper::MiniMol &mol, clipper::Xmap<float>& xwrk, float res) {
+    NucleicAcidTools::residue_label(mol);
     auto rsrzs = NautilusUtil::per_residue_rsrz(mol, xwrk, res);
     int count = 0;
     for (const auto& rsr_pair: rsrzs) {

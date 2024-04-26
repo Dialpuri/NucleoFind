@@ -241,14 +241,16 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
     for (int cyc = 0; cyc < cycles; cyc++) {
         std::cout << "ML Based cycle " << clipper::String(cyc + 1, 3) << std::endl << std::endl;
         mol_wrk = run_cycle(nhit, srchst, verbose, natools, seq_wrk, mol_wrk, xwrk, log, predictions);
+        NucleicAcidTools::chain_label(mol_wrk, clipper::MMDBManager::CIF);
+        mol_wrk = NucleicAcidTools::chain_sort(mol_wrk);
     }
 
     NautilusUtil::save_minimol(mol_wrk, "mlbuiltmodel.pdb");
     clipper::MiniMol best_model = mol_wrk;
 
-    int best_na_count = NautilusUtil::count_well_modelled_nas(best_model, xwrk, hkls.resolution().limit());
-    float best_rscc = NautilusUtil::calculate_rscc(best_model, xwrk, hkls.resolution().limit());
+    int best_na_count = NautilusUtil::count_well_modelled_nas(mol_wrk, xwrk, hkls.resolution().limit());
 
+    std::cout << "Built " << best_na_count << " residues with RSRZ >= -1" << std::endl;
 
     for (int cyc = 0; cyc < cycles; cyc++) {
         std::cout << "Internal cycle " << clipper::String(cyc + 1, 3) << std::endl << std::endl; // edited
@@ -260,17 +262,17 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
 
         mol_wrk = run_cycle(nhit, srchst, verbose, natools, seq_wrk, mol_wrk, xwrk, log, predictions);
 
-        float rscc = NautilusUtil::calculate_rscc(mol_wrk, xwrk, hkls.resolution().limit());
         int current_count = NautilusUtil::count_well_modelled_nas(mol_wrk, xwrk, hkls.resolution().limit());
-        if (rscc > best_rscc && current_count > best_na_count) {
+        std::cout << "Cycle "<< cyc+1 << " built " << best_na_count << " residues with RSRZ >= -1" << std::endl;
+
+        if (current_count > best_na_count) {
             std::cout << "Taking model from old cycle " << cyc + 1 << "\n";
-            best_rscc = rscc;
             best_model = mol_wrk;
             best_na_count = current_count;
         }
     }
 
-    std::cout << "Taking best model from all cycles with " << best_na_count << " nucleic acids built." << std::endl;
+    std::cout << "Taking best model from all cycles with " << best_na_count << " nucleic acids residues with RSRZ >= -1 built." << std::endl;
     mol_wrk = best_model;
 
     // move to match input model

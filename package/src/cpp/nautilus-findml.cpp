@@ -934,7 +934,12 @@ clipper::MiniMol FindML::remove_clashing_protein(clipper::MiniMol& na_chain) {
 }
 
 clipper::MiniMol FindML::remove_low_confidence(clipper::MiniMol & mol) {
-    std::map<std::pair<int, int>, double> rsrs = NautilusUtil::per_residue_rsrz(mol, xwrk, m_resolution);
+    NucleicAcidTools::chain_label(mol, clipper::MMDBManager::PDB);
+
+    // Set the IDs of the residues, for use as keys later
+    NucleicAcidTools::residue_label(mol);
+
+    std::map<std::pair<std::string, std::string>, double> rsrs = NautilusUtil::per_residue_rsrz(mol, xwrk, m_resolution);
     double rsr_threshold = -1.5;
     clipper::MiniMol mol_final = {mol.spacegroup(), mol.cell()};
 
@@ -943,13 +948,13 @@ clipper::MiniMol FindML::remove_low_confidence(clipper::MiniMol & mol) {
         mp.set_id(mol[p].id());
         int count = 0;
         for (int m = 0; m < mol[p].size(); m++) {
-            std::pair<int, int> residue_key = std::make_pair(p, m);
+            std::pair<std::string, std::string> residue_key = std::make_pair(mol[p].id().trim(), mol[p][m].id().trim());
             if (rsrs.find(residue_key) != rsrs.end()) {
                 double rsrz = rsrs[residue_key];
                 if (rsrz < rsr_threshold) {continue;}
             }
             else {
-                std::cout << "Residue found that was not in the RSR calculation" << p << " " << m << std::endl;
+                std::cout << "Residue found that was not in the RSR calculation " << mol[p].id().trim() << " " << mol[p][m].id().trim() << std::endl;
                 continue;
             }
 
@@ -962,6 +967,7 @@ clipper::MiniMol FindML::remove_low_confidence(clipper::MiniMol & mol) {
         if (count > 0)
             mol_final.insert(mp);
     }
+
     return mol_final;
 }
 
