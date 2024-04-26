@@ -92,8 +92,10 @@ class Prediction:
             ccp4 = gemmi.Ccp4Map()
             ccp4.grid = grid
             ccp4.update_ccp4_header()
-
-            ccp4.write_ccp4_map(output_path.replace(".map", f"_{self.model_names[index]}.map"))
+            if ".map" in output_path:
+                ccp4.write_ccp4_map(output_path.replace(".map", f"_{self.model_names[index]}.map"))
+            else:
+                ccp4.write_ccp4_map(f"{output_path}_{self.model_names[index]}.map")
 
     def save_variance_map(self, output_path: str):
         for index, grid in enumerate(self.variance_grids):
@@ -103,7 +105,10 @@ class Prediction:
             ccp4 = gemmi.Ccp4Map()
             ccp4.grid = grid
             ccp4.update_ccp4_header()
-            ccp4.write_ccp4_map(output_path.replace(".map", f"_variance_{self.model_names[index]}.map"))
+            if ".map" in output_path:
+                ccp4.write_ccp4_map(output_path.replace(".map", f"_variance_{self.model_names[index]}.map"))
+            else:
+                ccp4.write_ccp4_map(f"{output_path}_variance_{self.model_names[index]}.map")
 
     def save_interpolated_map(self, output_path: str, grid_spacing: float = 0.7):
         logging.info("Saving interpolated map")
