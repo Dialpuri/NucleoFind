@@ -247,16 +247,16 @@ float NucleicAcidTargets::score_phosphate( const clipper::Xmap<float>& xmap, con
   return target_p.score_sum( xmap, rtop );
 }
 
-float NucleicAcidTargets::score_sugar_from_predictions(const clipper::Xmap<float>& xmap, const NucleicAcidDB::NucleicAcidFull& na) {
+float NucleicAcidTargets::score_sugar_from_predictions(const clipper::Xmap<float>& xmap, const NucleicAcidDB::NucleicAcid &na) {
     float score = 0;
-    if (!na.O5p1.is_null()) score += xmap.interp<clipper::Interp_cubic>(na.O5p1.coord_frac(xmap.cell()));
-    if (!na.C5p1.is_null()) score += xmap.interp<clipper::Interp_cubic>(na.C5p1.coord_frac(xmap.cell()));
-    if (!na.C4p1.is_null()) score += xmap.interp<clipper::Interp_cubic>(na.C4p1.coord_frac(xmap.cell()));
-    if (!na.O4p1.is_null()) score += xmap.interp<clipper::Interp_cubic>(na.O4p1.coord_frac(xmap.cell()));
-    if (!na.C3p1.is_null()) score += xmap.interp<clipper::Interp_cubic>(na.C3p1.coord_frac(xmap.cell()));
-    if (!na.O3p1.is_null()) score += xmap.interp<clipper::Interp_cubic>(na.O3p1.coord_frac(xmap.cell()));
-    if (!na.C2p1.is_null()) score += xmap.interp<clipper::Interp_cubic>(na.C2p1.coord_frac(xmap.cell()));
-    if (!na.C1p1.is_null()) score += xmap.interp<clipper::Interp_cubic>(na.C1p1.coord_frac(xmap.cell()));
+    if (!na.coord_o5().is_null()) score += xmap.interp<clipper::Interp_cubic>(na.coord_o5().coord_frac(xmap.cell()));
+    if (!na.coord_c5().is_null()) score += xmap.interp<clipper::Interp_cubic>(na.coord_c5().coord_frac(xmap.cell()));
+    if (!na.coord_c4().is_null()) score += xmap.interp<clipper::Interp_cubic>(na.coord_c4().coord_frac(xmap.cell()));
+    if (!na.coord_o4().is_null()) score += xmap.interp<clipper::Interp_cubic>(na.coord_o4().coord_frac(xmap.cell()));
+    if (!na.coord_c3().is_null()) score += xmap.interp<clipper::Interp_cubic>(na.coord_c3().coord_frac(xmap.cell()));
+    if (!na.coord_o3().is_null()) score += xmap.interp<clipper::Interp_cubic>(na.coord_o3().coord_frac(xmap.cell()));
+    if (!na.coord_c2().is_null()) score += xmap.interp<clipper::Interp_cubic>(na.coord_c2().coord_frac(xmap.cell()));
+    if (!na.coord_c1().is_null()) score += xmap.interp<clipper::Interp_cubic>(na.coord_c1().coord_frac(xmap.cell()));
     return score;
 }
 
@@ -264,14 +264,21 @@ NucleicAcidDB::NucleicAcid NucleicAcidTargets::next_na_group( const clipper::Xma
 {
   NucleicAcidDB::NucleicAcid nmax;
   float smax = -1.0e20;
-  for ( int p = 0; p < nadb.size()-1; p++ ) {
+    bool sugar_map_available = false;
+    clipper::Xmap<float> sugar_map;
+    if (predictions.get_sugar_map().has_value()) {
+        sugar_map = predictions.get_sugar_map().value();
+        sugar_map_available = true;
+    }
+
+    for ( int p = 0; p < nadb.size()-1; p++ ) {
     NucleicAcidDB::Chain frag = nadb.extract( p, 2 );
     if ( frag.is_continuous() ) {
       superpose_sugar( frag, 0, na );
       float score = ( score_phosphate( xmap, frag[0], frag[1] ) +
                       score_sugar    ( xmap, frag[1] ) );
-      if (predictions.get_sugar_map().has_value()) {
-          float predicted_score = score_sugar_from_predictions(predictions.get_sugar_map().value(), NucleicAcidDB::NucleicAcidFull(frag[1].mmonomer()));
+      if (sugar_map_available) {
+          float predicted_score = score_sugar_from_predictions(sugar_map, frag[1] );
           if (predicted_score < 0.4) {
               continue;
           }
@@ -289,6 +296,13 @@ NucleicAcidDB::NucleicAcid NucleicAcidTargets::next_na_group( const clipper::Xma
 NucleicAcidDB::NucleicAcid NucleicAcidTargets::prev_na_group( const clipper::Xmap<float>& xmap, const NucleicAcidDB::NucleicAcid& na, PredictedMaps& predictions ) const
 {
   NucleicAcidDB::NucleicAcid nmax;
+  bool sugar_map_available = false;
+  clipper::Xmap<float> sugar_map;
+  if (predictions.get_sugar_map().has_value()) {
+     sugar_map = predictions.get_sugar_map().value();
+      sugar_map_available = true;
+  }
+
   float smax = -1.0e20;
   for ( int p = 0; p < nadb.size()-1; p++ ) {
     NucleicAcidDB::Chain frag = nadb.extract( p, 2 );
@@ -296,8 +310,8 @@ NucleicAcidDB::NucleicAcid NucleicAcidTargets::prev_na_group( const clipper::Xma
       superpose_sugar( frag, 1, na );
       float score = ( score_phosphate( xmap, frag[0], frag[1] ) +
                       score_sugar    ( xmap, frag[0] ) );
-        if (predictions.get_sugar_map().has_value()) {
-            float predicted_score = score_sugar_from_predictions(predictions.get_sugar_map().value(), NucleicAcidDB::NucleicAcidFull(frag[0].mmonomer()));
+        if (sugar_map_available) {
+            float predicted_score = score_sugar_from_predictions(sugar_map, frag[0]);
             if (predicted_score < 0.4) {
                 continue;
             }
@@ -605,15 +619,15 @@ const clipper::MiniMol NucleicAcidTargets::grow( const clipper::Xmap<float>& xma
   clipper::MiniMol mol_new = mol;
   float scut = target_sugar().cutoff_sum( fcut );
   for ( int c = 0; c < mol_new.size(); c++ ) {
+//      std::cout << c << "/" << mol_new.size() << std::endl;
     if ( !mol_new[c].exists_property( "NON-NA" ) ) {
-
     // find terminal and start monomer id in chain?
       NucleicAcidDB::NucleicAcid na;
       for ( int i = 0; i < ngrow; i++ ) {
-        na = next_na_group( xmap, mol_new[c][mol_new[c].size()-1], predictions);
-        if ( score_sugar( xmap, na ) < scut ) break;
-        na.set_type( '?' );
-        mol_new[c].insert( na.mmonomer() );
+            na = next_na_group( xmap, mol_new[c][mol_new[c].size()-1], predictions);
+          if ( score_sugar( xmap, na ) < scut ) break;
+            na.set_type( '?' );
+            mol_new[c].insert( na.mmonomer() );
       }
       for ( int i = 0; i < ngrow; i++ ) {
         na = prev_na_group( xmap, mol_new[c][0], predictions );

@@ -41,7 +41,7 @@ class NucleicAcidTargets {
   const NucleicAcidDB::Chain& db() const { return nadb; } 
   static void superpose_sugar( NucleicAcidDB::Chain& frag, int posn, const NucleicAcidDB::NucleicAcid& na );
   float score_sugar( const clipper::Xmap<float>& xmap, const NucleicAcidDB::NucleicAcid& na ) const;
-  static float score_sugar_from_predictions(const clipper::Xmap<float>& xmap, const NucleicAcidDB::NucleicAcidFull& na) ;
+  static float score_sugar_from_predictions(const clipper::Xmap<float>& xmap, const NucleicAcidDB::NucleicAcid &na) ;
 
   float score_phosphate( const clipper::Xmap<float>& xmap, const NucleicAcidDB::NucleicAcid& na1, const NucleicAcidDB::NucleicAcid& na2 ) const;
   NucleicAcidDB::NucleicAcid next_na_group( const clipper::Xmap<float>& xmap, const NucleicAcidDB::NucleicAcid& na, PredictedMaps& predictions ) const;
