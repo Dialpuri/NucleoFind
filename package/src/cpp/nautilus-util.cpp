@@ -398,6 +398,21 @@ int NautilusUtil::count_well_modelled_nas(clipper::MiniMol &mol, clipper::Xmap<f
     return count;
 }
 
+int NautilusUtil::count_nas(clipper::MiniMol& mol) {
+    int nas = 0;
+      for ( int c = 0; c < mol.size(); c++ )
+        if ( !mol[c].exists_property( "NON-NA" ) ) {
+          for ( int r = 0; r < mol[c].size(); r++ )
+          {
+            if ( mol[c][r].lookup( " C4 ", clipper::MM::ANY ) >= 0 ) // base ring
+            {
+                nas += 1;
+            }
+          }
+        }
+  return nas;
+}
+
 float NautilusUtil::calculate_rscc(clipper::MiniMol&mol, const clipper::Xmap<float>& xmap, float res) {
   clipper::Cell cell = xmap.cell();
   clipper::Spacegroup spg = xmap.spacegroup();

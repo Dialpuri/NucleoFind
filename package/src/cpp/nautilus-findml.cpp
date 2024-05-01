@@ -905,6 +905,8 @@ clipper::MiniMol FindML::remove_clashing_protein(clipper::MiniMol& na_chain) {
         mol_final.insert(mp);
     }
 
+    std::set<std::string> allowed_atoms = {"CA", "C", "N", "O"};
+
     for (int p = 0; p < mol.size(); p++) {
         clipper::MPolymer mp;
         mp.set_id(mol[p].id());
@@ -914,7 +916,21 @@ clipper::MiniMol FindML::remove_clashing_protein(clipper::MiniMol& na_chain) {
             clipper::MMonomer residue = mol[p][m];
             std::vector<std::string> key = {chain.id(), residue.type(), std::to_string(residue.seqnum())};
             if (to_remove.find(key) != to_remove.end()) {
-//                std::cout << key[0] << "-" << key[1] << "-" << key[2] << " found clashing with likely nucleic acid, removing. " << std::endl;
+                clipper::MMonomer backbone_only;
+                backbone_only.set_type(mol[p][m].type());
+                backbone_only.set_id(mol[p][m].id());
+
+                for (int a = 0; a < mol[p][m].size(); a++) {
+                    if (allowed_atoms.find(mol[p][m][a].id().trim()) != allowed_atoms.end()) {
+                        backbone_only.insert(mol[p][m][a]);
+                    }
+                }
+
+                if (backbone_only.size() != 0) {
+                    mp.insert(backbone_only);
+                    count += 1;
+                }
+
                 continue;
             }
             count += 1;
@@ -1019,8 +1035,8 @@ PlacedFragmentResult FindML::place_fragments(const clipper::MiniMol& phosphate_p
 clipper::MiniMol FindML::find() {
     clipper::MiniMol phosphate_peaks = calculate_phosphate_peaks(0.1);
     TripletCoordinates phosphate_triplets = find_triplet_coordinates(phosphate_peaks);
-     draw_triplets(phosphate_triplets, phosphate_peaks, "triplets-ext.pdb");
-     NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
+//     draw_triplets(phosphate_triplets, phosphate_peaks, "triplets-ext.pdb");
+//     NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
     std::cout << phosphate_triplets.size() << " phosphate triplets found\n";
 
     PairedChainIndices pairs = organise_triplets_to_chains(phosphate_triplets);

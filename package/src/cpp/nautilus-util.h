@@ -192,6 +192,7 @@ class NautilusUtil {
 
     static int count_well_modelled_nas(clipper::MiniMol& mol, clipper::Xmap<float>& xwrk, float res);
 
+    static int count_nas(clipper::MiniMol& mol);
 };
 
 

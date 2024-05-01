@@ -233,19 +233,21 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
     find_ml.set_resolution(hkls.resolution().limit()); // Needed for the RSRZ calculation, but if not set defaults to 2
     mol_wrk = find_ml.find();
 
+    int nas_found = NautilusUtil::count_nas(mol_wrk);
+
     log.log("FIND ML", mol_wrk, verbose >= 5);
     ModelTidy::chain_renumber(mol_wrk, seq_wrk);
 
-    NautilusUtil::save_minimol(mol_wrk, "findml.pdb");
-
-    for (int cyc = 0; cyc < cycles; cyc++) {
-        std::cout << "ML Based cycle " << clipper::String(cyc + 1, 3) << std::endl << std::endl;
-        mol_wrk = run_cycle(nhit, srchst, verbose, natools, seq_wrk, mol_wrk, xwrk, log, predictions);
-        NucleicAcidTools::chain_label(mol_wrk, clipper::MMDBManager::CIF);
-        mol_wrk = NucleicAcidTools::chain_sort(mol_wrk);
+    if (nas_found > 0) {
+        for (int cyc = 0; cyc < cycles; cyc++) {
+            std::cout << "ML Based cycle " << clipper::String(cyc + 1, 3) << std::endl << std::endl;
+            mol_wrk = run_cycle(nhit, srchst, verbose, natools, seq_wrk, mol_wrk, xwrk, log, predictions);
+            NucleicAcidTools::chain_label(mol_wrk, clipper::MMDBManager::CIF);
+            mol_wrk = NucleicAcidTools::chain_sort(mol_wrk);
+        }
     }
 
-    NautilusUtil::save_minimol(mol_wrk, "mlbuiltmodel.pdb");
+//    NautilusUtil::save_minimol(mol_wrk, "mlbuiltmodel.pdb");
     clipper::MiniMol best_model = mol_wrk;
 
     int best_na_count = NautilusUtil::count_well_modelled_nas(mol_wrk, xwrk, hkls.resolution().limit());
