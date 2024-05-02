@@ -404,7 +404,7 @@ int NautilusUtil::count_nas(clipper::MiniMol& mol) {
         if ( !mol[c].exists_property( "NON-NA" ) ) {
           for ( int r = 0; r < mol[c].size(); r++ )
           {
-            if ( mol[c][r].lookup( " C4 ", clipper::MM::ANY ) >= 0 ) // base ring
+            if ( mol[c][r].lookup( " C1' ", clipper::MM::ANY ) >= 0 ) // base ring
             {
                 nas += 1;
             }
