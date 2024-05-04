@@ -916,20 +916,20 @@ clipper::MiniMol FindML::remove_clashing_protein(clipper::MiniMol& na_chain) {
             clipper::MMonomer residue = mol[p][m];
             std::vector<std::string> key = {chain.id(), residue.type(), std::to_string(residue.seqnum())};
             if (to_remove.find(key) != to_remove.end()) {
-                clipper::MMonomer backbone_only;
-                backbone_only.set_type(mol[p][m].type());
-                backbone_only.set_id(mol[p][m].id());
+                // clipper::MMonomer backbone_only;
+                // backbone_only.set_type(mol[p][m].type());
+                // backbone_only.set_id(mol[p][m].id());
 
-                for (int a = 0; a < mol[p][m].size(); a++) {
-                    if (allowed_atoms.find(mol[p][m][a].id().trim()) != allowed_atoms.end()) {
-                        backbone_only.insert(mol[p][m][a]);
-                    }
-                }
+                // for (int a = 0; a < mol[p][m].size(); a++) {
+                //     if (allowed_atoms.find(mol[p][m][a].id().trim()) != allowed_atoms.end()) {
+                //         backbone_only.insert(mol[p][m][a]);
+                //     }
+                // }
 
-                if (backbone_only.size() != 0) {
-                    mp.insert(backbone_only);
-                    count += 1;
-                }
+                // if (backbone_only.size() != 0) {
+                    // mp.insert(backbone_only);
+                    // count += 1;
+                // }
 
                 continue;
             }

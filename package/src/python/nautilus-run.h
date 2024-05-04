@@ -19,6 +19,10 @@ clipper::MiniMol &
 run_cycle(int nhit, double srchst, int verbose, NucleicAcidTargets &natools, const clipper::MMoleculeSequence &seq_wrk,
           clipper::MiniMol &mol_wrk, const clipper::Xmap<float> &xwrk, NautilusLog &log, PredictedMaps& predictions) {
     // grow chains
+
+    int nas_found = NautilusUtil::count_nas(mol_wrk);
+    if (nas_found == 0) { return mol_wrk;}
+
     mol_wrk = natools.grow(xwrk, mol_wrk, 25, 0.001, predictions);
     log.log("GROW", mol_wrk, verbose >= 5);
 
