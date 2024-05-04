@@ -883,7 +883,7 @@ clipper::MiniMol FindML::remove_clashing_protein(clipper::MiniMol& na_chain) {
 
     for (int p = 0; p < na_chain.size(); p++) {
         clipper::MPolymer mp;
-//        mp.set_id(na_chain[p].id());
+       mp.set_id(na_chain[p].id());
         for (int m = 0; m < na_chain[p].size(); m++) {
             for (int a = 0; a < na_chain[p][m].size(); a++) {
                 auto nearby_atoms = nb.atoms_near(na_chain[p][m][a].coord_orth(), 1);
