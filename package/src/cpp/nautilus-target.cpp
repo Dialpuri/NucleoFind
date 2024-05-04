@@ -619,7 +619,6 @@ const clipper::MiniMol NucleicAcidTargets::grow( const clipper::Xmap<float>& xma
   clipper::MiniMol mol_new = mol;
   float scut = target_sugar().cutoff_sum( fcut );
   for ( int c = 0; c < mol_new.size(); c++ ) {
-//      std::cout << c << "/" << mol_new.size() << std::endl;
     if ( !mol_new[c].exists_property( "NON-NA" ) ) {
     // find terminal and start monomer id in chain?
       NucleicAcidDB::NucleicAcid na;
@@ -641,7 +640,7 @@ const clipper::MiniMol NucleicAcidTargets::grow( const clipper::Xmap<float>& xma
 }
 
 
-const clipper::MiniMol NucleicAcidTargets::link( const clipper::Xmap<float>& xmap, const clipper::MiniMol& mol) const
+const clipper::MiniMol NucleicAcidTargets::link( const clipper::Xmap<float>& xmap, const clipper::MiniMol& mol, bool join) const
 {
   const clipper::Spacegroup& spgr = xmap.spacegroup();
   const clipper::Cell&       cell = xmap.cell();
@@ -689,7 +688,8 @@ const clipper::MiniMol NucleicAcidTargets::link( const clipper::Xmap<float>& xma
         }
       }
   if ( mol_new.size() > mol.size() )
-    mol_new = NucleicAcidJoin::join( mol_new );
+      if (join)
+        mol_new = NucleicAcidJoin::join( mol_new );
   return mol_new; 
 }
 

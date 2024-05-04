@@ -883,7 +883,7 @@ clipper::MiniMol FindML::remove_clashing_protein(clipper::MiniMol& na_chain) {
 
     for (int p = 0; p < na_chain.size(); p++) {
         clipper::MPolymer mp;
-        mp.set_id(na_chain[p].id());
+//        mp.set_id(na_chain[p].id());
         for (int m = 0; m < na_chain[p].size(); m++) {
             for (int a = 0; a < na_chain[p][m].size(); a++) {
                 auto nearby_atoms = nb.atoms_near(na_chain[p][m][a].coord_orth(), 1);
@@ -946,6 +946,7 @@ clipper::MiniMol FindML::remove_clashing_protein(clipper::MiniMol& na_chain) {
     // NautilusUtil::save_minimol(mol_final, "clash_mol.pdb");
     // Need to flag chains so join knows which is protein and which is NA.
     mol_final = NucleicAcidTools::flag_chains(mol_final);
+
     return mol_final;
 }
 
@@ -1035,12 +1036,12 @@ PlacedFragmentResult FindML::place_fragments(const clipper::MiniMol& phosphate_p
 clipper::MiniMol FindML::find() {
     clipper::MiniMol phosphate_peaks = calculate_phosphate_peaks(0.1);
     TripletCoordinates phosphate_triplets = find_triplet_coordinates(phosphate_peaks);
-//     draw_triplets(phosphate_triplets, phosphate_peaks, "triplets-ext.pdb");
+     draw_triplets(phosphate_triplets, phosphate_peaks, "triplets-ext.pdb");
 //     NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
     std::cout << phosphate_triplets.size() << " phosphate triplets found\n";
 
     PairedChainIndices pairs = organise_triplets_to_chains(phosphate_triplets);
-//
+
 //    for (const auto& pair : pairs) {
 //        std::cout << "Pair:" << std::endl;
 //        std::cout << "First vector: ";

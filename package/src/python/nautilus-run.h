@@ -22,18 +22,28 @@ run_cycle(int nhit, double srchst, int verbose, NucleicAcidTargets &natools, con
     mol_wrk = natools.grow(xwrk, mol_wrk, 25, 0.001, predictions);
     log.log("GROW", mol_wrk, verbose >= 5);
 
+//    NautilusUtil::save_minimol(mol_wrk, "grow.pdb");
+
     // join
     NucleicAcidJoin na_join;
     mol_wrk = na_join.join(mol_wrk);
     log.log("JOIN", mol_wrk, verbose >= 5);
 
+//    NautilusUtil::save_minimol(mol_wrk, "join.pdb");
+
+
     // link
     mol_wrk = natools.link(xwrk, mol_wrk);
     log.log("LINK", mol_wrk, verbose >= 5);
 
+//    NautilusUtil::save_minimol(mol_wrk, "link.pdb");
+
     // prune
     mol_wrk = natools.prune(mol_wrk);
     log.log("PRUNE", mol_wrk, verbose >= 5);
+
+//    NautilusUtil::save_minimol(mol_wrk, "prune.pdb");
+
 
     // rebuild
     mol_wrk = natools.rebuild_chain(xwrk, mol_wrk);
@@ -232,11 +242,14 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
     find_ml.load_library_from_file(ippdb_ref);
     find_ml.set_resolution(hkls.resolution().limit()); // Needed for the RSRZ calculation, but if not set defaults to 2
     mol_wrk = find_ml.find();
+    mol_wrk = natools.link(xwrk, mol_wrk);
+    ModelTidy::chain_renumber(mol_wrk, seq_wrk);
+    NucleicAcidTools::chain_sort(mol_wrk);
+
+    NautilusUtil::save_minimol(mol_wrk, "find.pdb");
 
     int nas_found = NautilusUtil::count_nas(mol_wrk);
-
     log.log("FIND ML", mol_wrk, verbose >= 5);
-    ModelTidy::chain_renumber(mol_wrk, seq_wrk);
 
     if (nas_found > 0) {
         for (int cyc = 0; cyc < cycles; cyc++) {

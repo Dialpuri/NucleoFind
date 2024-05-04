@@ -54,7 +54,7 @@ class NucleicAcidTargets {
   const clipper::MiniMol phosphate( const clipper::Xmap<float>& xmap, const clipper::MiniMol& mol, const clipper::MiniMol& mol_pho );
   const clipper::MiniMol find( const clipper::Xmap<float>& xmap, const clipper::MiniMol& mol, int nsugar, int nphosp, double step );
   const clipper::MiniMol grow( const clipper::Xmap<float>& xmap, const clipper::MiniMol& mol, int ngrow, double fcut, PredictedMaps& predictions) const;
-  const clipper::MiniMol link( const clipper::Xmap<float>& xmap, const clipper::MiniMol& mol ) const;
+  const clipper::MiniMol link( const clipper::Xmap<float>& xmap, const clipper::MiniMol& mol , bool join = true) const;
   const clipper::MiniMol prune( const clipper::MiniMol& mol ) const;
   const clipper::MiniMol rebuild_chain( const clipper::Xmap<float>& xmap, const clipper::MiniMol& mol ) const;
 
