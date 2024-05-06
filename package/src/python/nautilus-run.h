@@ -257,6 +257,7 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
             mol_wrk = run_cycle(nhit, srchst, verbose, natools, seq_wrk, mol_wrk, xwrk, log, predictions);
             NucleicAcidTools::chain_label(mol_wrk, clipper::MMDBManager::CIF);
             mol_wrk = NucleicAcidTools::chain_sort(mol_wrk);
+            NucleicAcidTools::residue_label(mol_wrk);
         }
     }
 
