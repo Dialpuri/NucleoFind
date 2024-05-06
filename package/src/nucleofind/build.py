@@ -2,6 +2,7 @@ from .nautilus_module import Input, Output, run
 import argparse
 from .__version__ import __version__
 from .predict import predict_map
+import traceback
 
 def main():
     parser = argparse.ArgumentParser(description='nucleofind build')
@@ -51,7 +52,11 @@ def main():
 
     output = Output(args.pdbout, args.xmlout)
 
-    run(input, output, args.cycles)
+    try:
+        run(input, output, args.cycles)
+    except:
+        print(traceback.format_exc())
+
 
 
 def build(mtzin: str, seqin: str, pdbin: str, predin: str, colin_fo: str, colin_fc: str, colin_free: str, pdbout: str,

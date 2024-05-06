@@ -419,6 +419,7 @@ const NucleicAcidDB::Chain NucleicAcidTargets::join_sugars( const clipper::Xmap<
       }
     }
   }
+
   return chnbest;
 }
 
@@ -640,7 +641,7 @@ const clipper::MiniMol NucleicAcidTargets::grow( const clipper::Xmap<float>& xma
 }
 
 
-const clipper::MiniMol NucleicAcidTargets::link( const clipper::Xmap<float>& xmap, const clipper::MiniMol& mol, bool join) const
+const clipper::MiniMol NucleicAcidTargets::link( const clipper::Xmap<float>& xmap, const clipper::MiniMol& mol) const
 {
   const clipper::Spacegroup& spgr = xmap.spacegroup();
   const clipper::Cell&       cell = xmap.cell();
@@ -656,6 +657,7 @@ const clipper::MiniMol NucleicAcidTargets::link( const clipper::Xmap<float>& xma
         NucleicAcidDB::Chain chn;
         for ( int r1 = 0; r1 < 2; r1++ ) {
           for ( int r2 = 0; r2 < 2; r2++ ) {
+            if (l1-r1 < 0) continue;
             NucleicAcidDB::NucleicAcid na1 = mol[c1][l1-r1];
             NucleicAcidDB::NucleicAcid na2 = mol[c2][r2];
             clipper::Coord_orth   cref = na1.coord_o3();
@@ -688,8 +690,7 @@ const clipper::MiniMol NucleicAcidTargets::link( const clipper::Xmap<float>& xma
         }
       }
   if ( mol_new.size() > mol.size() )
-      if (join)
-        mol_new = NucleicAcidJoin::join( mol_new );
+    mol_new = NucleicAcidJoin::join( mol_new );
   return mol_new; 
 }
 

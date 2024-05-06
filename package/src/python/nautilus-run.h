@@ -19,6 +19,10 @@ clipper::MiniMol &
 run_cycle(int nhit, double srchst, int verbose, NucleicAcidTargets &natools, const clipper::MMoleculeSequence &seq_wrk,
           clipper::MiniMol &mol_wrk, const clipper::Xmap<float> &xwrk, NautilusLog &log, PredictedMaps& predictions) {
     // grow chains
+
+    int nas_found = NautilusUtil::count_nas(mol_wrk);
+    if (nas_found == 0) { return mol_wrk;}
+
     mol_wrk = natools.grow(xwrk, mol_wrk, 25, 0.001, predictions);
     log.log("GROW", mol_wrk, verbose >= 5);
 
@@ -242,14 +246,16 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
     find_ml.load_library_from_file(ippdb_ref);
     find_ml.set_resolution(hkls.resolution().limit()); // Needed for the RSRZ calculation, but if not set defaults to 2
     mol_wrk = find_ml.find();
+    log.log("FIND ML", mol_wrk, verbose >= 5);
     mol_wrk = natools.link(xwrk, mol_wrk);
+    log.log("FIND ML LINK", mol_wrk, verbose >= 5);
+
     ModelTidy::chain_renumber(mol_wrk, seq_wrk);
     NucleicAcidTools::chain_sort(mol_wrk);
 
-    NautilusUtil::save_minimol(mol_wrk, "find.pdb");
+    // NautilusUtil::save_minimol(mol_wrk, "find.pdb");
 
     int nas_found = NautilusUtil::count_nas(mol_wrk);
-    log.log("FIND ML", mol_wrk, verbose >= 5);
 
     if (nas_found > 0) {
         for (int cyc = 0; cyc < cycles; cyc++) {
