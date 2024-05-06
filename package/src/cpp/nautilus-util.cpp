@@ -311,6 +311,8 @@ NautilusUtil::per_residue_rsrz(clipper::MiniMol& mol, const clipper::Xmap<float>
         }
         na_only.insert(mp);
     }
+    NucleicAcidTools::chain_label(na_only, clipper::MMDBManager::CIF);
+    NucleicAcidTools::residue_label(na_only);
 
     clipper::MAtomNonBond neighbour_search = clipper::MAtomNonBond(na_only, 1.5);
     clipper::Coord_frac cf0( 0,0,0 );
@@ -393,6 +395,7 @@ int NautilusUtil::count_well_modelled_nas(clipper::MiniMol &mol, clipper::Xmap<f
     auto rsrzs = NautilusUtil::per_residue_rsrz(mol, xwrk, res);
     int count = 0;
     for (const auto& rsr_pair: rsrzs) {
+        std::cout << rsr_pair.first.first << "-" << rsr_pair.first.second << " " << rsr_pair.second << std::endl;
         if (rsr_pair.second >= -1) {count += 1;}
     }
     return count;
