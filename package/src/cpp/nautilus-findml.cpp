@@ -14,6 +14,8 @@ FindML::FindML(const clipper::MiniMol &mol, const clipper::Xmap<float> &xwrk, Pr
         throw std::runtime_error("Cannot predict without an inputted phosphate predicted map");
     }
     xphospred = predictions.get_phosphate_map().value();
+    if (predictions.get_sugar_map().has_value()) xsugarpred = predictions.get_sugar_map().value();
+    if (predictions.get_base_map().has_value()) xbasepred = predictions.get_base_map().value();
 }
 
 /*
@@ -22,7 +24,8 @@ FindML::FindML(const clipper::MiniMol &mol, const clipper::Xmap<float> &xwrk, Pr
  *
  */
 
-clipper::MiniMol FindML::generate_phosphate_molecule_from_gridpoints(double value_threshold) {
+clipper::MiniMol
+FindML::generate_molecule_from_gridpoints(clipper::Xmap<float> &predicted_map, double value_threshold) {
     clipper::MiniMol minimol(xwrk.spacegroup(), xwrk.cell());
     clipper::MModel m_model;
     clipper::MPolymer m_poly;
@@ -30,23 +33,20 @@ clipper::MiniMol FindML::generate_phosphate_molecule_from_gridpoints(double valu
     m_mon.set_seqnum(1);
     m_mon.set_type("X");
 
-
-
-
-    clipper::Grid_sampling grid_sampling = xphospred.grid_sampling();
+    clipper::Grid_sampling grid_sampling = predicted_map.grid_sampling();
     clipper::Coord_grid g0 = clipper::Coord_grid(0, 0, 0);
     clipper::Coord_grid g1 = clipper::Coord_grid(grid_sampling.nu(),
                                                  grid_sampling.nv(),
                                                  grid_sampling.nw());
 
     clipper::Xmap_base::Map_reference_coord i0, iu, iv, iw;
-    i0 = clipper::Xmap_base::Map_reference_coord(xphospred, g0);
+    i0 = clipper::Xmap_base::Map_reference_coord(predicted_map, g0);
 
     int i = 0;
     for (iu = i0; iu.coord().u() <= g1.u(); iu.next_u()) {
         for (iv = iu; iv.coord().v() <= g1.v(); iv.next_v()) {
             for (iw = iv; iw.coord().w() <= g1.w(); iw.next_w()) {
-                if (xphospred[iw] >= value_threshold) {
+                if (predicted_map[iw] >= value_threshold) {
                     clipper::MAtom m_atom = clipper::MAtom();
                     m_atom.set_id(std::to_string(i));
                     m_atom.set_name("X");
@@ -93,8 +93,9 @@ clipper::Coord_grid FindML::ascend_grid_gradient(const clipper::Coord_grid& grid
 
 }
 
-clipper::MiniMol FindML::find_phosphate_peaks(const clipper::MiniMol& phosphate_mol) const {
-    clipper::MiniMol ascended_mol = clipper::MiniMol(xphospred.spacegroup(), xphospred.cell());
+clipper::MiniMol
+FindML::find_peaks(const clipper::Xmap<float> &predicted_map, const clipper::MiniMol &mol) const {
+    clipper::MiniMol ascended_mol = clipper::MiniMol(predicted_map.spacegroup(), predicted_map.cell());
 
     clipper::MMonomer ascended_monomer;
     ascended_monomer.set_type("PA");
@@ -102,18 +103,18 @@ clipper::MiniMol FindML::find_phosphate_peaks(const clipper::MiniMol& phosphate_
 
     std::vector <clipper::Coord_grid> atom_peaks;
 
-    for (int poly = 0; poly < phosphate_mol.model().size(); poly++) {
-        for (int mon = 0; mon < phosphate_mol.model()[poly].size(); mon++) {
-            for (int atom = 0; atom < phosphate_mol.model()[poly][mon].size(); atom++) {
+    for (int poly = 0; poly < mol.model().size(); poly++) {
+        for (int mon = 0; mon < mol.model()[poly].size(); mon++) {
+            for (int atom = 0; atom < mol.model()[poly][mon].size(); atom++) {
                 constexpr int max_iter = 1000;
 
-                clipper::Coord_grid m_atom_grid = phosphate_mol.model()[poly][mon][atom].coord_orth().coord_frac(
-                        xphospred.cell()).coord_grid(xphospred.grid_sampling());
+                clipper::Coord_grid m_atom_grid = mol.model()[poly][mon][atom].coord_orth().coord_frac(
+                        predicted_map.cell()).coord_grid(predicted_map.grid_sampling());
 
                 clipper::Coord_grid current_best = m_atom_grid;
 
                 for (int i = 0; i < max_iter; i++) {
-                    clipper::Coord_grid best_neighbour = ascend_grid_gradient(current_best, xphospred);
+                    clipper::Coord_grid best_neighbour = ascend_grid_gradient(current_best, predicted_map);
                     if (best_neighbour.u() == current_best.u() &&
                         best_neighbour.v() == current_best.v() &&
                         best_neighbour.w() == current_best.w()) {
@@ -138,7 +139,7 @@ clipper::MiniMol FindML::find_phosphate_peaks(const clipper::MiniMol& phosphate_
         mp.insert(ascended_monomer);
         ascended_mol.model().insert(mp);
 
-        clipper::MiniMol peak_mol = clipper::MiniMol(xphospred.spacegroup(), xphospred.cell());
+        clipper::MiniMol peak_mol = clipper::MiniMol(predicted_map.spacegroup(), predicted_map.cell());
 
         clipper::MMonomer peak_monomer;
         peak_monomer.set_type("X");
@@ -146,7 +147,7 @@ clipper::MiniMol FindML::find_phosphate_peaks(const clipper::MiniMol& phosphate_
 
         for (int i = 0; i < atom_peaks.size(); i++) {
             peak_monomer.insert(
-                    NautilusUtil::create_atom(atom_peaks[i].coord_frac(xphospred.grid_sampling()).coord_orth(xphospred.cell()), i,
+                    NautilusUtil::create_atom(atom_peaks[i].coord_frac(predicted_map.grid_sampling()).coord_orth(predicted_map.cell()), i,
                                               "X"));
         }
 
@@ -161,12 +162,12 @@ clipper::MiniMol FindML::find_phosphate_peaks(const clipper::MiniMol& phosphate_
     return {};
 }
 
-clipper::MiniMol FindML::assimilate_phosphate_peaks(clipper::MiniMol& phosphate_peaks, float radius, const std::string& name) const {
-    clipper::MModel m_model = phosphate_peaks.model();
+clipper::MiniMol FindML::assimilate_peaks(clipper::MiniMol& peaks, float radius, const std::string& name) const {
+    clipper::MModel m_model = peaks.model();
     std::vector<clipper::MAtom> results;
     std::set<int> checked_atoms;
 
-    clipper::MAtomNonBond non_bond = clipper::MAtomNonBond(phosphate_peaks, radius);
+    clipper::MAtomNonBond non_bond = clipper::MAtomNonBond(peaks, radius);
 
     for (int poly = 0; poly < m_model.size(); poly++) {
         for (int mon = 0; mon < m_model[poly].size(); mon++) {
@@ -255,11 +256,25 @@ clipper::MiniMol FindML::refine_phosphate_peaks(const clipper::MiniMol& phosphat
 
 
 clipper::MiniMol FindML::calculate_phosphate_peaks(double value_threshold) {
-    clipper::MiniMol phosphate_mol = generate_phosphate_molecule_from_gridpoints(value_threshold);
-    clipper::MiniMol phosphate_peak_groups = find_phosphate_peaks(phosphate_mol);
-    clipper::MiniMol phosphate_peaks = assimilate_phosphate_peaks(phosphate_peak_groups, 1.5, "P");
+    clipper::MiniMol phosphate_mol = generate_molecule_from_gridpoints(xphospred, value_threshold);
+    clipper::MiniMol phosphate_peak_groups = find_peaks(xphospred, phosphate_mol);
+    clipper::MiniMol phosphate_peaks = assimilate_peaks(phosphate_peak_groups, 1.5, "P");
     clipper::MiniMol refined_phosphate_peaks = refine_phosphate_peaks(phosphate_peaks);
     return refined_phosphate_peaks;
+}
+
+clipper::MiniMol FindML::calculate_sugar_peaks(double value_threshold) {
+    clipper::MiniMol sugar_mol = generate_molecule_from_gridpoints(xsugarpred, value_threshold);
+    clipper::MiniMol sugar_peak_groups = find_peaks(xsugarpred, sugar_mol);
+    clipper::MiniMol sugar_peaks = assimilate_peaks(sugar_peak_groups, 1, "S");
+    return sugar_peaks;
+}
+
+clipper::MiniMol FindML::calculate_base_peaks(double value_threshold) {
+    clipper::MiniMol base_mol = generate_molecule_from_gridpoints(xbasepred, value_threshold);
+    clipper::MiniMol base_peak_groups = find_peaks(xbasepred, base_mol);
+    clipper::MiniMol base_peaks = assimilate_peaks(base_peak_groups, 1, "B");
+    return base_peaks;
 }
 
 /*
@@ -274,10 +289,14 @@ clipper::MiniMol FindML::calculate_phosphate_peaks(double value_threshold) {
  *
  */
 
-FindML::TripletCoordinates FindML::find_triplet_coordinates(const clipper::MiniMol& phosphate_peaks) {
+FindML::TripletCoordinates
+FindML::find_triplet_coordinates(const clipper::MiniMol &phosphate_peaks, const clipper::MiniMol &sugar_peaks) {
     float radius = 8;
     clipper::MAtomNonBond m_atom_non_bond = clipper::MAtomNonBond(phosphate_peaks, radius);
     clipper::MiniMol mol_ = phosphate_peaks;
+
+    clipper::MAtomNonBond sugar_non_bond = clipper::MAtomNonBond(sugar_peaks, 2);
+
 
     int p = 0;
     int m = 0;
@@ -333,11 +352,17 @@ FindML::TripletCoordinates FindML::find_triplet_coordinates(const clipper::MiniM
                 double angle_d = clipper::Util::rad2d(angle);
 
                 if (target_angle - target_range < angle_d && angle_d < target_angle + target_range) {
-                    return_list.push_back({
-                                                  {first_atom.atom(), first_atom_orth},
-                                                  {atom,              m_atom_orth},
-                                                  {third_atom.atom(), third_atom_orth}
-                                          });
+                    clipper::Coord_orth AB_center = first_atom_orth + 0.5*(m_atom_orth-first_atom_orth);
+                    clipper::Coord_orth BC_center = m_atom_orth + 0.5*(third_atom_orth-m_atom_orth);
+
+                    if (!sugar_non_bond.atoms_near(AB_center, 2).empty() && !sugar_non_bond.atoms_near(BC_center, 2).empty()) {
+                        return_list.push_back({
+                                                      {first_atom.atom(), first_atom_orth},
+                                                      {atom,              m_atom_orth},
+                                                      {third_atom.atom(), third_atom_orth}
+                                              });
+                    }
+
                 }
 
 
@@ -396,14 +421,13 @@ float FindML::score_sugar(NucleicAcidDB::NucleicAcidFull &chain) {
     if (!predictions.get_sugar_map().has_value()) return 0;
     clipper::Xmap<float> xsugarpred = predictions.get_sugar_map().value();
     float score = 0.0f;
-    if (!chain.O5p1.is_null()) score += xsugarpred.interp<clipper::Interp_cubic>(chain.O5p1.coord_frac(xsugarpred.cell()));
-    if (!chain.C5p1.is_null()) score += xsugarpred.interp<clipper::Interp_cubic>(chain.C5p1.coord_frac(xsugarpred.cell()));
-    if (!chain.C4p1.is_null()) score += xsugarpred.interp<clipper::Interp_cubic>(chain.C4p1.coord_frac(xsugarpred.cell()));
-    if (!chain.O4p1.is_null()) score += xsugarpred.interp<clipper::Interp_cubic>(chain.O4p1.coord_frac(xsugarpred.cell()));
-    if (!chain.C3p1.is_null()) score += xsugarpred.interp<clipper::Interp_cubic>(chain.C3p1.coord_frac(xsugarpred.cell()));
-    if (!chain.O3p1.is_null()) score += xsugarpred.interp<clipper::Interp_cubic>(chain.O3p1.coord_frac(xsugarpred.cell()));
-    if (!chain.C2p1.is_null()) score += xsugarpred.interp<clipper::Interp_cubic>(chain.C2p1.coord_frac(xsugarpred.cell()));
-    if (!chain.C1p1.is_null()) score += xsugarpred.interp<clipper::Interp_cubic>(chain.C1p1.coord_frac(xsugarpred.cell()));
+    if (!chain.C5p1.is_null()) score += xsugarpred.interp<clipper::Interp_cubic>(chain.C5p1.coord_frac(xwrk.cell()));
+    if (!chain.C4p1.is_null()) score += xsugarpred.interp<clipper::Interp_cubic>(chain.C4p1.coord_frac(xwrk.cell()));
+    if (!chain.O4p1.is_null()) score += xsugarpred.interp<clipper::Interp_cubic>(chain.O4p1.coord_frac(xwrk.cell()));
+    if (!chain.C3p1.is_null()) score += xsugarpred.interp<clipper::Interp_cubic>(chain.C3p1.coord_frac(xwrk.cell()));
+    if (!chain.O3p1.is_null()) score += xsugarpred.interp<clipper::Interp_cubic>(chain.O3p1.coord_frac(xwrk.cell()));
+    if (!chain.C2p1.is_null()) score += xsugarpred.interp<clipper::Interp_cubic>(chain.C2p1.coord_frac(xwrk.cell()));
+    if (!chain.C1p1.is_null()) score += xsugarpred.interp<clipper::Interp_cubic>(chain.C1p1.coord_frac(xwrk.cell()));
     return score;
 }
 
@@ -411,13 +435,21 @@ float FindML::score_base(NucleicAcidDB::NucleicAcidFull &chain) {
     if (!predictions.get_base_map().has_value()) return 0;
     clipper::Xmap<float> xbasepred = predictions.get_base_map().value();
     float score = 0.0f;
-    if (!chain.N1_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.N1_1.coord_frac(xbasepred.cell()));
-    if (!chain.N2_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.N2_1.coord_frac(xbasepred.cell()));
-    if (!chain.N3_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.N3_1.coord_frac(xbasepred.cell()));
-    if (!chain.N4_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.N4_1.coord_frac(xbasepred.cell()));
-    if (!chain.N6_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.N6_1.coord_frac(xbasepred.cell()));
-    if (!chain.N7_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.N7_1.coord_frac(xbasepred.cell()));
-    if (!chain.N9_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.N9_1.coord_frac(xbasepred.cell()));
+    if (!chain.N1_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.N1_1.coord_frac(xwrk.cell()));
+    if (!chain.N2_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.N2_1.coord_frac(xwrk.cell()));
+    if (!chain.N3_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.N3_1.coord_frac(xwrk.cell()));
+    if (!chain.N4_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.N4_1.coord_frac(xwrk.cell()));
+    if (!chain.N6_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.N6_1.coord_frac(xwrk.cell()));
+    if (!chain.N7_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.N7_1.coord_frac(xwrk.cell()));
+    if (!chain.N9_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.N9_1.coord_frac(xwrk.cell()));
+    if (!chain.C2_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.C2_1.coord_frac(xwrk.cell()));
+    if (!chain.C4_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.C4_1.coord_frac(xwrk.cell()));
+    if (!chain.C5_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.C5_1.coord_frac(xwrk.cell()));
+    if (!chain.C6_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.C6_1.coord_frac(xwrk.cell()));
+    if (!chain.C8_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.C8_1.coord_frac(xwrk.cell()));
+    if (!chain.O2_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.O2_1.coord_frac(xwrk.cell()));
+    if (!chain.O6_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.O6_1.coord_frac(xwrk.cell()));
+
     return score;
 }
 
@@ -427,8 +459,8 @@ float FindML::score_fragment(NucleicAcidDB::ChainFull &fragment, clipper::Xmap<f
     float total_score = 0.0f;
     for (int i = 0; i < fragment.size(); i++) {
         float score = score_density(fragment[i], xmap, i==fragment.size()-1);
-        // score += score_sugar(fragment[i]);
-        // score += score_base(fragment[i]);
+         score += score_sugar(fragment[i]);
+         score += score_base(fragment[i]);
         fragment[i].score = score;
         total_score += score;
     }
@@ -500,7 +532,7 @@ NucleicAcidDB::ChainFull FindML::refine_fragment_coordinates(NucleicAcidDB::Chai
     NucleicAcidDB::ChainFull com_fragment = original_fragment;
     com_fragment.transform(com_rtop);
 
-    RefineFragmentCoordinates refiner = RefineFragmentCoordinates(xwrk, xphospred, com_fragment, com);
+    RefineFragmentCoordinates refiner = RefineFragmentCoordinates(xwrk, &xphospred, &xsugarpred, &xbasepred, com_fragment, com);
 
     clipper::RTop_orth refined_rtop = refiner.refine();
 
@@ -916,20 +948,20 @@ clipper::MiniMol FindML::remove_clashing_protein(clipper::MiniMol& na_chain) {
             clipper::MMonomer residue = mol[p][m];
             std::vector<std::string> key = {chain.id(), residue.type(), std::to_string(residue.seqnum())};
             if (to_remove.find(key) != to_remove.end()) {
-                clipper::MMonomer backbone_only;
-                backbone_only.set_type(mol[p][m].type());
-                backbone_only.set_id(mol[p][m].id());
-
-                for (int a = 0; a < mol[p][m].size(); a++) {
-                    if (allowed_atoms.find(mol[p][m][a].id().trim()) != allowed_atoms.end()) {
-                        backbone_only.insert(mol[p][m][a]);
-                    }
-                }
-
-                if (backbone_only.size() != 0) {
-                    mp.insert(backbone_only);
-                    count += 1;
-                }
+//                clipper::MMonomer backbone_only;
+//                backbone_only.set_type(mol[p][m].type());
+//                backbone_only.set_id(mol[p][m].id());
+//
+//                for (int a = 0; a < mol[p][m].size(); a++) {
+//                    if (allowed_atoms.find(mol[p][m][a].id().trim()) != allowed_atoms.end()) {
+//                        backbone_only.insert(mol[p][m][a]);
+//                    }
+//                }
+//
+//                if (backbone_only.size() != 0) {
+//                    mp.insert(backbone_only);
+//                    count += 1;
+//                }
 
                 continue;
             }
@@ -1035,7 +1067,14 @@ PlacedFragmentResult FindML::place_fragments(const clipper::MiniMol& phosphate_p
 
 clipper::MiniMol FindML::find() {
     clipper::MiniMol phosphate_peaks = calculate_phosphate_peaks(0.1);
-    TripletCoordinates phosphate_triplets = find_triplet_coordinates(phosphate_peaks);
+    clipper::MiniMol sugar_peaks = calculate_sugar_peaks(0.7);
+    clipper::MiniMol base_peaks = calculate_base_peaks(0.7);
+
+//         NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
+//     NautilusUtil::save_minimol(sugar_peaks, "sugar_peaks.pdb");
+//    NautilusUtil::save_minimol(base_peaks, "base_peaks.pdb");
+
+    TripletCoordinates phosphate_triplets = find_triplet_coordinates(phosphate_peaks, sugar_peaks);
      draw_triplets(phosphate_triplets, phosphate_peaks, "triplets-ext.pdb");
 //     NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
     std::cout << phosphate_triplets.size() << " phosphate triplets found\n";

@@ -63,15 +63,22 @@ private:
      * PREDICTIONS TO POINTS START
      */
 
-    clipper::MiniMol generate_phosphate_molecule_from_gridpoints(double value_threshold);
+    clipper::MiniMol
+    generate_molecule_from_gridpoints(clipper::Xmap<float> &predicted_map, double value_threshold);
 
     clipper::MiniMol calculate_phosphate_peaks(double value_threshold);
 
+    clipper::MiniMol calculate_sugar_peaks(double value_threshold);
+
+    clipper::MiniMol calculate_base_peaks(double value_threshold);
+
+
     static clipper::Coord_grid ascend_grid_gradient(const clipper::Coord_grid &grid_point, const clipper::Xmap<float> &xmap);
 
-    [[nodiscard]] clipper::MiniMol find_phosphate_peaks(const clipper::MiniMol& phosphate_mol) const;
+    [[nodiscard]] clipper::MiniMol
+    find_peaks(const clipper::Xmap<float> &predicted_map, const clipper::MiniMol &mol) const;
 
-    [[nodiscard]] clipper::MiniMol assimilate_phosphate_peaks(clipper::MiniMol& phosphate_peaks, float radius, const std::string& name) const;
+    [[nodiscard]] clipper::MiniMol assimilate_peaks(clipper::MiniMol& peaks, float radius, const std::string& name) const;
 
     [[nodiscard]] clipper::MiniMol refine_phosphate_peaks(const clipper::MiniMol& phosphate_peaks) const;
 
@@ -85,7 +92,8 @@ private:
      * PREDICTED POINTS TO MOLECULE START
      */
 
-    static TripletCoordinates find_triplet_coordinates(const clipper::MiniMol& phosphate_peaks);
+    static FindML::TripletCoordinates
+    find_triplet_coordinates(const clipper::MiniMol &phosphate_peaks, const clipper::MiniMol &sugar_peaks);
 
     NucleicAcidDB::ChainFull
     refine_fragment(NucleicAcidDB::ChainFull &original_fragment, float translation_range, float translation_step);
@@ -179,6 +187,8 @@ private:
     clipper::Xmap<float> xwrk;
     PredictedMaps predictions;
     clipper::Xmap<float> xphospred;
+    clipper::Xmap<float> xsugarpred;
+    clipper::Xmap<float> xbasepred;
 
     clipper::MiniMol mol;
     NucleicAcidDB::ChainFull nadb;
