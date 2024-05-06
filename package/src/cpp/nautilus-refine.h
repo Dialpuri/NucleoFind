@@ -149,10 +149,20 @@ public:
     RefineFragmentCoordinates() = default;
 
     RefineFragmentCoordinates(const clipper::Xmap<float>& xmap,
-                              const clipper::Xmap<float>& phosphate_map,
+                              const clipper::Xmap<float>* phosphate_map,
+                              const clipper::Xmap<float>* sugar_map,
+                              const clipper::Xmap<float>* base_map,
                               NucleicAcidDB::ChainFull& chain_at_origin,
                               clipper::Vec3<> center_of_mass):
-                              m_xmap(&xmap), m_phosphate_map(&phosphate_map), m_translation(center_of_mass), m_chain(chain_at_origin) {}
+                              m_xmap(&xmap),
+                              m_phosphate_map(phosphate_map),
+                              m_sugar_map(sugar_map),
+                              m_base_map(base_map),
+                              m_translation(center_of_mass), m_chain(chain_at_origin) {
+        if (sugar_map != nullptr) {sugar_map_available = true;}
+        if (base_map != nullptr) {base_map_available = true;}
+
+    }
 
     inline int num_params() const override {return 6;}
 
@@ -163,6 +173,12 @@ public:
 private:
     const clipper::Xmap<float> *m_xmap{};
     const clipper::Xmap<float> *m_phosphate_map{};
+    const clipper::Xmap<float> *m_sugar_map = nullptr;
+    const clipper::Xmap<float> *m_base_map = nullptr;
+
+    bool sugar_map_available = false;
+    bool base_map_available = true;
+
     const clipper::Vec3<> m_translation;
     const NucleicAcidDB::ChainFull m_chain;
     float m_rotation_step = clipper::Util::d2rad(2);
