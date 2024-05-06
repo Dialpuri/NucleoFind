@@ -694,16 +694,19 @@ const clipper::MiniMol NucleicAcidTargets::link( const clipper::Xmap<float>& xma
 }
 
 
-const clipper::MiniMol NucleicAcidTargets::prune( const clipper::MiniMol& mol ) const
+const clipper::MiniMol NucleicAcidTargets::prune( clipper::MiniMol& mol ) const
 {
-  // set up clash model (with bases removed)
-  clipper::MiniMol mol_nb = mol;
+    // set up clash model (with bases removed)
+    mol = NucleicAcidTools::chain_sort(mol);
+    NucleicAcidTools::residue_label(mol);
+    clipper::MiniMol mol_nb = mol;
+
   for ( int c = 0; c < mol_nb.size(); c++ ) {
-    for ( int r = 0; r < mol_nb[c].size(); r++ ) {
-      NucleicAcidDB::NucleicAcid na( mol_nb[c][r] );
-      if ( na.flag() != NucleicAcidDB::NucleicAcid::NONE )
-        mol_nb[c][r] = na.mmonomer();
-    }
+      for (int r = 0; r < mol_nb[c].size(); r++) {
+          NucleicAcidDB::NucleicAcid na(mol_nb[c][r]);
+          if (na.flag() != NucleicAcidDB::NucleicAcid::NONE)
+              mol_nb[c][r] = na.mmonomer();
+      }
   }
   // find clashes
   clipper::MAtomNonBond nb( mol_nb, 4.0 );
@@ -742,11 +745,11 @@ const clipper::MiniMol NucleicAcidTargets::prune( const clipper::MiniMol& mol ) 
         if ( mol_nb[c][r].type() != "~~~" ) {
           mp.insert( mol[c][r] );
         } else {
-          if ( mp.size() >= 3 ) mol_new.insert( mp );
+          if ( mp.size() >= 1 ) mol_new.insert( mp );
           mp = clipper::MPolymer();
         }
       }
-      if ( mp.size() >= 3 ) mol_new.insert( mp );
+      if ( mp.size() >= 1 ) mol_new.insert( mp );
     } else {
       mol_new.insert( mol[c] );
     }
