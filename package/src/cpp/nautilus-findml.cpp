@@ -1013,7 +1013,7 @@ clipper::MiniMol FindML::remove_low_confidence(clipper::MiniMol & mol) {
             count += 1;
             mp.insert(mol[p][m]);
         }
-        if (count > 0)
+        if (count > 1) //only allow chains with more than 1 residue to pass
             mol_final.insert(mp);
     }
 
@@ -1112,8 +1112,15 @@ clipper::MiniMol FindML::find() {
     }
 
     clipper::MiniMol filtered_chain = form_organised_chains(placed_fragments, placed_fragment_indices);
+    // NautilusUtil::save_minimol(filtered_chain, "filtered_chain.pdb");
     clipper::MiniMol base_removed_mol = remove_bases(filtered_chain);
+        // NautilusUtil::save_minimol(base_removed_mol, "base_removed_mol.pdb");
+
     clipper::MiniMol low_confidence_removed_model = remove_low_confidence(base_removed_mol);
+            // NautilusUtil::save_minimol(low_confidence_removed_model, "low_confidence_removed_model.pdb");
+
     clipper::MiniMol clash_removed_mol = remove_clashing_protein(low_confidence_removed_model);
+                // NautilusUtil::save_minimol(clash_removed_mol, "clash_removed_mol.pdb");
+
     return clash_removed_mol;
 }

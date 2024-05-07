@@ -130,7 +130,10 @@ class Prediction:
         if self.use_gpu:
             providers.insert(0, 'CUDAExecutionProvider')
 
-        self.models = [rt.InferenceSession(model, providers=providers) for model in self.model_paths ]
+        sess_options = rt.SessionOptions()
+        sess_options.intra_op_num_threads = 1
+        self.models = [rt.InferenceSession(model, providers=providers, sess_options=sess_options) for model in self.model_paths ]
+
 
     def _load_map(self, map_path: str, normalise: bool = True):
         self.map: gemmi.Ccp4Map = gemmi.read_ccp4_map(map_path)
