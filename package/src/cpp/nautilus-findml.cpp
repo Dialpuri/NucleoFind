@@ -1067,8 +1067,8 @@ PlacedFragmentResult FindML::place_fragments(const clipper::MiniMol& phosphate_p
 
 clipper::MiniMol FindML::find() {
     clipper::MiniMol phosphate_peaks = calculate_phosphate_peaks(0.1);
-    clipper::MiniMol sugar_peaks = calculate_sugar_peaks(0.7);
-    clipper::MiniMol base_peaks = calculate_base_peaks(0.7);
+    clipper::MiniMol sugar_peaks = calculate_sugar_peaks(0.3);
+    clipper::MiniMol base_peaks = calculate_base_peaks(0.3);
 
 //         NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
 //     NautilusUtil::save_minimol(sugar_peaks, "sugar_peaks.pdb");
