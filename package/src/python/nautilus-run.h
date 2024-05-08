@@ -348,7 +348,8 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
     pdbfile.export_minimol(mol_new);
     pdbfile.write_file(output.get_pdb_out(), cifflag);
     if (output.get_xml_out().has_value()) { 
-        log.xml(output.get_xml_out().value());
+        std::string xmlpath = output.get_xml_out().value();
+        log.xml(xmlpath);
     }
 //   msg = log.log_info( mol_new, true );	// added by SWH
 //   std::cout << "$TEXT:Result: $$ $$" << std::endl << msg << "\n$$" << std::endl; // added by SWH

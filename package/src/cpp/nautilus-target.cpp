@@ -695,7 +695,6 @@ const clipper::MiniMol NucleicAcidTargets::link( const clipper::Xmap<float>& xma
   if ( mol_new.size() > mol.size() )
     mol_new = NucleicAcidJoin::join( mol_new );
 
-  std::cout << "695" << std::endl;
   return mol_new; 
 }
 
