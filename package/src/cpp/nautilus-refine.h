@@ -56,7 +56,7 @@ public:
 
     inline int num_params() const override { return 3; }
 
-    double operator()(const std::vector<double> &args) const;
+    double operator()(const std::vector<double> &args) const override;
 
     clipper::Coord_orth refine(const clipper::Coord_orth &coord);
 
@@ -110,7 +110,7 @@ public:
 
     inline int num_params() const override { return 3; }
 
-    double operator()(const std::vector<double> &args) const;
+    double operator()(const std::vector<double> &args) const override;
 
     clipper::RTop_orth refine();
 
@@ -133,7 +133,7 @@ public:
 
     inline int num_params() const override { return 3; }
 
-    double operator()(const std::vector<double> &args) const;
+    double operator()(const std::vector<double> &args) const override;
 
     clipper::RTop_orth refine();
 
@@ -166,7 +166,7 @@ public:
 
     inline int num_params() const override {return 6;}
 
-    double operator()(const std::vector<double>& args) const;
+    double operator()(const std::vector<double>& args) const override;
 
     clipper::RTop_orth refine();
 

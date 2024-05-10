@@ -684,19 +684,17 @@ const clipper::MiniMol NucleicAcidTargets::link( const clipper::Xmap<float>& xma
         if ( chn.size() != 0 ) {
           clipper::MPolymer mp;
           for ( int r = 0; r < chn.size(); r++ ) {
-            std::cout << "Adding chn[" << r << "] to monomer" << std::endl; 
+//            std::cout << "Adding chn[" << r << "] to monomer" << std::endl;
             mp.insert( chn[r].mmonomer() );
 
           }
           mol_new.insert( mp );
-          std::cout<<"JOIN: "<<c1<<" "<<c2<<" "<<chn.size()<<std::endl;
         }
       }
   if ( mol_new.size() > mol.size() )
     mol_new = NucleicAcidJoin::join( mol_new );
 
-  std::cout << "695" << std::endl;
-  return mol_new; 
+  return mol_new;
 }
 
 
