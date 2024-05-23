@@ -900,11 +900,21 @@ clipper::MiniMol FindML::remove_clashing_protein(clipper::MiniMol &na_chain) {
 //        mp.set_id(na_chain[p].id());
         for (int m = 0; m < na_chain[p].size(); m++) {
             for (int a = 0; a < na_chain[p][m].size(); a++) {
-                auto nearby_atoms = nb.atoms_near(na_chain[p][m][a].coord_orth(), 1);
+                auto nearby_atoms = nb.atoms_near(na_chain[p][m][a].coord_orth(), 1.5);
 
                 for (const auto &nearby_atom: nearby_atoms) {
                     clipper::MPolymer chain = molwrk[nearby_atom.polymer()];
                     clipper::MMonomer residue = chain[nearby_atom.monomer()];
+                    clipper::MAtom atom = residue[nearby_atom.atom()];
+
+                    clipper::Coord_frac cf = atom.coord_orth().coord_frac(na_chain.cell());
+                    cf.symmetry_copy_near(na_chain.spacegroup(), na_chain.cell(), na_chain[p][m][a].coord_orth().coord_frac(na_chain.cell()
+                    ));
+                    clipper::Coord_orth co = cf.coord_orth(na_chain.cell());
+                    if ((na_chain[p][m][a].coord_orth()-co).lengthsq() > 2.25) {
+                        continue;
+                    }
+
                     NucleicAcidDB::NucleicAcid na = {residue};
                     if (na.flag() == NucleicAcidDB::NucleicAcid::NONE) {
                         to_remove.insert({chain.id(), residue.type(), std::to_string(residue.seqnum())});
@@ -1058,10 +1068,10 @@ FindML::place_fragments(const clipper::MiniMol &phosphate_peaks, const std::vect
 clipper::MiniMol FindML::find() {
     clipper::MiniMol phosphate_peaks = calculate_phosphate_peaks(0.1);
 
-    clipper::MiniMol sugar_peaks = {xwrk.spacegroup(), xwrk.cell()};
-    clipper::MiniMol base_peaks = {xwrk.spacegroup(), xwrk.cell()};
+    clipper::MiniMol sugar_peaks;
+    clipper::MiniMol base_peaks;
     if (predictions.get_sugar_map().has_value()) sugar_peaks = calculate_sugar_peaks(0.3);
-    if (predictions.get_sugar_map().has_value()) base_peaks = calculate_base_peaks(0.3);
+    if (predictions.get_base_map().has_value()) base_peaks = calculate_base_peaks(0.3);
 
     NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
     //NautilusUtil::save_minimol(sugar_peaks, "sugar_peaks.pdb");
