@@ -11,7 +11,10 @@ def build():
     pdbin = "tests/test_data/5d5w/xyzout.pdb"
     seqin = "tests/test_data/5d5w/5d5w.fasta"
     pdbout = "tests/5d5w.pdb"
-    predin = "tests/test_data/5d5w/phosphate.map"
+    phosin = "tests/test_data/5d5w/phosphate.map"
+    sugarin = "tests/test_data/5d5w/sugar.map"
+    basein = "tests/test_data/5d5w/base.map"
+
     colinfo = "FP,SIGFP"
     colinfc = "FWT,PHWT"
     colinfree = "FREE"
@@ -19,9 +22,11 @@ def build():
     cycles = 3
     data = {"mtzin": mtzin, "pdbin": pdbin,
             "seqin": seqin, "pdbout": pdbout,
-            "predin": predin, "colinfo": colinfo,
-            "colinfc": colinfc, "colinfree": colinfree,
-            "xmlout": xmlout, "cycles": cycles}
+            "phosin": phosin, "sugarin" : sugarin, "basein": basein,
+            "colinfo": colinfo, "colinfc": colinfc,
+            "colinfree": colinfree, "xmlout": xmlout,
+            "cycles": cycles}
+
     os.environ["CLIBD"]="tests/test_data"
     os.environ["LD_LIBRARY_PATH"]="tests/test_data"
     os.environ["CCP4"]="tests/test_data"
@@ -33,7 +38,7 @@ def build():
         os.remove(data["pdbout"])
 
     t0 = time.time()
-    b.build(data["mtzin"], data["seqin"], data["pdbin"], data["predin"], data["colinfo"], data["colinfc"],
+    b.build(data["mtzin"], data["seqin"], data["pdbin"], data["phosin"], data["sugarin"], data["basein"], data["colinfo"], data["colinfc"],
             data["colinfree"], data["pdbout"], data["xmlout"], data["cycles"])
     t1 = time.time()
     data["time"] = (t1-t0)
