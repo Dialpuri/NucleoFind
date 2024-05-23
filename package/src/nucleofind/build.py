@@ -59,9 +59,9 @@ def main():
 
 
 
-def build(mtzin: str, seqin: str, pdbin: str, predin: str, colin_fo: str, colin_fc: str, colin_free: str, pdbout: str,
+def build(mtzin: str, seqin: str, pdbin: str, phosin: str, sugarin: str, basein: str, colin_fo: str, colin_fc: str, colin_free: str, pdbout: str,
           xmlout: str, cycles: int):
-    input = Input(mtzin, seqin, pdbin, predin, "", "", colin_fo, "", "", colin_fc,
+    input = Input(mtzin, seqin, pdbin, phosin, sugarin, basein, colin_fo, "", "", colin_fc,
                   colin_free)
     output = Output(pdbout, xmlout)
     run(input, output, cycles)
