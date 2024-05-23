@@ -60,8 +60,8 @@ def main():
 
 
 def build(mtzin: str, seqin: str, pdbin: str, predin: str, colin_fo: str, colin_fc: str, colin_free: str, pdbout: str,
-          xmlout):
+          xmlout: str, cycles: int):
     input = Input(mtzin, seqin, pdbin, predin, "", "", colin_fo, "", "", colin_fc,
                   colin_free)
     output = Output(pdbout, xmlout)
-    run(input, output, 1)
+    run(input, output, cycles)
