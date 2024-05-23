@@ -285,7 +285,7 @@ float NautilusUtil::per_residue_rscc(clipper::MiniMol& mol, const clipper::Xmap<
         }
 
         double rscc = sum_delta/sqrt(sum_delta_obs_sq*sum_delta_calc_sq);
-        std::cout << polymer << " " << na_only[polymer][monomer].id() << " " << na_only[polymer][monomer].type() << " " << rscc << std::endl;
+//        std::cout << polymer << " " << na_only[polymer][monomer].id() << " " << na_only[polymer][monomer].type() << " " << rscc << std::endl;
     }
 }
 
@@ -395,7 +395,7 @@ int NautilusUtil::count_well_modelled_nas(clipper::MiniMol &mol, clipper::Xmap<f
     auto rsrzs = NautilusUtil::per_residue_rsrz(mol, xwrk, res);
     int count = 0;
     for (const auto& rsr_pair: rsrzs) {
-        std::cout << rsr_pair.first.first << "-" << rsr_pair.first.second << " " << rsr_pair.second << std::endl;
+//        std::cout << rsr_pair.first.first << "-" << rsr_pair.first.second << " " << rsr_pair.second << std::endl;
         if (rsr_pair.second >= -1) {count += 1;}
     }
     return count;
@@ -515,7 +515,7 @@ void NautilusLog::xml( const clipper::String& file ) const //, const clipper::Mi
   // xml output each cycle and summary, added SWH Nov'17
   std::ofstream f;
   f.open( file.c_str(), std::ios::out );
-  f << "<NautilusResult>" << std::endl;
+  f << "<NucleoFindResult>" << std::endl;
   f << " <Title>" << title_.c_str() << "</Title>" << std::endl;
   f << " <Cycles>" << std::endl;
   for ( int c = 0; c < data.size() ; c++ )
@@ -537,7 +537,7 @@ void NautilusLog::xml( const clipper::String& file ) const //, const clipper::Mi
   f << "  <ResiduesSequenced>" << data[c].nseq << "</ResiduesSequenced>" << std::endl;
   f << "  <ResiduesLongestFragment>" << data[c].nmax << "</ResiduesLongestFragment>" << std::endl;
   f << " </Final>" << std::endl;
-  f << "</NautilusResult>" << std::endl;
+  f << "</NucleoFindResult>" << std::endl;
   f.close();
 }
 
