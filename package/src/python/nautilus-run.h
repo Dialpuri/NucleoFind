@@ -229,12 +229,14 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
         clipper::CCP4MAPfile mapfile;
         mapfile.open_read(input.get_sugar_prediction_path().value());
         mapfile.import_xmap(xsugarpred);
+        mapfile.close_read();
     }
 
     if (input.get_base_prediction_path().has_value()) {
         clipper::CCP4MAPfile mapfile;
         mapfile.open_read(input.get_base_prediction_path().value());
         mapfile.import_xmap(xbasepred);
+        mapfile.close_read();
     }
 
     PredictedMaps predictions = {xphospred, xsugarpred, xbasepred};
