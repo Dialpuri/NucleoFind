@@ -34,10 +34,8 @@ jobs:
           ./get_sources
           pip install .
           pip install pytest
-          nucleofind-install -m phosphate
-          pytest tests/test_build.py
-          pytest tests/test_install.py
-          pytest tests/test_predict.py
+          nucleofind-install -m all
+          pytest tests
 
   build_sdist:
     needs: [ check_versioning, run_tests ]
