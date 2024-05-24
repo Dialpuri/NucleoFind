@@ -5,6 +5,7 @@
 #ifndef NAUTILUS_FINDML_H
 #define NAUTILUS_FINDML_H
 #include <clipper/clipper-minimol.h>
+#include <optional>
 
 #include "nucleicacid_db.h"
 //
@@ -14,13 +15,36 @@ struct ChainData {
 };
 struct PlacedFragmentResult;
 
+class PredictedMaps {
+public:
+    PredictedMaps(const clipper::Xmap<float> &phosphate_map, const clipper::Xmap<float> &sugar_map,
+                  const clipper::Xmap<float> &base_map)
+            : phosphate(phosphate_map), sugar(sugar_map), base(base_map) {}
+
+    [[nodiscard]] std::optional<clipper::Xmap<float>> get_phosphate_map() const {
+        if (!phosphate.cell().is_null()) {return phosphate;}
+        return std::nullopt;
+    }
+
+    [[nodiscard]] std::optional<clipper::Xmap<float>> get_sugar_map() const {
+        if (!sugar.cell().is_null()) {return sugar;}
+        return std::nullopt;
+    }
+
+    [[nodiscard]] std::optional<clipper::Xmap<float>> get_base_map() const {
+        if (!base.cell().is_null()) {return base;}
+        return std::nullopt;
+    }
+
+private:
+    clipper::Xmap<float> phosphate;
+    clipper::Xmap<float> sugar;
+    clipper::Xmap<float> base;
+};
+
 class FindML {
 public:
-    explicit FindML(const clipper::MiniMol& mol,
-                    const clipper::Xmap<float>& xphospred,
-                    const clipper::Xmap<float>& xsugarpred,
-                    const clipper::Xmap<float>& xbasepred,
-                    const clipper::Xmap<float>& xwrk);
+    explicit FindML(const clipper::MiniMol &mol, const clipper::Xmap<float> &xwrk, PredictedMaps predictions);
 
     void load_library_from_file(const std::string& path) {nadb.add_pdb(path);}
 
@@ -39,15 +63,22 @@ private:
      * PREDICTIONS TO POINTS START
      */
 
-    clipper::MiniMol generate_phosphate_molecule_from_gridpoints(double value_threshold);
+    clipper::MiniMol
+    generate_molecule_from_gridpoints(clipper::Xmap<float> &predicted_map, double value_threshold);
 
     clipper::MiniMol calculate_phosphate_peaks(double value_threshold);
 
+    clipper::MiniMol calculate_sugar_peaks(double value_threshold);
+
+    clipper::MiniMol calculate_base_peaks(double value_threshold);
+
+
     static clipper::Coord_grid ascend_grid_gradient(const clipper::Coord_grid &grid_point, const clipper::Xmap<float> &xmap);
 
-    [[nodiscard]] clipper::MiniMol find_phosphate_peaks(const clipper::MiniMol& phosphate_mol) const;
+    [[nodiscard]] clipper::MiniMol
+    find_peaks(const clipper::Xmap<float> &predicted_map, const clipper::MiniMol &mol) const;
 
-    [[nodiscard]] clipper::MiniMol assimilate_phosphate_peaks(clipper::MiniMol& phosphate_peaks, float radius, const std::string& name) const;
+    [[nodiscard]] clipper::MiniMol assimilate_peaks(clipper::MiniMol& peaks, float radius, const std::string& name) const;
 
     [[nodiscard]] clipper::MiniMol refine_phosphate_peaks(const clipper::MiniMol& phosphate_peaks) const;
 
@@ -61,7 +92,8 @@ private:
      * PREDICTED POINTS TO MOLECULE START
      */
 
-    static TripletCoordinates find_triplet_coordinates(const clipper::MiniMol& phosphate_peaks);
+    static FindML::TripletCoordinates
+    find_triplet_coordinates(const clipper::MiniMol &phosphate_peaks, const clipper::MiniMol &sugar_peaks);
 
     NucleicAcidDB::ChainFull
     refine_fragment(NucleicAcidDB::ChainFull &original_fragment, float translation_range, float translation_step);
@@ -153,6 +185,7 @@ private:
 
 private:
     clipper::Xmap<float> xwrk;
+    PredictedMaps predictions;
     clipper::Xmap<float> xphospred;
     clipper::Xmap<float> xsugarpred;
     clipper::Xmap<float> xbasepred;

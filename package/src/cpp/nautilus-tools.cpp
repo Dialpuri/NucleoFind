@@ -350,6 +350,14 @@ std::pair<int, int> NucleicAcidTools::get_usedlabels(clipper::String chainid, st
 }
 
 
+void NucleicAcidTools::residue_label(clipper::MiniMol &mol) {
+    for (int p = 0; p < mol.size(); p++) {
+        for (int m = 0; m < mol[p].size(); m++) {
+            mol[p][m].set_id(m);
+        }
+    }
+}
+
 /*
 bool NucleicAcidTools::chain_label( clipper::MiniMol& mol )
 {

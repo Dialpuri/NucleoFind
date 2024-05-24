@@ -1,15 +1,42 @@
+import dataclasses
+import pathlib
+
 from .nautilus_module import Input, Output, run
 import argparse
 from .__version__ import __version__
 from .predict import predict_map
+import traceback
+
+
+@dataclasses.dataclass
+class InputParameters:
+    mtzin: str | pathlib.Path = ""
+    pdbin: str | pathlib.Path = ""
+    seqin: str | pathlib.Path = ""
+    phosin: str | pathlib.Path = ""
+    sugarin: str | pathlib.Path = ""
+    basein: str | pathlib.Path = ""
+    colinfo: str | pathlib.Path = ""
+    colinfc: str | pathlib.Path = ""
+    colinfree: str | pathlib.Path = ""
+    cycles: int = 3
+
+
+@dataclasses.dataclass
+class OutputParameters:
+    pdbout: str | pathlib.Path = ""
+    xmlout: str | pathlib.Path = ""
+
 
 def main():
     parser = argparse.ArgumentParser(description='nucleofind build')
     parser.add_argument("-mtzin", required=True)
-    parser.add_argument("-seqin", required=True)
+    parser.add_argument("-seqin", required=False, default="")
     parser.add_argument("-pdbin", required=False, default="")
     parser.add_argument("-pdbout", required=True)
-    parser.add_argument("-predin", required=True)
+    parser.add_argument("-phosin", required=True)
+    parser.add_argument("-sugarin", required=False, default="")
+    parser.add_argument("-basein", required=False, default="")
     parser.add_argument("-colin-fo", required=True)
     parser.add_argument("-colin-fc", required=True)
     parser.add_argument("-colin-free", required=False, default="")
@@ -19,8 +46,9 @@ def main():
 
     args = parser.parse_args()
 
-    if args.predin == "auto":
-        print("Before building, NucleoFind will predict a phosphate map and output it into the current working directory")
+    if args.phosin == "auto":
+        print(
+            "Before building, NucleoFind will predict a phosphate map and output it into the current working directory")
         split_calculated_sf = args.colin_fc.split(",")
 
         if not split_calculated_sf:
@@ -33,14 +61,14 @@ def main():
                     intensity=split_calculated_sf[0],
                     phase=split_calculated_sf[1])
 
-        args.predin = "phosphate.map"
+        args.phosin = "phosphate.map"
 
     input = Input(args.mtzin,
                   args.seqin,
                   args.pdbin,
-                  args.predin,
-                  "",
-                  "",
+                  args.phosin,
+                  args.sugarin,
+                  args.basein,
                   args.colin_fo,
                   "",
                   "",
@@ -49,12 +77,36 @@ def main():
 
     output = Output(args.pdbout, args.xmlout)
 
-    run(input, output, args.cycles)
+    try:
+        run(input, output, args.cycles)
+    except:
+        print(traceback.format_exc())
 
 
-def build(mtzin: str, seqin: str, pdbin: str, predin: str, colin_fo: str, colin_fc: str, colin_free: str, pdbout: str,
-          xmlout):
-    input = Input(mtzin, seqin, pdbin, predin, "", "", colin_fo, "", "", colin_fc,
-                  colin_free)
-    output = Output(pdbout, xmlout)
-    run(input, output, 1)
+def build(input_parameters: InputParameters, output_parameters: OutputParameters):
+    input = Input(
+        str(input_parameters.mtzin),
+        str(input_parameters.seqin),
+        str(input_parameters.pdbin),
+        str(input_parameters.phosin),
+        str(input_parameters.sugarin),
+        str(input_parameters.basein),
+        str(input_parameters.colinfo),
+        str(""),
+        str(""),
+        str(input_parameters.colinfc),
+        str(input_parameters.colinfree)
+    )
+    output = Output(
+        str(output_parameters.pdbout),
+        str(output_parameters.xmlout))
+
+    run(input, output, input_parameters.cycles)
+
+# def build(mtzin: str, seqin: str, pdbin: str, phosin: str, sugarin: str, basein: str, colin_fo: str, colin_fc: str,
+#           colin_free: str, pdbout: str,
+#           xmlout: str, cycles: int):
+#     input = Input(mtzin, seqin, pdbin, phosin, sugarin, basein, colin_fo, "", "", colin_fc,
+#                   colin_free)
+#     output = Output(pdbout, xmlout)
+#     run(input, output, cycles)

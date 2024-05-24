@@ -17,23 +17,37 @@
 
 clipper::MiniMol &
 run_cycle(int nhit, double srchst, int verbose, NucleicAcidTargets &natools, const clipper::MMoleculeSequence &seq_wrk,
-          clipper::MiniMol &mol_wrk, const clipper::Xmap<float> &xwrk, NautilusLog &log) {
+          clipper::MiniMol &mol_wrk, const clipper::Xmap<float> &xwrk, NautilusLog &log, PredictedMaps& predictions) {
     // grow chains
-    mol_wrk = natools.grow(xwrk, mol_wrk, 25, 0.01);
+
+    int nas_found = NautilusUtil::count_nas(mol_wrk);
+    if (nas_found == 0) { return mol_wrk;}
+
+    mol_wrk = natools.grow(xwrk, mol_wrk, 25, 0.001, predictions);
     log.log("GROW", mol_wrk, verbose >= 5);
+
+//    NautilusUtil::save_minimol(mol_wrk, "grow.pdb");
 
     // join
     NucleicAcidJoin na_join;
     mol_wrk = na_join.join(mol_wrk);
     log.log("JOIN", mol_wrk, verbose >= 5);
 
+//    NautilusUtil::save_minimol(mol_wrk, "join.pdb");
+
+
     // link
     mol_wrk = natools.link(xwrk, mol_wrk);
     log.log("LINK", mol_wrk, verbose >= 5);
 
+//    NautilusUtil::save_minimol(mol_wrk, "link.pdb");
+
     // prune
     mol_wrk = natools.prune(mol_wrk);
     log.log("PRUNE", mol_wrk, verbose >= 5);
+
+//    NautilusUtil::save_minimol(mol_wrk, "prune.pdb");
+
 
     // rebuild
     mol_wrk = natools.rebuild_chain(xwrk, mol_wrk);
@@ -215,38 +229,52 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
         clipper::CCP4MAPfile mapfile;
         mapfile.open_read(input.get_sugar_prediction_path().value());
         mapfile.import_xmap(xsugarpred);
+        mapfile.close_read();
     }
 
     if (input.get_base_prediction_path().has_value()) {
         clipper::CCP4MAPfile mapfile;
         mapfile.open_read(input.get_base_prediction_path().value());
         mapfile.import_xmap(xbasepred);
+        mapfile.close_read();
     }
+
+    PredictedMaps predictions = {xphospred, xsugarpred, xbasepred};
 
     mol_wrk = NucleicAcidTools::flag_chains(mol_wrk);
     clipper::MiniMol mol_wrk_original = mol_wrk;
 
-    FindML find_ml = FindML(mol_wrk, xphospred, xsugarpred, xbasepred, xwrk);
+    FindML find_ml = FindML(mol_wrk, xwrk, predictions);
     find_ml.load_library_from_file(ippdb_ref);
     find_ml.set_resolution(hkls.resolution().limit()); // Needed for the RSRZ calculation, but if not set defaults to 2
     mol_wrk = find_ml.find();
-
     log.log("FIND ML", mol_wrk, verbose >= 5);
+    mol_wrk = natools.link(xwrk, mol_wrk);
+    log.log("FIND ML LINK", mol_wrk, verbose >= 5);
+
     ModelTidy::chain_renumber(mol_wrk, seq_wrk);
+    NucleicAcidTools::chain_sort(mol_wrk);
 
-//    NautilusUtil::save_minimol(mol_wrk, "findml.pdb");*/
+    // NautilusUtil::save_minimol(mol_wrk, "find.pdb");
 
-    for (int cyc = 0; cyc < cycles; cyc++) {
-        std::cout << "ML Based cycle " << clipper::String(cyc + 1, 3) << std::endl << std::endl;
-        mol_wrk = run_cycle(nhit, srchst, verbose, natools, seq_wrk, mol_wrk, xwrk, log);
+    int nas_found = NautilusUtil::count_nas(mol_wrk);
+
+    if (nas_found > 0) {
+        for (int cyc = 0; cyc < cycles; cyc++) {
+            std::cout << "ML Based cycle " << clipper::String(cyc + 1, 3) << std::endl << std::endl;
+            mol_wrk = run_cycle(nhit, srchst, verbose, natools, seq_wrk, mol_wrk, xwrk, log, predictions);
+            NucleicAcidTools::chain_label(mol_wrk, clipper::MMDBManager::CIF);
+            mol_wrk = NucleicAcidTools::chain_sort(mol_wrk);
+            NucleicAcidTools::residue_label(mol_wrk);
+        }
     }
 
 //    NautilusUtil::save_minimol(mol_wrk, "mlbuiltmodel.pdb");
     clipper::MiniMol best_model = mol_wrk;
 
-    int best_na_count = NautilusUtil::count_well_modelled_nas(best_model, xwrk, hkls.resolution().limit());
-    float best_rscc = NautilusUtil::calculate_rscc(best_model, xwrk, hkls.resolution().limit());
+    int best_na_count = NautilusUtil::count_well_modelled_nas(mol_wrk, xwrk, hkls.resolution().limit());
 
+    std::cout << "Built " << best_na_count << " residues with RSRZ >= -1" << std::endl;
 
     for (int cyc = 0; cyc < cycles; cyc++) {
         std::cout << "Internal cycle " << clipper::String(cyc + 1, 3) << std::endl << std::endl; // edited
@@ -256,19 +284,19 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
         mol_wrk = natools.find(xwrk, mol_wrk, nhit / 2, nhit / 2, srchst);
         log.log("FIND", mol_wrk, verbose >= 5);
 
-        mol_wrk = run_cycle(nhit, srchst, verbose, natools, seq_wrk, mol_wrk, xwrk, log);
+        mol_wrk = run_cycle(nhit, srchst, verbose, natools, seq_wrk, mol_wrk, xwrk, log, predictions);
 
-        float rscc = NautilusUtil::calculate_rscc(mol_wrk, xwrk, hkls.resolution().limit());
         int current_count = NautilusUtil::count_well_modelled_nas(mol_wrk, xwrk, hkls.resolution().limit());
-        if (rscc > best_rscc && current_count > best_na_count) {
+        std::cout << "Cycle "<< cyc+1 << " built " << best_na_count << " residues with RSRZ >= -1" << std::endl;
+
+        if (current_count > best_na_count) {
             std::cout << "Taking model from old cycle " << cyc + 1 << "\n";
-            best_rscc = rscc;
             best_model = mol_wrk;
             best_na_count = current_count;
         }
     }
 
-    std::cout << "Taking best model from all cycles with " << best_na_count << " nucleic acids built." << std::endl;
+    std::cout << "Taking best model from all cycles with " << best_na_count << " nucleic acids residues with RSRZ >= -1 built." << std::endl;
     mol_wrk = best_model;
 
     // move to match input model
@@ -316,14 +344,18 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
     log.log("TIDY", mol_new, verbose >= 5);
     //new chain labelling routine, for 2-char label, SWH
     NucleicAcidTools::chain_label(mol_new, cifflag);
-    log.log("LABE", mol_new, verbose >= 5);
+    log.log("LABEL", mol_new, verbose >= 5);
     // final file output
     clipper::MMDBfile pdbfile;
     pdbfile.export_minimol(mol_new);
     pdbfile.write_file(output.get_pdb_out(), cifflag);
+    if (output.get_xml_out().has_value()) { 
+        std::string xmlpath = output.get_xml_out().value();
+        log.xml(xmlpath);
+    }
 //   msg = log.log_info( mol_new, true );	// added by SWH
 //   std::cout << "$TEXT:Result: $$ $$" << std::endl << msg << "\n$$" << std::endl; // added by SWH
     log.profile();
     prog.set_termination_message("Normal termination");
 
-}; 
+};

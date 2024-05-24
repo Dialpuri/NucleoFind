@@ -3,7 +3,7 @@
         SYSTEM "https://resources.jetbrains.com/writerside/1.0/xhtml-entities.dtd">
 <topic xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:noNamespaceSchemaLocation="https://resources.jetbrains.com/writerside/1.0/topic.v2.xsd"
-       title="Model Building" id="Model-Building">
+       title="Automated Model Building" id="Model-Building">
 
     <p>
        Using the predicted phosphate positions, NucleoFind is able to build nucleic acid into electron density.
@@ -25,7 +25,7 @@
                              -seqin sequence.fasta
                              -pdbin xyz.pdb
                              -pdbout output.pdb
-                             -predin phosphate.map
+                             -phosin phosphate.map
                              -colin-fo FP,SIGFP
                              -colin-fc FWT,PWHT
                              -colin-free FREE
@@ -39,24 +39,33 @@
 
         <deflist type="medium">
             <def title="-mtzin">
-                Path to MTZ file.
+                <p>Path to MTZ file.</p>
+                <b>Required</b>
             </def>
             <def title="-seqin">
                 Path to sequence or FASTA file.
             </def>
             <def title="-pdbin">
-                Path to PDB model.
+                Path to input model.
             </def>
             <def title="-pdbout">
-                Path of the output model
+                <p>Path to output model</p>
+                <b>Required</b>
             </def>
-            <def title="-predin">
-                Path to the predicted phosphate map
+            <def title="-phosin">
+                <p>Path to the predicted phosphate map</p>
+                <b>Required</b>
                 <note>
                     <p>Pass the auto argument instead of a path to run NucleoFind and output the predicted phosphate
                         map to the current working directory.</p>
-                    <p>e.g. <code>-predin auto</code></p>
+                    <p>e.g. <code>-phosin auto</code></p>
                 </note>
+            </def>
+            <def title="-sugarin">
+            Path to the predicted sugar map
+            </def>
+            <def title="-basein">
+                Path to the predicted base map
             </def>
             <def title="-colin-fo">
                 <p>Column name for observed structure factors</p>

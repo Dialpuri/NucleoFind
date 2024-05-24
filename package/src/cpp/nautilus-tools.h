@@ -22,6 +22,7 @@ class NucleicAcidTools {
   static clipper::Coord_orth coord_adjust( const clipper::Coord_orth& co, const clipper::Coord_orth& cc3, const clipper::Coord_orth& cf3, const clipper::Coord_orth& cc4, const clipper::Coord_orth& cf4, double rad );
   static bool symm_match( clipper::MiniMol& molwrk, const clipper::MiniMol& molref );
   static bool chain_label(clipper::MiniMol& mol, clipper::MMDBManager::TYPE cifflag );
+  static void residue_label(clipper::MiniMol& mol);
   static std::pair<int,int> get_usedlabels(clipper::String chainid, std::vector<clipper::String> labels);
  private:
   class MapFilterFn_g5 : public clipper::MapFilterFn_base { public:

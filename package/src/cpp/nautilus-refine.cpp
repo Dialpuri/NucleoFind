@@ -352,6 +352,16 @@ Target_fn_refine_fragment_trn::refine() {
 
 // REFINE FRAGMENT COORDINATES
 
+float get_predicted_map_score(clipper::Coord_orth& coord, const clipper::Xmap<float>* xmap, const clipper::Cell& cell, float threshold, float score_addition) {
+    if (!coord.is_null() && !xmap->cell().is_null()) {
+        float density_predicted_score = xmap->interp<clipper::Interp_cubic>(coord.coord_frac(cell));
+        if (density_predicted_score > threshold) {
+            return score_addition;
+        }
+    }
+    return 0;
+}
+
 double RefineFragmentCoordinates::operator()(const std::vector<double> &args) const {
 
     clipper::Vec3<> new_translation = {args[3], args[4], args[5]};
@@ -395,11 +405,33 @@ double RefineFragmentCoordinates::operator()(const std::vector<double> &args) co
         if (!chain.O2_1.is_null()) score += m_xmap->interp<clipper::Interp_cubic>(chain.O2_1.coord_frac(m_xmap->cell()));
         if (!chain.O6_1.is_null()) score += m_xmap->interp<clipper::Interp_cubic>(chain.O6_1.coord_frac(m_xmap->cell()));
         if (!chain.P.is_null()) score += m_xmap->interp<clipper::Interp_cubic>(chain.P.coord_frac(m_xmap->cell()));
-        if (!chain.P.is_null()) {
-            float density_predicted_score = m_phosphate_map->interp<clipper::Interp_cubic>(chain.P.coord_frac(m_xmap->cell()));
-            if (density_predicted_score < 0.1) {
-                score -= 100;
-            }
+
+        score += get_predicted_map_score(chain.P, m_phosphate_map, m_xmap->cell(), 0.5, 10);
+
+        if (sugar_map_available) {
+            score += get_predicted_map_score(chain.C2p1, m_sugar_map, m_xmap->cell(), 0.7, 1);
+            score += get_predicted_map_score(chain.C3p1, m_sugar_map,m_xmap->cell(), 0.7, 1);
+            score += get_predicted_map_score(chain.C4p1, m_sugar_map,m_xmap->cell(), 0.7, 1);
+            score += get_predicted_map_score(chain.C5p1, m_sugar_map, m_xmap->cell(),0.7,1);
+            score += get_predicted_map_score(chain.O3p1, m_sugar_map,m_xmap->cell(), 0.7, 1);
+            score += get_predicted_map_score(chain.C1p1, m_sugar_map, m_xmap->cell(),0.7, 1);
+        }
+
+        if (base_map_available) {
+            int base_atom_count = 0;
+            score += get_predicted_map_score(chain.N1_1, m_base_map,m_xmap->cell(), 0.8, 1);
+            score += get_predicted_map_score(chain.N2_1, m_base_map,m_xmap->cell(), 0.8, 1);
+            score += get_predicted_map_score(chain.N3_1, m_base_map,m_xmap->cell(), 0.8, 1);
+            score += get_predicted_map_score(chain.N4_1, m_base_map,m_xmap->cell(), 0.8, 1);
+            score += get_predicted_map_score(chain.N6_1, m_base_map,m_xmap->cell(), 0.8, 1);
+            score += get_predicted_map_score(chain.N7_1, m_base_map, m_xmap->cell(),0.8, 1);
+            score += get_predicted_map_score(chain.C2_1, m_base_map, m_xmap->cell(),0.8, 1);
+            score += get_predicted_map_score(chain.C4_1, m_base_map,m_xmap->cell(), 0.8, 1);
+            score += get_predicted_map_score(chain.C5_1, m_base_map, m_xmap->cell(),0.9, 1);
+            score += get_predicted_map_score(chain.C6_1, m_base_map,m_xmap->cell(), 0.8, 1);
+            score += get_predicted_map_score(chain.C8_1, m_base_map, m_xmap->cell(),0.8, 1);
+            score += get_predicted_map_score(chain.O2_1, m_base_map,m_xmap->cell(), 0.8, 1);
+            score += get_predicted_map_score(chain.O6_1, m_base_map,m_xmap->cell(), 0.8, 1);
         }
 
         test_fragment[i].score = score;
