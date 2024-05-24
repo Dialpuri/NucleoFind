@@ -44,7 +44,10 @@
                 <b>Required</b>
             </def>
             <def title="-m ">
-                <p>Name of nucleic acid characteristic to predict, e.g. <code>phosphate</code></p>
+                <p>Name of nucleic acid characteristic to predict</p>
+                <p>e.g. <code> -m phosphate</code></p>
+                <p>e.g. <code> -m phosphate,sugar</code></p>
+                <p>e.g. <code> -m all</code></p>
                 <p>Optional if only one model is installed, otherwise required.</p>
             </def>
             <def title="-r, -resolution">
