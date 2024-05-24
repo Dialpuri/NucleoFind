@@ -42,7 +42,7 @@ jobs:
         run:  nucleofind-install --all
 
       - name: Run tests
-        run : pytest tests
+        run : pytest tests -s
 
   debug:
       needs: [run_tests]
