@@ -29,10 +29,10 @@ public:
         this->colin_fc = colin_fc; 
         this->colin_free = colin_free;
 
-        if (mtzin.empty()) { throw std::runtime_error("MTZ Path must not be empty");}
-        if (seqin.empty()) { throw std::runtime_error("SEQ Path must not be empty");}
+        if (mtzin.empty()) { throw std::runtime_error("MTZ path must not be empty");}
+//        if (seqin.empty()) { throw std::runtime_error("SEQ Path must not be empty");}
         // if (pdbin.empty()) { throw std::runtime_error("PDB Path must not be empty");}
-        if (phospredin.empty()) { throw std::runtime_error("Phosphate predicition Path must not be empty");}
+        if (phospredin.empty()) { throw std::runtime_error("Phosphate prediction path must not be empty");}
 
     };
 
