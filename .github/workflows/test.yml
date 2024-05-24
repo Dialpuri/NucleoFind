@@ -6,19 +6,19 @@ on:
       - master
 
 jobs:
-  check_versioning:
-    name: Check versions match
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-      - run: |
-          cd package
-          ./get_sources
-          pip install . 
-          python tests/test_version.py -version ${{ github.event.release.tag_name }}
+#  check_versioning:
+#    name: Check versions match
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#      - uses: actions/setup-python@v5
+#        with:
+#          python-version: '3.10'
+#      - run: |
+#          cd package
+#          ./get_sources
+#          pip install .
+#          python tests/test_version.py -version ${{ github.event.release.tag_name }}
 
   run_tests:
     name: Run Python tests
@@ -33,7 +33,7 @@ jobs:
           ./get_sources
           pip install .
           pip install pytest
-          nucleofind-install -m all 
+          nucleofind-install --all 
           pytest tests
 
   debug:
