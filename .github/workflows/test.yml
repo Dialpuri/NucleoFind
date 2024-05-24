@@ -22,15 +22,27 @@ jobs:
         run: |
           export CC=$(which clang)
           export CXX=$(which clang++)
-          
+          echo $CC
+          echo $CXX
+          clang --version 
+          clang++ --version
 
+      - name: Get sources
       - run: |
           cd package
           ./get_sources
-          pip install .
-          pip install pytest
-          nucleofind-install --all 
-          pytest tests
+
+      - name: Install NucleoFind
+      - run: pip install .
+
+      - name: Install pytest
+      - run: pip install pytest
+
+      - name: Install NucleoFind models
+      - run:  nucleofind-install --all
+
+      - name: Run tests
+      - run : pytest tests
 
   debug:
       needs: [run_tests]
