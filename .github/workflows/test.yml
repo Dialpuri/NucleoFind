@@ -29,11 +29,12 @@ jobs:
 
       - name: Get sources
         run: |
-          cd package
           ./get_sources
+        working-directory: ./package
 
       - name: Install NucleoFind
         run: pip install .
+        working-directory: ./package
 
       - name: Install pytest
         run: pip install pytest
@@ -43,6 +44,7 @@ jobs:
 
       - name: Run tests
         run : pytest tests -s
+        working-directory: ./package
 
   debug:
       needs: [run_tests]
