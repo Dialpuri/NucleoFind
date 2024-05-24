@@ -1073,12 +1073,12 @@ clipper::MiniMol FindML::find() {
     if (predictions.get_sugar_map().has_value()) sugar_peaks = calculate_sugar_peaks(0.3);
     if (predictions.get_base_map().has_value()) base_peaks = calculate_base_peaks(0.3);
 
-    NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
+//    NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
     //NautilusUtil::save_minimol(sugar_peaks, "sugar_peaks.pdb");
     //NautilusUtil::save_minimol(base_peaks, "base_peaks.pdb");
 
     TripletCoordinates phosphate_triplets = find_triplet_coordinates(phosphate_peaks, sugar_peaks);
-    draw_triplets(phosphate_triplets, phosphate_peaks, "triplets-ext.pdb");
+//    draw_triplets(phosphate_triplets, phosphate_peaks, "triplets-ext.pdb");
 //     NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
     std::cout << phosphate_triplets.size() << " phosphate triplets found\n";
 

@@ -44,8 +44,8 @@ class NucleicAcidTargets {
   static float score_sugar_from_predictions(const clipper::Xmap<float>& xmap, const NucleicAcidDB::NucleicAcid &na) ;
 
   float score_phosphate( const clipper::Xmap<float>& xmap, const NucleicAcidDB::NucleicAcid& na1, const NucleicAcidDB::NucleicAcid& na2 ) const;
-  NucleicAcidDB::NucleicAcid next_na_group( const clipper::Xmap<float>& xmap, const NucleicAcidDB::NucleicAcid& na, PredictedMaps& predictions ) const;
-  NucleicAcidDB::NucleicAcid prev_na_group( const clipper::Xmap<float>& xmap, const NucleicAcidDB::NucleicAcid& na, PredictedMaps& predictions ) const;
+  NucleicAcidDB::NucleicAcid next_na_group(const clipper::Xmap<float>& xmap, const NucleicAcidDB::NucleicAcid& na, const clipper::Xmap<float> &sugar_map ) const;
+  NucleicAcidDB::NucleicAcid prev_na_group(const clipper::Xmap<float>& xmap, const NucleicAcidDB::NucleicAcid& na, const clipper::Xmap<float> &sugar_map ) const;
   const NucleicAcidTarget& target_sugar() const { return target_s; }
   const NucleicAcidTarget& target_phosphate() const { return target_p; }
 
