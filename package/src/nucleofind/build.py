@@ -31,7 +31,7 @@ class OutputParameters:
 def main():
     parser = argparse.ArgumentParser(description='nucleofind build')
     parser.add_argument("-mtzin", required=True)
-    parser.add_argument("-seqin", required=True)
+    parser.add_argument("-seqin", required=False, default="")
     parser.add_argument("-pdbin", required=False, default="")
     parser.add_argument("-pdbout", required=True)
     parser.add_argument("-phosin", required=True)
@@ -61,7 +61,7 @@ def main():
                     intensity=split_calculated_sf[0],
                     phase=split_calculated_sf[1])
 
-        args.predin = "phosphate.map"
+        args.phosin = "phosphate.map"
 
     input = Input(args.mtzin,
                   args.seqin,
