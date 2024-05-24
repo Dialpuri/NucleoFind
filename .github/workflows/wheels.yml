@@ -37,13 +37,24 @@ jobs:
           export CC=$(which clang)
           export CXX=$(which clang++)
 
-      - run: |
-          cd package
+      - name: Get sources
+        run: |
           ./get_sources
-          pip install .
-          pip install pytest
-          nucleofind-install --all
-          pytest tests
+        working-directory: ./package
+
+      - name: Install NucleoFind
+        run: pip install .
+        working-directory: ./package
+
+      - name: Install pytest
+        run: pip install pytest
+
+      - name: Install NucleoFind models
+        run:  nucleofind-install --all
+
+      - name: Run tests
+        run : pytest tests
+        working-directory: ./package
 
   build_sdist:
     needs: [ check_versioning, run_tests ]
