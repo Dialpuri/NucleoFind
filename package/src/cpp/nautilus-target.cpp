@@ -260,16 +260,14 @@ float NucleicAcidTargets::score_sugar_from_predictions(const clipper::Xmap<float
     return score;
 }
 
-NucleicAcidDB::NucleicAcid NucleicAcidTargets::next_na_group( const clipper::Xmap<float>& xmap, const NucleicAcidDB::NucleicAcid& na , PredictedMaps& predictions) const
+NucleicAcidDB::NucleicAcid NucleicAcidTargets::next_na_group(const clipper::Xmap<float>& xmap, const NucleicAcidDB::NucleicAcid& na , const clipper::Xmap<float> &sugar_map) const
 {
   NucleicAcidDB::NucleicAcid nmax;
   float smax = -1.0e20;
-    bool sugar_map_available = false;
-    clipper::Xmap<float> sugar_map;
-    if (predictions.get_sugar_map().has_value()) {
-        sugar_map = predictions.get_sugar_map().value();
-        sugar_map_available = true;
-    }
+  bool sugar_map_available = false;
+  if (!sugar_map.is_null()) {
+      sugar_map_available = true;
+  }
 
     for ( int p = 0; p < nadb.size()-1; p++ ) {
     NucleicAcidDB::Chain frag = nadb.extract( p, 2 );
@@ -293,17 +291,15 @@ NucleicAcidDB::NucleicAcid NucleicAcidTargets::next_na_group( const clipper::Xma
 }
 
 
-NucleicAcidDB::NucleicAcid NucleicAcidTargets::prev_na_group( const clipper::Xmap<float>& xmap, const NucleicAcidDB::NucleicAcid& na, PredictedMaps& predictions ) const
+NucleicAcidDB::NucleicAcid NucleicAcidTargets::prev_na_group(const clipper::Xmap<float>& xmap, const NucleicAcidDB::NucleicAcid& na, const clipper::Xmap<float> &sugar_map ) const
 {
   NucleicAcidDB::NucleicAcid nmax;
-  bool sugar_map_available = false;
-  clipper::Xmap<float> sugar_map;
-  if (predictions.get_sugar_map().has_value()) {
-     sugar_map = predictions.get_sugar_map().value();
-      sugar_map_available = true;
-  }
+    bool sugar_map_available = false;
+    if (!sugar_map.is_null()) {
+    sugar_map_available = true;
+    }
 
-  float smax = -1.0e20;
+    float smax = -1.0e20;
   for ( int p = 0; p < nadb.size()-1; p++ ) {
     NucleicAcidDB::Chain frag = nadb.extract( p, 2 );
     if ( frag.is_continuous() ) {
@@ -619,18 +615,24 @@ const clipper::MiniMol NucleicAcidTargets::grow( const clipper::Xmap<float>& xma
 {
   clipper::MiniMol mol_new = mol;
   float scut = target_sugar().cutoff_sum( fcut );
+
+  clipper::Xmap<float> sugar_map;
+  if (predictions.get_sugar_map().has_value()) {
+      sugar_map = predictions.get_sugar_map().value();
+  }
+
   for ( int c = 0; c < mol_new.size(); c++ ) {
     if ( !mol_new[c].exists_property( "NON-NA" ) ) {
     // find terminal and start monomer id in chain?
       NucleicAcidDB::NucleicAcid na;
       for ( int i = 0; i < ngrow; i++ ) {
-            na = next_na_group( xmap, mol_new[c][mol_new[c].size()-1], predictions);
+            na = next_na_group( xmap, mol_new[c][mol_new[c].size()-1], sugar_map);
           if ( score_sugar( xmap, na ) < scut ) break;
             na.set_type( '?' );
             mol_new[c].insert( na.mmonomer() );
       }
       for ( int i = 0; i < ngrow; i++ ) {
-        na = prev_na_group( xmap, mol_new[c][0], predictions );
+        na = prev_na_group( xmap, mol_new[c][0], sugar_map );
         if ( score_sugar( xmap, na ) < scut ) break;
         na.set_type( '?' );
         mol_new[c].insert( na.mmonomer(), 0 );
