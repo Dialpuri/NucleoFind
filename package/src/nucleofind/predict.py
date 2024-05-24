@@ -92,6 +92,9 @@ class Prediction:
             ccp4 = gemmi.Ccp4Map()
             ccp4.grid = grid
             ccp4.update_ccp4_header()
+            if '.map' in output_path and len(self.predicted_grids) == 1:
+                ccp4.write_ccp4_map(output_path)
+                return
             if ".map" in output_path:
                 ccp4.write_ccp4_map(output_path.replace(".map", f"_{self.model_names[index]}.map"))
             else:
@@ -383,7 +386,7 @@ class Prediction:
 def predict_map(model: str, input: str, output: str, resolution: float = 2.5, intensity: str = "FWT",
                 phase: str = "PHWT", overlap: float = 16):
     model_path = find_model(model)
-    prediction = Prediction(model_dir=model_path)
+    prediction = Prediction(model_paths=[model_path])
     prediction.make_prediction(input, [intensity, phase], overlap=overlap)
     prediction.save_predicted_map(output)
 
