@@ -28,18 +28,18 @@ jobs:
           clang++ --version
 
       - name: Get sources
-      - run: |
+        run: |
           cd package
           ./get_sources
 
       - name: Install NucleoFind
-      - run: pip install .
+        run: pip install .
 
       - name: Install pytest
-      - run: pip install pytest
+        run: pip install pytest
 
       - name: Install NucleoFind models
-      - run:  nucleofind-install --all
+        run:  nucleofind-install --all
 
       - name: Run tests
       - run : pytest tests
