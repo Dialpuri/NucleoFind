@@ -34,7 +34,7 @@ jobs:
           ./get_sources
           pip install .
           pip install pytest
-          nucleofind-install -m all
+          nucleofind-install --all
           pytest tests
 
   build_sdist:
