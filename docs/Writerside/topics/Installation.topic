@@ -5,6 +5,7 @@
        xsi:noNamespaceSchemaLocation="https://resources.jetbrains.com/writerside/1.0/topic.v2.xsd"
        title="Package Installation" id="Installation">
 
+        <note>Python 3.10 or greater is required</note>
         <procedure title="Python Package" id="pip">
             <p>To install <code>NucleoFind</code> as a Python package:</p>
             <step>
