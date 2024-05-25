@@ -402,7 +402,7 @@ def run():
     parser.add_argument("-r", "-resolution", nargs='?', help="Resolution cutoff")
     parser.add_argument("-intensity", nargs='?', help="Name of intensity column in MTZ")
     parser.add_argument("-phase", nargs='?', help="Name of phase column in MTZ")
-    parser.add_argument("-overlap", nargs='?', help="Amount of overlap to use", const=16, default=16)
+    parser.add_argument("-overlap", nargs='?', help="Amount of overlap to use", const=16, default=16, type=int)
     parser.add_argument("-variance", action=argparse.BooleanOptionalAction, help="Output variance map")
     parser.add_argument("-raw", action=argparse.BooleanOptionalAction, help="Output raw map (no argmax)")
     parser.add_argument("-gpu", action=argparse.BooleanOptionalAction, help="Use GPU (experimental)")
