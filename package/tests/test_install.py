@@ -2,7 +2,7 @@ import subprocess
 import site
 import os
 import hashlib
-
+import pytest
 
 def get_md5_sums():
     phosphate_md5_sum = "61c0f43b46ff9a686f23c63b4bac0583"
@@ -43,6 +43,7 @@ def perform_installation_test(model_type: str):
     assert found_sum == data[model_type]
 
 
+@pytest.mark.slow
 def test_install():
     perform_installation_test("phosphate")
     perform_installation_test("sugar")
