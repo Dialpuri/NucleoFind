@@ -8,6 +8,7 @@
 #include <clipper/clipper-minimol.h>
 #include <clipper/clipper-ccp4.h>
 #include <clipper/core/map_interp.h>
+#include <map>
 
 class NautilusUtil {
  public:

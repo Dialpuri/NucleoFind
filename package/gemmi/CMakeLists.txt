@@ -86,7 +86,7 @@ set(gemmi_HEADERS
         ${gemmi_src}/include/gemmi/levmar.hpp
         ${gemmi_src}/include/gemmi/linkhunt.hpp
         ${gemmi_src}/include/gemmi/math.hpp
-        ${gemmi_src}/include/gemmi/merge.hpp
+#        ${gemmi_src}/include/gemmi/merge.hpp
         ${gemmi_src}/include/gemmi/metadata.hpp
         ${gemmi_src}/include/gemmi/mmcif.hpp
         ${gemmi_src}/include/gemmi/mmcif_impl.hpp
@@ -146,7 +146,7 @@ set(gemmi_HEADERS
 set(gemmi_third_party-headers_HEADERS
         ${gemmi_src}/include/gemmi/third_party/fast_float.h
         ${gemmi_src}/include/gemmi/third_party/pocketfft_hdronly.h
-        ${gemmi_src}/include/gemmi/third_party/sajson.h
+#        ${gemmi_src}/include/gemmi/third_party/sajson.h
         ${gemmi_src}/include/gemmi/third_party/tinydir.h
 )
 

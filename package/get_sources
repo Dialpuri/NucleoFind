@@ -7,10 +7,9 @@ if [ -d "clipper" ]; then
     echo "Found clipper"
 else
     echo "Checking out clipper"
-  curl -L http://www.ysbl.york.ac.uk/jsd523/clipper-gemmi-wrapper-20240123.tar.gz -o clipper-gemmi-wrapper.tar.gz
-    echo "Unpacking fftw-2.1.5"
-    tar xf clipper-gemmi-wrapper.tar.gz
-    mv clipper-gemmi-wrapper clipper
+    curl -L http://ftp.ccp4.ac.uk/opensource/clipper-2.1.20201109.tar.gz -o clipper-2.1.20201109.tar.gz
+    tar xf clipper-2.1.20201109.tar.gz
+    mv clipper-2.1 clipper
 
 fi 
 
@@ -20,7 +19,7 @@ else
     echo "Checking out gemmi"
     git clone https://github.com/project-gemmi/gemmi.git gemmi
     cd gemmi
-    git checkout v0.6.4
+    git checkout v0.6.5
     cd ..
     echo
 fi
