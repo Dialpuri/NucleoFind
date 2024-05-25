@@ -34,7 +34,6 @@ endif()
 
 set(WRK_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
-add_subdirectory(${WRK_DIR}/clipper/gemmi)
 add_subdirectory(${WRK_DIR}/clipper/minimol)
 add_subdirectory(${WRK_DIR}/clipper/core)
 add_subdirectory(${WRK_DIR}/clipper/contrib)
@@ -96,7 +95,6 @@ target_link_directories(nautilus_lib
         ${CMAKE_BINARY_DIR}/clipper/mmdb
         ${CMAKE_BINARY_DIR}/clipper/cif
         ${CMAKE_BINARY_DIR}/clipper/ccp4
-        ${CMAKE_BINARY_DIR}/clipper/gemmi
         ${CMAKE_BINARY_DIR}/clipper/minimol
         ${CMAKE_BINARY_DIR}/clipper/core
         ${CMAKE_BINARY_DIR}/clipper/contrib
@@ -113,7 +111,6 @@ target_link_libraries(
         clipper-mmdb
         clipper-cif
         clipper-ccp4
-        clipper-gemmi
         clipper-minimol
         clipper-core
         clipper-contrib
@@ -177,7 +174,6 @@ target_include_directories(nautilus_module PUBLIC
         ${WRK_DIR}/clipper/core
         ${WRK_DIR}/clipper/contrib
         ${WRK_DIR}/clipper/ccp4
-        ${WRK_DIR}/clipper/gemmi
         ${WRK_DIR}/clipper/minimol
         ${WRK_DIR}/fftw
         ${WRK_DIR}/rfftw
@@ -188,21 +184,9 @@ target_include_directories(nautilus_module PUBLIC
 
 target_link_directories(nautilus_module
         PUBLIC
-        # ${WRK_DIR}/mmdb2
-        # ${WRK_DIR}/clipper/mmdb
-        # ${WRK_DIR}/clipper/cif
-        # ${WRK_DIR}/clipper/core
-        # ${WRK_DIR}/clipper/contrib
-        # ${WRK_DIR}/clipper/ccp4
-        # ${WRK_DIR}/clipper/gemmi
-        # ${WRK_DIR}/clipper/minimol
-        # ${WRK_DIR}/fftw
-        # ${WRK_DIR}/rfftw
-        # ${WRK_DIR}/ccp4
         ${CMAKE_BINARY_DIR}/clipper/mmdb
         ${CMAKE_BINARY_DIR}/clipper/cif
         ${CMAKE_BINARY_DIR}/clipper/ccp4
-        ${CMAKE_BINARY_DIR}/clipper/gemmi
         ${CMAKE_BINARY_DIR}/clipper/minimol
         ${CMAKE_BINARY_DIR}/clipper/contrib
         ${CMAKE_BINARY_DIR}/clipper/core
@@ -221,7 +205,6 @@ target_link_libraries(
         clipper-mmdb
         clipper-cif
         clipper-ccp4
-        clipper-gemmi
         clipper-minimol
         clipper-contrib
         clipper-core

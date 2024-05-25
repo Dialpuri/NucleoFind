@@ -1,34 +1,24 @@
 project(clipper-minimol)
 
 add_library(clipper-minimol STATIC
-        ${WRK_DIR}/checkout/clipper/clipper/minimol/container_minimol.cpp
-        ${WRK_DIR}/checkout/clipper/clipper/minimol/minimol.cpp
-        ${WRK_DIR}/checkout/clipper/clipper/minimol/minimol_data.cpp
-        ${WRK_DIR}/checkout/clipper/clipper/minimol/minimol_io_gemmi.cpp
-        ${WRK_DIR}/checkout/clipper/clipper/minimol/minimol_io_mmdb.cpp
-        ${WRK_DIR}/checkout/clipper/clipper/minimol/minimol_io_seq.cpp
-        ${WRK_DIR}/checkout/clipper/clipper/minimol/minimol_seq.cpp
-        ${WRK_DIR}/checkout/clipper/clipper/minimol/minimol_utils.cpp
+        ../../checkout/clipper/clipper/minimol/container_minimol.cpp
+        ../../checkout/clipper/clipper/minimol/minimol.cpp
+        ../../checkout/clipper/clipper/minimol/minimol_data.cpp
+        ../../checkout/clipper/clipper/minimol/minimol_io.cpp
+        ../../checkout/clipper/clipper/minimol/minimol_seq.cpp
+        ../../checkout/clipper/clipper/minimol/minimol_utils.cpp
 )
 
-target_include_directories(clipper-minimol PRIVATE
-        ${WRK_DIR}/checkout/mmdb2/
-        ${WRK_DIR}/checkout/clipper
-        ${WRK_DIR}/checkout/fftw-2.1.5/fftw
-        ${WRK_DIR}/checkout/fftw-2.1.5/rfftw
-        ${WRK_DIR}/checkout/gemmi/include
-)
+target_include_directories(clipper-minimol PRIVATE ../../checkout/mmdb2/ ../../checkout/clipper ../../checkout/fftw-2.1.5/fftw ../../checkout/fftw-2.1.5/rfftw)
 
 set(clipper-minimol_HEADERS
-        ${WRK_DIR}/checkout/clipper/clipper/minimol/minimol_data.h
-        ${WRK_DIR}/checkout/clipper/clipper/minimol/minimol.h
-        ${WRK_DIR}/checkout/clipper/clipper/minimol/container_minimol.h
-        ${WRK_DIR}/checkout/clipper/clipper/minimol/minimol_io_gemmi.h
-        ${WRK_DIR}/checkout/clipper/clipper/minimol/minimol_io_mmdb.h
-        ${WRK_DIR}/checkout/clipper/clipper/minimol/minimol_io_seq.h
-        ${WRK_DIR}/checkout/clipper/clipper/minimol/minimol_seq.h
-        ${WRK_DIR}/checkout/clipper/clipper/minimol/minimol_utils.h
-        ${WRK_DIR}/checkout/clipper/clipper/clipper-minimol.h
+        ${CMAKE_SOURCE_DIR}/checkout/clipper//clipper/minimol/minimol_data.h
+        ${CMAKE_SOURCE_DIR}/checkout/clipper//clipper/minimol/minimol.h
+        ${CMAKE_SOURCE_DIR}/checkout/clipper//clipper/minimol/container_minimol.h
+        ${CMAKE_SOURCE_DIR}/checkout/clipper//clipper/minimol/minimol_io.h
+        ${CMAKE_SOURCE_DIR}/checkout/clipper//clipper/minimol/minimol_seq.h
+        ${CMAKE_SOURCE_DIR}/checkout/clipper//clipper/minimol/minimol_utils.h
+        ${CMAKE_SOURCE_DIR}/checkout/clipper//clipper/clipper-minimol.h
 )
 
 target_compile_options(clipper-minimol PUBLIC "-DFFTW_ENABLE_FLOAT")

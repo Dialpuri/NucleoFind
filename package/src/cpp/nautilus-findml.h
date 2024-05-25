@@ -6,7 +6,8 @@
 #define NAUTILUS_FINDML_H
 #include <clipper/clipper-minimol.h>
 #include <optional>
-
+#include <unordered_set>
+#include <set>
 #include "nucleicacid_db.h"
 //
 struct ChainData {
