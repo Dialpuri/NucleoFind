@@ -48,7 +48,7 @@ def predictions_python(parameters):
     Run NucleoFind using the Python API.
 
     Args:
-        parameters (dict): A dictionary containing the necessary input parameters.
+        parameters (SimpleNamespace): A dictionary containing the necessary input parameters.
 
     Returns:
         str: The path to the output file.
@@ -66,7 +66,7 @@ def predictions_cmdline(parameters):
     Run NucleoFind using the command line interface.
 
     Args:
-        parameters (dict): A dictionary containing the necessary input parameters.
+        parameters (SimpleNamespace): A dictionary containing the necessary input parameters.
 
     Returns:
         str: The path to the output file.
@@ -83,7 +83,7 @@ def test_python_prediction(predictions_python, parameters, md5sums):
     to the known MD5 sums.
 
     Parameters:
-    - predictions_python (str): Path to the output model base directory.
+    - predictions_python (path): Path to the output model base directory.
     - parameters (SimpleNamespace): A dictionary of parameters used in the predictions.
     - md5sums (SimpleNamespace): A dictionary of MD5 sums corresponding to the predictions.
 
@@ -95,16 +95,16 @@ def test_python_prediction(predictions_python, parameters, md5sums):
 
 def test_cmdline_prediction(predictions_cmdline, parameters, md5sums):
     """
-       This function is used to test the predictions made by a command line interface. It compares the MD5 sums of the
-       predictions to the known MD5 sums.
+    This function is used to test the predictions made by a command line interface. It compares the MD5 sums of the
+    predictions to the known MD5 sums.
 
-       Parameters:
-       - predictions_python (str): Path to the output model base directory.
-       - parameters (SimpleNamespace): A dictionary of parameters used in the predictions.
-       - md5sums (SimpleNamespace): A dictionary of MD5 sums corresponding to the predictions.
+    Parameters:
+    - predictions_python (path): Path to the output model base directory.
+    - parameters (SimpleNamespace): A dictionary of parameters used in the predictions.
+    - md5sums (SimpleNamespace): A dictionary of MD5 sums corresponding to the predictions.
 
-       Raises:
-           AssertionError: An error occurs if the calculated prediction MD5 sums do not equal the known MD5 sums.
+    Raises:
+        AssertionError: An error occurs if the calculated prediction MD5 sums do not equal the known MD5 sums.
        """
     compare_sums(md5sums, parameters, predictions_cmdline)
 
