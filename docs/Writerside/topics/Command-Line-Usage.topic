@@ -41,6 +41,11 @@
             </def>
             <def title="-o, -output">
                 <p>Path to output .map file</p>
+                <p>e.g. <code> -o prediction.map</code></p>
+                <p>If multiple models are specified, the suffix _model.map will be added to the outputs.</p>
+                <p>e.g. <code>-m phosphate,sugar -o prediction</code> outputs two files
+                <code>prediction_phosphate.map</code> and <code>prediction_sugar.map</code>
+                </p>
                 <b>Required</b>
             </def>
             <def title="-m ">
