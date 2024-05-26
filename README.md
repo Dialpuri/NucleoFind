@@ -16,3 +16,11 @@ Nucleic acid electron density interpretation remains a difficult problem for com
 To build NucleoFind upon every Python import, which will be useful in development, run: 
 
     pip install --no-build-isolation --config-settings=editable.rebuild=true -Cbuild-dir=build -ve .
+
+### Testing
+
+If you wish to contribute to this repository, all tests must pass, they can be run with pytest: 
+
+    cd package
+    pytest tests --runslow --unit -v 
+    
