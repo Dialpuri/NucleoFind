@@ -68,10 +68,10 @@ run_cycle(int nhit, double srchst, int verbose, NucleicAcidTargets &natools, con
 
 void run(NautilusInput &input, NautilusOutput &output, int cycles) {
 
-    CCP4Program prog("nucleofind-build", "0.1", "$Date: 2024/02/26");
+    CCP4Program prog("nucleofind-build", "0.6.1", "$Date: 2024/02/26");
     prog.set_termination_message("Failed");
 
-    std::cout << std::endl << "Copyright Jordan Dialpuri, Kevin Cowtan and University of York." << std::endl
+    std::cout << std::endl << "Copyright (c) 2024 Jordan Dialpuri, Jon Agirre, Kevin Cowtan, Paul Bond and University of York. All rights reserved" << std::endl
               << std::endl;
     prog.summary_beg();
     std::cout << "$TEXT:Reference: $$ Please reference $$" << std::endl << std::endl
