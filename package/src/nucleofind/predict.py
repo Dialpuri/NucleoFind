@@ -113,7 +113,7 @@ class Prediction:
             else:
                 ccp4.write_ccp4_map(f"{output_path}_variance_{self.model_names[index]}.map")
 
-    def save_interpolated_map(self, output_path: str, grid_spacing: float = 0.7):
+    def save_interpolated_map(self, output_path: str):
         logging.info("Saving interpolated map")
         ccp4 = gemmi.Ccp4Map()
         ccp4.grid = self.interpolated_grid
@@ -151,11 +151,13 @@ class Prediction:
         res = mtz.resolution_high()
         spacing = 0.7
         sample_rate = res / spacing
-        self.raw_grid = mtz.transform_f_phi_to_map(*column_names, sample_rate=sample_rate)
-        self.raw_grid.normalize()
+
         if resolution_cutoff:
             data = np.array(mtz, copy=False)
             mtz.set_data(data[mtz.make_d_array() >= resolution_cutoff])
+
+        self.raw_grid = mtz.transform_f_phi_to_map(*column_names, sample_rate=sample_rate)
+        self.raw_grid.normalize()
 
     @staticmethod
     def _get_bounding_box(grid: gemmi.FloatGrid) -> gemmi.PositionBox:
