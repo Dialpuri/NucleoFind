@@ -10,9 +10,3 @@ Nucleic acid electron density interpretation remains a difficult problem for com
 
 ## Documentation
 [Link to Documentation](https://dialpuri.github.io/NucleoFind/about-nucleofind.html)
-
-## Development
-
-To build NucleoFind upon every Python import, which will be useful in development, run: 
-
-    pip install --no-build-isolation --config-settings=editable.rebuild=true -Cbuild-dir=build -ve .
