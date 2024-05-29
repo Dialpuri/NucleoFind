@@ -230,7 +230,7 @@ enable_testing()
 
 add_executable(
         nucleofind_test
-        ${WRK_DIR}/src/tests/test_test.cpp
+        ${WRK_DIR}/src/tests/test_findml.cpp
 )
 target_link_libraries(
         nucleofind_test
