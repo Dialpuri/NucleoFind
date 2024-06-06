@@ -247,7 +247,7 @@ class Prediction:
                 position = output_grid.point_to_position(point) - self.box_minimum
                 point.value = array_grid.interpolate_value(position)
 
-            output_grid.symmetrize_max()
+            output_grid.symmetrize_avg()
             output_grids.append(output_grid)
 
         return output_grids
