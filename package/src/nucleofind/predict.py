@@ -159,9 +159,11 @@ class Prediction:
 
     @staticmethod
     def _get_bounding_box(grid: gemmi.FloatGrid) -> gemmi.PositionBox:
+        logging.debug(f"Spacegroup: {grid.spacegroup}")
         extent = gemmi.find_asu_brick(grid.spacegroup).get_extent()
-        extent.maximum = gemmi.Fractional(1, 1, 1)
-        extent.minimum = gemmi.Fractional(0, 0, 0)
+
+        logging.debug(f"ASU Brick Minimum: {extent.minimum}")
+        logging.debug(f"ASU Brick Maximum: {extent.maximum}")
 
         corners = [
             grid.unit_cell.orthogonalize(fractional)
