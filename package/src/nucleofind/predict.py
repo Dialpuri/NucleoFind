@@ -20,10 +20,11 @@ from .__version__ import __version__
 
 class Prediction:
     def __init__(self, model_paths: List[str], use_gpu: bool = False, compute_variance: bool = False,
-                 disable_progress_bar: bool = False):
+                 disable_progress_bar: bool = False, compute_entire_cell: bool = False):
         self.model_paths: List[str] = model_paths
         self.use_gpu: bool = use_gpu
         self.disable_progress_bar: bool = disable_progress_bar
+        self.compute_entire_cell: bool = compute_entire_cell
 
         if use_gpu and platform.system() == "Darwin":
             logging.warning("GPU acceleration was specified but is not supported on MacOS, continuing with CPU only")
@@ -157,13 +158,16 @@ class Prediction:
             data = np.array(mtz, copy=False)
             mtz.set_data(data[mtz.make_d_array() >= resolution_cutoff])
 
-    @staticmethod
-    def _get_bounding_box(grid: gemmi.FloatGrid) -> gemmi.PositionBox:
+    def _get_bounding_box(self, grid: gemmi.FloatGrid) -> gemmi.PositionBox:
         logging.debug(f"Spacegroup: {grid.spacegroup}")
         extent = gemmi.find_asu_brick(grid.spacegroup).get_extent()
 
         logging.debug(f"ASU Brick Minimum: {extent.minimum}")
         logging.debug(f"ASU Brick Maximum: {extent.maximum}")
+
+        if self.compute_entire_cell:
+            extent.maximum = gemmi.Fractional(1, 1, 1)
+            extent.minimum = gemmi.Fractional(0, 0, 0)
 
         corners = [
             grid.unit_cell.orthogonalize(fractional)
@@ -405,6 +409,8 @@ def run():
     parser.add_argument("-intensity", nargs='?', help="Name of intensity column in MTZ")
     parser.add_argument("-phase", nargs='?', help="Name of phase column in MTZ")
     parser.add_argument("-overlap", nargs='?', help="Amount of overlap to use", const=16, default=16, type=int)
+    parser.add_argument("-no-symmetry", action=argparse.BooleanOptionalAction, help="Compute predictions "
+                                                                                            "for the entire unit cell")
     parser.add_argument("-variance", action=argparse.BooleanOptionalAction, help="Output variance map")
     parser.add_argument("-raw", action=argparse.BooleanOptionalAction, help="Output raw map (no argmax)")
     parser.add_argument("-gpu", action=argparse.BooleanOptionalAction, help="Use GPU (experimental)")
@@ -454,7 +460,8 @@ def run():
     prediction = Prediction(model_paths=model_paths,
                             use_gpu=True if args["gpu"] else False,
                             compute_variance=True if args["variance"] else False,
-                            disable_progress_bar=True if args["silent"] else False)
+                            disable_progress_bar=True if args["silent"] else False,
+                            compute_entire_cell=True if args["no_symmetry"] else False)
 
     prediction.make_prediction(args["i"], [args["intensity"], args["phase"]], overlap=args["overlap"],
                                use_raw_values=True if args["raw"] else False)
