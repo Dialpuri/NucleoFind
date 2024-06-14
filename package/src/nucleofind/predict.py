@@ -243,11 +243,16 @@ class Prediction:
             array_cell = gemmi.UnitCell(size_x, size_y, size_z, 90, 90, 90)
             array_grid = gemmi.FloatGrid(grid_to_interp[..., model_index], array_cell)
 
-            for point in output_grid.masked_asu():
+            if self.compute_entire_cell:
+                grid_iterable = output_grid
+            else:
+                grid_iterable = output_grid.masked_asu()
+
+            for point in grid_iterable:
                 position = output_grid.point_to_position(point) - self.box_minimum
                 point.value = array_grid.interpolate_value(position)
 
-            output_grid.symmetrize_avg()
+            output_grid.symmetrize_max()
             output_grids.append(output_grid)
 
         return output_grids
