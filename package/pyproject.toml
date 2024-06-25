@@ -18,7 +18,8 @@ dependencies=[
     'onnxruntime-gpu; platform_system != "Darwin"',
     'onnxruntime; platform_system == "Darwin"',
     'tqdm',
-    'gemmi'
+    'gemmi',
+    'numpy<2.0.0'
 ]
 [project.urls]
 Homepage = "https://github.com/Dialpuri/NucleoFind"
