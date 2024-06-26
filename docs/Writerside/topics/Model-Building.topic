@@ -23,7 +23,7 @@
 
     <note>
         Ensure that CCP4 is sourced before running, this is due to <code>nucleofind-build</code>
-        requiring a library file which exists <code>$CLIBD</code>. Future versions of <code>nucleofind</code> aim
+        requiring a library file which exists in <code>$CLIBD</code>. Future versions of <code>nucleofind</code> aim
         to package this file alongside the pip installation.
         <p>MacOS</p><code> source /Applications/ccp4-X.X/bin/ccp4.setup-sh </code>
         <p>Linux</p><code> source /opt/xtal/ccp4-X.X/bin/ccp4.setup-sh </code>
