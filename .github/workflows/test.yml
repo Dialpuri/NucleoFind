@@ -17,7 +17,9 @@ jobs:
           python-version: '3.10'
 
       - name: Install Clang
-        run: sudo apt-get install -y clang
+        run: |
+          sudo apt update
+          sudo apt-get install -y clang
 
       - name: Set environment variables for Clang
         run: |
@@ -30,6 +32,8 @@ jobs:
 
       - name: Get sources
         run: |
+          mkdir -p checkout
+          chmod +x ./get_sources 
           ./get_sources
         working-directory: ./package
 
@@ -62,6 +66,7 @@ jobs:
 
       - name: Get sources
         run: |
+          mkdir checkout
           sh get_sources
         working-directory: ./package
 
