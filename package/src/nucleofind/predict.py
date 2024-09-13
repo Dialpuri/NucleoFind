@@ -9,6 +9,7 @@ import time
 from glob import glob
 from typing import List
 import platform
+from pathlib import Path
 
 import gemmi
 import numpy as np
@@ -19,9 +20,9 @@ from .__version__ import __version__
 
 
 class Prediction:
-    def __init__(self, model_paths: List[str], use_gpu: bool = False, compute_variance: bool = False,
+    def __init__(self, model_paths: List[Path], use_gpu: bool = False, compute_variance: bool = False,
                  disable_progress_bar: bool = False, compute_entire_cell: bool = False):
-        self.model_paths: List[str] = model_paths
+        self.model_paths: List[Path] = model_paths
         self.use_gpu: bool = use_gpu
         self.disable_progress_bar: bool = disable_progress_bar
         self.compute_entire_cell: bool = compute_entire_cell
@@ -31,7 +32,7 @@ class Prediction:
             self.use_gpu = False
 
         self.compute_variance: bool = compute_variance
-        self.model_names: List[str] = [x.split("/")[-1].rstrip(".onnx") for x in model_paths]
+        self.model_names: List[Path] = [x.stem for x in model_paths]
 
         self.predicted_map: np.ndarray = None
         self.variance_map: np.ndarray = None
@@ -452,7 +453,7 @@ def run():
             raise FileNotFoundError("Model path could not be found, check the supplied path")
         # model_paths = args["m"]
     else:
-        logging.info(f"Found models: {' '.join(model_paths)}, continuing...")
+        logging.info(f"Found models: {' '.join(str(model_paths))}, continuing...")
 
     if not os.path.isfile(args["i"]):
         raise FileNotFoundError(
@@ -519,7 +520,7 @@ def find_all_potential_models():
     if not potential_models:
         model_not_found_err()
 
-    return potential_models
+    return [Path(x) for x in potential_models]
 
 
 def find_model(model_selection: str) -> str:
@@ -539,7 +540,7 @@ to install a single model (choose either phosphate, sugar or base)
 
     if model_selection:
         for model in models:
-            filename = model.split("/")[-1]
+            filename = model.name
             if model_selection in filename:
                 return model
 
@@ -549,7 +550,7 @@ to install a single model (choose either phosphate, sugar or base)
 
     print(f"The specified model type '{model_selection}' could not be found, please add one of the following flags")
 
-    filenames = set([x.split("/")[-1].rstrip(".onnx") for x in models])
+    filenames = set([x.stem for x in models])
     for name in filenames:
         print(f"-m {name}")
 

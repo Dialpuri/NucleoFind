@@ -72,7 +72,7 @@ def predictions_cmdline(parameters):
         str: The path to the output file.
     """
     output = parameters.output.parent / ("cmd_" + parameters.output.stem)
-    cmd = f"nucleofind -i {parameters.mtzin} -o {output} -m all -overlap 32"
+    cmd = f'nucleofind -i "{parameters.mtzin}" -o "{output}" -m all -overlap 32'
     os.system(cmd)
     return output
 
