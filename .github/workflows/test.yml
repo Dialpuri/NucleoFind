@@ -5,8 +5,9 @@ on:
     branches:
       - master
 
+
 jobs:
-  run_tests:
+  run_unix_tests:
     name: Run Python tests
     runs-on: ubuntu-latest
     steps:
@@ -46,8 +47,41 @@ jobs:
         run : pytest tests
         working-directory: ./package
 
+  run_windows_tests:
+    name: Run Python tests
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - uses: TheMrMilchmann/setup-msvc-dev@v3
+        with:
+          arch: x64
+
+      - name: Get sources
+        run: |
+          sh get_sources
+        working-directory: ./package
+
+      - name: Install NucleoFind
+        run: pip install .
+        working-directory: ./package
+
+      - name: Install pytest
+        run: pip install pytest
+
+      - name: Install NucleoFind models
+        run:  nucleofind-install --all
+
+      - name: Run tests
+        run : pytest tests
+        working-directory: ./package
+
+
   debug:
-      needs: [run_tests]
+      needs: [run_unix_tests, run_windows_tests]
       runs-on: ubuntu-latest
       if: ${{ failure() }}
       steps:
