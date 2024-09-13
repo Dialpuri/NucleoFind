@@ -40,8 +40,6 @@ build-dir = "build/{wheel_tag}"
 # Build stable ABI wheels for CPython 3.12+
 wheel.py-api = "cp312"
 
-cmake.build-type = "Release"
-cmake.define.CMAKE_GENERATOR_PLATFORM="x64"
 
 
 # Dynamically assign the project version from the __version__.py file
