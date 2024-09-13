@@ -3,18 +3,26 @@
 mkdir -p checkout
 cd checkout
 
-if [ -d "clipper" ]; then
+if [ -d "clipcper" ]; then
     echo "Found clipper"
 else
     echo "Checking out clipper"
-    curl -L http://ftp.ccp4.ac.uk/opensource/clipper-2.1.20201109.tar.gz -o clipper-2.1.20201109.tar.gz
-    tar xf clipper-2.1.20201109.tar.gz
-    mv clipper-2.1 clipper
+    curl -L http://www.ysbl.york.ac.uk/jsd523/clipper-gemmi-wrapper-20240603.tar.gz -o clipper.tar.gz
+    tar xf clipper.tar.gz
+    mv clipper-gemmi-wrapper clipper
+    echo
+fi
+#     curl -L http://ftp.ccp4.ac.uk/opensource/clipper-2.1.20201109.tar.gz -o clipper-2.1.20201109.tar.gz
+# tar xf clipper-2.1.20201109.tar.gz
+# mv clipper-2.1 clipper
 
-fi 
+#     curl -L http://www.ysbl.york.ac.uk/jsd523/clipper-gemmi-wrapper-20240603.tar.gz -o clipper.tar.gz
+# tar xf clipper.tar.gz
+# mv clipper-gemmi-wrapper clipper
+# cd ..
 
 if [ -d "gemmi" ]; then
-  echo "Found gemmi"
+    echo "Found gemmi"
 else
     echo "Checking out gemmi"
     git clone https://github.com/project-gemmi/gemmi.git gemmi
@@ -27,35 +35,33 @@ fi
 if [ -d "mmdb2" ]; then
     echo "Found mmdb2"
 else
-echo "Checking out mmdb2"
-curl -L http://www.ysbl.york.ac.uk/jsd523/mmdb2-2.0.22.tar.gz -o mmdb2-2.0.22.tar.gz
-tar xf mmdb2-2.0.22.tar.gz
-ln -s mmdb2-2.0.22 mmdb2
-echo
+    echo "Checking out mmdb2"
+    curl -L http://www.ysbl.york.ac.uk/jsd523/mmdb2-2.0.22.tar.gz -o mmdb2-2.0.22.tar.gz
+    tar xf mmdb2-2.0.22.tar.gz
+    ln -s mmdb2-2.0.22 mmdb2
+    echo
 fi
 
 if [ -d "libccp4" ]; then
     echo "Found libccp4"
 else
     echo "Checking out libccp4"
-curl -L http://www.ysbl.york.ac.uk/jsd523/libccp4-8.0.0.tar.gz -o libccp4-8.0.0.tar.gz
-tar xf libccp4-8.0.0.tar.gz
-ln -s libccp4-8.0.0 libccp4
+    curl -L http://www.ysbl.york.ac.uk/jsd523/libccp4-8.0.0.tar.gz -o libccp4-8.0.0.tar.gz
+    tar xf libccp4-8.0.0.tar.gz
+    mv libccp4-8.0.0 libccp4
     echo
-fi 
-
-
+fi
 
 if [ -d "fftw-2.1.5" ]; then
     echo "Found fftw-2.1.5"
 else
 
-echo "Downloading out fftw-2.1.5"
-curl -L http://www.fftw.org/fftw-2.1.5.tar.gz -o fftw-2.1.5.tar.gz
-echo
-echo "Unpacking fftw-2.1.5"
-tar xf fftw-2.1.5.tar.gz
-echo
+    echo "Downloading out fftw-2.1.5"
+    curl -L http://www.fftw.org/fftw-2.1.5.tar.gz -o fftw-2.1.5.tar.gz
+    echo
+    echo "Unpacking fftw-2.1.5"
+    tar xf fftw-2.1.5.tar.gz
+    echo
 fi
 
 cd ..
