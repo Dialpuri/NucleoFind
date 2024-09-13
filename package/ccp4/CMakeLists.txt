@@ -63,6 +63,8 @@
 # PUBLIC_HEADER DESTINATION include/ccp4
 # )
 
+message(CMAKE_SYSTEM_PROCESSOR=${CMAKE_SYSTEM_PROCESSOR})
+
 
 cmake_minimum_required(VERSION 3.15)
 project(ccp4)

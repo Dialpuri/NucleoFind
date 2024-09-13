@@ -4,7 +4,7 @@ add_library(clipper-cif STATIC
 ${WRK_DIR}/checkout/clipper/clipper/cif/cif_data_io.cpp
 )
 
-target_include_directories(clipper-cif PRIVATE ${WRK_DIR}/checkout/mmdb2/ ${WRK_DIR}/checkout/clipper ${WRK_DIR}/checkout/fftw-2.1.5/fftw ${WRK_DIR}/checkout/fftw-2.1.5/fftw)
+target_include_directories(clipper-cif PRIVATE ${WRK_DIR}/checkout/mmdb2/ ${WRK_DIR}/checkout/clipper ${WRK_DIR}/checkout/fftw-2.1.5/fftw ${WRK_DIR}/checkout/fftw-2.1.5/fftw  ${WRK_DIR}/checkout/gemmi/include)
 
 set(clipper-cif_HEADERS
 ${WRK_DIR}/checkout/clipper/clipper/cif/cif_data_io.h

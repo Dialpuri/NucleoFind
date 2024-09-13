@@ -76,6 +76,10 @@ ${WRK_DIR}/checkout/mmdb2//mmdb2/mmdb_io_file.h
 target_compile_options(mmdb2 PUBLIC "-DFFTW_ENABLE_FLOAT")
 set_target_properties(mmdb2 PROPERTIES PUBLIC_HEADER "${mmdb2_HEADERS}")
 
+if(MSVC)
+    add_compile_definitions(DLL_EXPORT)
+endif()
+
 install(TARGETS mmdb2
 LIBRARY DESTINATION lib
 PUBLIC_HEADER DESTINATION include/mmdb2
