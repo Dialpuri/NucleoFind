@@ -1,4 +1,6 @@
-#  Copyright (c) 2024 Jordan Dialpuri, Jon Agirre, Kevin Cowtan, Paul Bond and University of York. All rights reserved
+#  Copyright (c) 2024 Jordan Dialpuri, Jon Agirre, Kathryn Cowtan, Paul Bond and University of York. All rights reserved
+
+from __future__ import annotations
 
 import dataclasses
 import pathlib
@@ -7,7 +9,6 @@ from .nautilus_module import Input, Output, run
 import argparse
 from .__version__ import __version__
 from .predict import predict_map
-import traceback
 
 
 @dataclasses.dataclass

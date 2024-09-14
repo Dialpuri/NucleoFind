@@ -32,9 +32,9 @@ def parameters(data_base_path):
 
 @pytest.fixture(scope='session')
 def md5sums():
-    phosphate_map_md5sum = "f9f3470859cac6c976b5146a635c58e7"
-    sugar_map_md5sum = "ffa9190ab0f9d4c7316fa101a7ab3e10"
-    base_map_md5sum = "3fa375bb2435def19020088dfd45b490"
+    phosphate_map_md5sum = "2c40f9be2942003e938d46a2637a5d7d"
+    sugar_map_md5sum = "7962a9fa8b8b17a17555bc5e683a9f7b"
+    base_map_md5sum = "0f7bfe99ccd8d3e7606d144a1395b141"
     return SimpleNamespace(
         phosphate=phosphate_map_md5sum,
         sugar=sugar_map_md5sum,
@@ -72,7 +72,7 @@ def predictions_cmdline(parameters):
         str: The path to the output file.
     """
     output = parameters.output.parent / ("cmd_" + parameters.output.stem)
-    cmd = f"nucleofind -i {parameters.mtzin} -o {output} -m all -overlap 32"
+    cmd = f'nucleofind -i "{parameters.mtzin}" -o "{output}" -m all -overlap 32'
     os.system(cmd)
     return output
 

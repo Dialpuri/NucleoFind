@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  - Copyright (c) 2024 Jordan Dialpuri, Jon Agirre, Kevin Cowtan, Paul Bond and University of York. All rights reserved
+  -->
+
 <!DOCTYPE topic
         SYSTEM "https://resources.jetbrains.com/writerside/1.0/xhtml-entities.dtd">
 <topic xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -16,6 +20,15 @@
             nucleofind-build [OPTIONS]
         </code-block>
     </chapter>
+
+    <note>
+        Ensure that CCP4 is sourced before running, this is due to <code>nucleofind-build</code>
+        requiring a library file which exists in <code>$CLIBD</code>. Future versions of <code>nucleofind</code> aim
+        to package this file alongside the pip installation.
+        <p>MacOS</p><code> source /Applications/ccp4-X.X/bin/ccp4.setup-sh </code>
+        <p>Linux</p><code> source /opt/xtal/ccp4-X.X/bin/ccp4.setup-sh </code>
+
+    </note>
 
     <chapter title="Example Usage" id="example">
 

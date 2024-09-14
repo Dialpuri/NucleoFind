@@ -7,7 +7,7 @@ name = "nucleofind"
 dynamic = ["version"]
 description = "NucleoFind: A Deep-Learning Network for Interpreting Nucleic Acid Electron Density"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 authors = [
     { name = "Jordan Dialpuri", email = "jordan.dialpuri@york.ac.uk" },
 ]
@@ -18,7 +18,8 @@ dependencies=[
     'onnxruntime-gpu; platform_system != "Darwin"',
     'onnxruntime; platform_system == "Darwin"',
     'tqdm',
-    'gemmi'
+    'gemmi',
+    'numpy<2.0.0'
 ]
 [project.urls]
 Homepage = "https://github.com/Dialpuri/NucleoFind"
@@ -38,6 +39,7 @@ build-dir = "build/{wheel_tag}"
 
 # Build stable ABI wheels for CPython 3.12+
 wheel.py-api = "cp312"
+
 
 
 # Dynamically assign the project version from the __version__.py file

@@ -3,10 +3,13 @@ cmake_minimum_required(VERSION 3.15...3.26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_VERBOSE_MAKEFILE ON)
+
+if (WIN32) 
+        set(CMAKE_BUILD_TYPE Release)
+        set(CMAKE_GENERATOR_PLATFORM x64)        
+endif()
+
 project(nautilus LANGUAGES CXX)
-#set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-#set(CMAKE_C_COMPILER "gcc")
-#set(CMAKE_CXX_COMPILER "/usr/bin/g++")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 if (NOT SKBUILD)
@@ -32,6 +35,7 @@ if (NOT SKBUILD)
   after editing C++ files.")
 endif()
 
+
 set(WRK_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_subdirectory(${WRK_DIR}/clipper/minimol)
@@ -40,7 +44,6 @@ add_subdirectory(${WRK_DIR}/clipper/contrib)
 add_subdirectory(${WRK_DIR}/clipper/cns)
 add_subdirectory(${WRK_DIR}/clipper/mmdb)
 add_subdirectory(${WRK_DIR}/clipper/cif)
-add_subdirectory(${WRK_DIR}/clipper/phs)
 add_subdirectory(${WRK_DIR}/clipper/ccp4)
 add_subdirectory(${WRK_DIR}/fftw)
 add_subdirectory(${WRK_DIR}/rfftw)
@@ -48,7 +51,7 @@ add_subdirectory(${WRK_DIR}/ccp4)
 add_subdirectory(${WRK_DIR}/mmdb2)
 add_subdirectory(${WRK_DIR}/gemmi)
 
-message(CMAKE_BINARY_DIR="${CMAKE_BINARY_DIR}")
+# message(CMAKE_BINARY_DIR="${CMAKE_BINARY_DIR}")
 
 include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}

@@ -11,16 +11,8 @@ Nucleic acid electron density interpretation remains a difficult problem for com
 ## Documentation
 [Link to Documentation](https://dialpuri.github.io/NucleoFind/about-nucleofind.html)
 
-## Development
+## Publications
 
-To build NucleoFind upon every Python import, which will be useful in development, run: 
+If you find _NucleoFind_ useful, please cite: 
 
-    pip install --no-build-isolation --config-settings=editable.rebuild=true -Cbuild-dir=build -ve .
-
-### Testing
-
-If you wish to contribute to this repository, all tests must pass, they can be run with pytest: 
-
-    cd package
-    pytest tests --runslow --unit -v 
-    
+- Jordan S Dialpuri, Jon Agirre, Kathryn D Cowtan, Paul S Bond, NucleoFind: A Deep-Learning Network for Interpreting Nucleic Acid Electron Density, Nucleic Acid Research, 2024 [https://doi.org/10.1093/nar/gkae715](https://doi.org/10.1093/nar/gkae715)

@@ -1,4 +1,4 @@
-#  Copyright (c) 2024 Jordan Dialpuri, Jon Agirre, Kevin Cowtan, Paul Bond and University of York. All rights reserved
+#  Copyright (c) 2024 Jordan Dialpuri, Jon Agirre, Kathryn Cowtan, Paul Bond and University of York. All rights reserved
 
 import site
 import os
@@ -12,6 +12,7 @@ class ModelType(enum.Enum):
     phosphate = 0
     sugar = 1
     base = 2
+
 
 class InstallLocation(enum.Enum):
     site_packages = 0

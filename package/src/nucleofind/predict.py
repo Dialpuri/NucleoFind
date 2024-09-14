@@ -1,4 +1,4 @@
-#  Copyright (c) 2024 Jordan Dialpuri, Jon Agirre, Kevin Cowtan, Paul Bond and University of York. All rights reserved
+#  Copyright (c) 2024 Jordan Dialpuri, Jon Agirre, Kathryn Cowtan, Paul Bond and University of York. All rights reserved
 
 import argparse
 import logging
@@ -9,6 +9,7 @@ import time
 from glob import glob
 from typing import List
 import platform
+from pathlib import Path
 
 import gemmi
 import numpy as np
@@ -19,18 +20,19 @@ from .__version__ import __version__
 
 
 class Prediction:
-    def __init__(self, model_paths: List[str], use_gpu: bool = False, compute_variance: bool = False,
-                 disable_progress_bar: bool = False):
-        self.model_paths: List[str] = model_paths
+    def __init__(self, model_paths: List[Path], use_gpu: bool = False, compute_variance: bool = False,
+                 disable_progress_bar: bool = False, compute_entire_cell: bool = False):
+        self.model_paths: List[Path] = model_paths
         self.use_gpu: bool = use_gpu
         self.disable_progress_bar: bool = disable_progress_bar
+        self.compute_entire_cell: bool = compute_entire_cell
 
         if use_gpu and platform.system() == "Darwin":
             logging.warning("GPU acceleration was specified but is not supported on MacOS, continuing with CPU only")
             self.use_gpu = False
 
         self.compute_variance: bool = compute_variance
-        self.model_names: List[str] = [x.split("/")[-1].rstrip(".onnx") for x in model_paths]
+        self.model_names: List[Path] = [x.stem for x in model_paths]
 
         self.predicted_map: np.ndarray = None
         self.variance_map: np.ndarray = None
@@ -156,14 +158,16 @@ class Prediction:
             data = np.array(mtz, copy=False)
             mtz.set_data(data[mtz.make_d_array() >= resolution_cutoff])
 
-        self.raw_grid = mtz.transform_f_phi_to_map(*column_names, sample_rate=sample_rate)
-        self.raw_grid.normalize()
-
-    @staticmethod
-    def _get_bounding_box(grid: gemmi.FloatGrid) -> gemmi.PositionBox:
+    def _get_bounding_box(self, grid: gemmi.FloatGrid) -> gemmi.PositionBox:
+        logging.debug(f"Spacegroup: {grid.spacegroup}")
         extent = gemmi.find_asu_brick(grid.spacegroup).get_extent()
-        extent.maximum = gemmi.Fractional(1, 1, 1)
-        extent.minimum = gemmi.Fractional(0, 0, 0)
+
+        logging.debug(f"ASU Brick Minimum: {extent.minimum}")
+        logging.debug(f"ASU Brick Maximum: {extent.maximum}")
+
+        if self.compute_entire_cell:
+            extent.maximum = gemmi.Fractional(1, 1, 1)
+            extent.minimum = gemmi.Fractional(0, 0, 0)
 
         corners = [
             grid.unit_cell.orthogonalize(fractional)
@@ -239,7 +243,12 @@ class Prediction:
             array_cell = gemmi.UnitCell(size_x, size_y, size_z, 90, 90, 90)
             array_grid = gemmi.FloatGrid(grid_to_interp[..., model_index], array_cell)
 
-            for point in output_grid.masked_asu():
+            if self.compute_entire_cell:
+                grid_iterable = output_grid
+            else:
+                grid_iterable = output_grid.masked_asu()
+
+            for point in grid_iterable:
                 position = output_grid.point_to_position(point) - self.box_minimum
                 point.value = array_grid.interpolate_value(position)
 
@@ -405,6 +414,8 @@ def run():
     parser.add_argument("-intensity", nargs='?', help="Name of intensity column in MTZ")
     parser.add_argument("-phase", nargs='?', help="Name of phase column in MTZ")
     parser.add_argument("-overlap", nargs='?', help="Amount of overlap to use", const=16, default=16, type=int)
+    parser.add_argument("-no-symmetry", action=argparse.BooleanOptionalAction, help="Compute predictions "
+                                                                                            "for the entire unit cell")
     parser.add_argument("-variance", action=argparse.BooleanOptionalAction, help="Output variance map")
     parser.add_argument("-raw", action=argparse.BooleanOptionalAction, help="Output raw map (no argmax)")
     parser.add_argument("-gpu", action=argparse.BooleanOptionalAction, help="Use GPU (experimental)")
@@ -441,7 +452,7 @@ def run():
             raise FileNotFoundError("Model path could not be found, check the supplied path")
         # model_paths = args["m"]
     else:
-        logging.info(f"Found models: {' '.join(model_paths)}, continuing...")
+        logging.info(f"Found models: {' '.join(str(model_paths))}, continuing...")
 
     if not os.path.isfile(args["i"]):
         raise FileNotFoundError(
@@ -454,7 +465,8 @@ def run():
     prediction = Prediction(model_paths=model_paths,
                             use_gpu=True if args["gpu"] else False,
                             compute_variance=True if args["variance"] else False,
-                            disable_progress_bar=True if args["silent"] else False)
+                            disable_progress_bar=True if args["silent"] else False,
+                            compute_entire_cell=True if args["no_symmetry"] else False)
 
     prediction.make_prediction(args["i"], [args["intensity"], args["phase"]], overlap=args["overlap"],
                                use_raw_values=True if args["raw"] else False)
@@ -507,7 +519,7 @@ def find_all_potential_models():
     if not potential_models:
         model_not_found_err()
 
-    return potential_models
+    return [Path(x) for x in potential_models]
 
 
 def find_model(model_selection: str) -> str:
@@ -527,7 +539,7 @@ to install a single model (choose either phosphate, sugar or base)
 
     if model_selection:
         for model in models:
-            filename = model.split("/")[-1]
+            filename = model.name
             if model_selection in filename:
                 return model
 
@@ -537,7 +549,7 @@ to install a single model (choose either phosphate, sugar or base)
 
     print(f"The specified model type '{model_selection}' could not be found, please add one of the following flags")
 
-    filenames = set([x.split("/")[-1].rstrip(".onnx") for x in models])
+    filenames = set([x.stem for x in models])
     for name in filenames:
         print(f"-m {name}")
 
