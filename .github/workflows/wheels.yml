@@ -17,6 +17,7 @@ jobs:
           python-version: '3.10'
       - run: |
           cd package
+          mkdir checkout
           ./get_sources
           pip install . 
           python tests/test_version.py -version ${{ github.event.release.tag_name }}
@@ -39,6 +40,7 @@ jobs:
 
       - name: Get sources
         run: |
+          mkdir checkout
           ./get_sources
         working-directory: ./package
 
@@ -68,6 +70,7 @@ jobs:
     - name: Move to correct directory
       run: |
         mv package/* . 
+        mkdir checkout
         ./get_sources
 
     - name: Install Clang
@@ -106,6 +109,7 @@ jobs:
     - name: Download dependencies
       run:  |
         cd package
+        mkdir checkout
         sh ./get_sources
 
     - uses: pypa/cibuildwheel@v2.16
