@@ -24,8 +24,7 @@ def clibd_error_msg():
                 You can try sourcing it: 
                 Ubuntu - source /opt/xtal/ccp4-X.X/bin/ccp4.setup-sh
                 MacOS - source /Applications/ccp4-X.X/bin/ccp4.setup-sh
-                """
-          )
+                """)
 
 
 def download_model(type: ModelType, folder: str, reinstall: bool):
@@ -62,7 +61,9 @@ def install_model(type: ModelType, location: str, reinstall: bool) -> bool:
     if InstallLocation[location] == InstallLocation.site_packages:
         site_packages_dir = site.getsitepackages()
         if len(site_packages_dir) == 0:
-            print("Site packages could not be found, ensure you are in a python virtualenvironment. Aborting.")
+            print(
+                "Site packages could not be found, ensure you are in a python virtualenvironment. Aborting."
+            )
             return False
 
         download_model(type=type, folder=site_packages_dir[0], reinstall=reinstall)
@@ -73,12 +74,17 @@ def run():
     model_list = ["phosphate", "sugar", "base"]
     output_list = ["ccp4", "site_packages"]
 
-    parser = argparse.ArgumentParser(description='nucleofind Install')
+    parser = argparse.ArgumentParser(description="nucleofind Install")
     parser.add_argument("-m", "--model", choices=model_list, required=False)
-    parser.add_argument("-o", "--output", choices=[location.name for location in InstallLocation], required=False,
-                        default=output_list[1])
-    parser.add_argument("--all", required=False, action='store_true')
-    parser.add_argument("--reinstall", required=False, action='store_true')
+    parser.add_argument(
+        "-o",
+        "--output",
+        choices=[location.name for location in InstallLocation],
+        required=False,
+        default=output_list[1],
+    )
+    parser.add_argument("--all", required=False, action="store_true")
+    parser.add_argument("--reinstall", required=False, action="store_true")
     parser.add_argument("-v", "--version", action="version", version=__version__)
 
     args = parser.parse_args()
@@ -88,9 +94,14 @@ def run():
         return
 
     if args.all:
-        status = [install_model(type=type, location=args.output, reinstall=args.reinstall) for type in ModelType]
+        status = [
+            install_model(type=type, location=args.output, reinstall=args.reinstall)
+            for type in ModelType
+        ]
         if not any(status):
             print("There was a problem with installation of one of the models.", status)
         return
 
-    install_model(type=ModelType[args.model], location=args.output, reinstall=args.reinstall)
+    install_model(
+        type=ModelType[args.model], location=args.output, reinstall=args.reinstall
+    )
