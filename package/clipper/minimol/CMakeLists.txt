@@ -1,36 +1,44 @@
 project(clipper-minimol)
 
-add_library(clipper-minimol STATIC
-        ../../checkout/clipper/clipper/minimol/container_minimol.cpp
-        ../../checkout/clipper/clipper/minimol/minimol.cpp
-        ../../checkout/clipper/clipper/minimol/minimol_data.cpp
-        # ../../checkout/clipper/clipper/minimol/minimol_io.cpp
-        ../../checkout/clipper/clipper/minimol/minimol_io_mmdb.cpp
-        ../../checkout/clipper/clipper/minimol/minimol_io_seq.cpp
-        ../../checkout/clipper/clipper/minimol/minimol_seq.cpp
-        ../../checkout/clipper/clipper/minimol/minimol_utils.cpp
-)
+add_library(
+  clipper-minimol STATIC
+  ${clipper-dependencies_SOURCE_DIR}/clipper/minimol/container_minimol.cpp
+  ${clipper-dependencies_SOURCE_DIR}/clipper/minimol/minimol.cpp
+  ${clipper-dependencies_SOURCE_DIR}/clipper/minimol/minimol_data.cpp
+  ${clipper-dependencies_SOURCE_DIR}/clipper/minimol/minimol_io_mmdb.cpp
+  ${clipper-dependencies_SOURCE_DIR}/clipper/minimol/minimol_io_seq.cpp
+  ${clipper-dependencies_SOURCE_DIR}/clipper/minimol/minimol_seq.cpp
+  ${clipper-dependencies_SOURCE_DIR}/clipper/minimol/minimol_utils.cpp)
 
-target_include_directories(clipper-minimol PRIVATE ../../checkout/mmdb2/ ../../checkout/clipper ../../checkout/fftw-2.1.5/fftw ../../checkout/fftw-2.1.5/rfftw)
+# target_include_directories(clipper-minimol PRIVATE ../../checkout/mmdb2/
+# ../../checkout/clipper ../../checkout/fftw-2.1.5/fftw
+# ../../checkout/fftw-2.1.5/rfftw)
+
+target_include_directories(
+  clipper-minimol
+  PRIVATE ${mmdb2-dependencies_SOURCE_DIR}
+          ${clipper-dependencies_SOURCE_DIR}/clipper
+          ${fftw-dependencies_SOURCE_DIR})
 
 set(clipper-minimol_HEADERS
-        ${CMAKE_SOURCE_DIR}/checkout/clipper//clipper/minimol/minimol_data.h
-        ${CMAKE_SOURCE_DIR}/checkout/clipper//clipper/minimol/minimol.h
-        ${CMAKE_SOURCE_DIR}/checkout/clipper//clipper/minimol/container_minimol.h
-        # ${CMAKE_SOURCE_DIR}/checkout/clipper//clipper/minimol/minimol_io.h
-        ${CMAKE_SOURCE_DIR}/checkout/clipper//clipper/minimol/minimol_io_mmdb.h
-        ${CMAKE_SOURCE_DIR}/checkout/clipper//clipper/minimol/minimol_io_seq.h
-        ${CMAKE_SOURCE_DIR}/checkout/clipper//clipper/minimol/minimol_seq.h
-        ${CMAKE_SOURCE_DIR}/checkout/clipper//clipper/minimol/minimol_utils.h
-        ${CMAKE_SOURCE_DIR}/checkout/clipper//clipper/clipper-minimol.h
-)
+    ${clipper-dependencies_SOURCE_DIR}/clipper/minimol/minimol_data.h
+    ${clipper-dependencies_SOURCE_DIR}/clipper/minimol/minimol.h
+    ${clipper-dependencies_SOURCE_DIR}/clipper/minimol/container_minimol.h
+    ${clipper-dependencies_SOURCE_DIR}/clipper/minimol/minimol_io_mmdb.h
+    ${clipper-dependencies_SOURCE_DIR}/clipper/minimol/minimol_io_seq.h
+    ${clipper-dependencies_SOURCE_DIR}/clipper/minimol/minimol_seq.h
+    ${clipper-dependencies_SOURCE_DIR}/clipper/minimol/minimol_utils.h
+    ${clipper-dependencies_SOURCE_DIR}/clipper/clipper-minimol.h)
 
 target_compile_options(clipper-minimol PUBLIC "-DFFTW_ENABLE_FLOAT")
-set_target_properties(clipper-minimol PROPERTIES PUBLIC_HEADER "${clipper-minimol_HEADERS}")
+set_target_properties(clipper-minimol PROPERTIES PUBLIC_HEADER
+                                                 "${clipper-minimol_HEADERS}")
+
 if(MSVC)
-    add_compile_definitions(CLIPPER_MINIMOL_DLL_EXPORT)
+  add_compile_definitions(CLIPPER_MINIMOL_DLL_EXPORT)
 endif()
-install(TARGETS clipper-minimol
-        LIBRARY DESTINATION lib
-        PUBLIC_HEADER DESTINATION include/clipper/minimol
-)
+
+install(
+  TARGETS clipper-minimol
+  LIBRARY DESTINATION lib
+  PUBLIC_HEADER DESTINATION include/clipper/minimol)

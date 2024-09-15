@@ -1,97 +1,95 @@
 project(fftw)
 
-add_library(fftw STATIC 
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/config.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/executor.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fftwf77.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fftwnd.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fn_1.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fn_10.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fn_11.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fn_12.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fn_13.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fn_14.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fn_15.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fn_16.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fn_2.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fn_3.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fn_32.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fn_4.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fn_5.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fn_6.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fn_64.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fn_7.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fn_8.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fn_9.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fni_1.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fni_10.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fni_11.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fni_12.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fni_13.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fni_14.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fni_15.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fni_16.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fni_2.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fni_3.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fni_32.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fni_4.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fni_5.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fni_6.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fni_64.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fni_7.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fni_8.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fni_9.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/ftw_10.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/ftw_16.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/ftw_2.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/ftw_3.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/ftw_32.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/ftw_4.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/ftw_5.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/ftw_6.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/ftw_64.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/ftw_7.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/ftw_8.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/ftw_9.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/ftwi_10.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/ftwi_16.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/ftwi_2.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/ftwi_3.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/ftwi_32.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/ftwi_4.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/ftwi_5.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/ftwi_6.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/ftwi_64.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/ftwi_7.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/ftwi_8.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/ftwi_9.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/generic.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/malloc.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/planner.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/putils.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/rader.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/timer.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/twiddle.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/wisdom.c
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/wisdomio.c
-)
+add_library(
+  fftw STATIC
+  ${fftw-dependencies_SOURCE_DIR}/fftw/config.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/executor.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fftwf77.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fftwnd.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fn_1.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fn_10.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fn_11.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fn_12.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fn_13.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fn_14.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fn_15.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fn_16.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fn_2.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fn_3.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fn_32.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fn_4.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fn_5.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fn_6.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fn_64.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fn_7.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fn_8.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fn_9.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fni_1.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fni_10.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fni_11.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fni_12.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fni_13.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fni_14.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fni_15.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fni_16.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fni_2.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fni_3.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fni_32.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fni_4.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fni_5.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fni_6.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fni_64.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fni_7.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fni_8.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/fni_9.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/ftw_10.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/ftw_16.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/ftw_2.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/ftw_3.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/ftw_32.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/ftw_4.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/ftw_5.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/ftw_6.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/ftw_64.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/ftw_7.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/ftw_8.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/ftw_9.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/ftwi_10.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/ftwi_16.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/ftwi_2.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/ftwi_3.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/ftwi_32.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/ftwi_4.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/ftwi_5.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/ftwi_6.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/ftwi_64.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/ftwi_7.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/ftwi_8.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/ftwi_9.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/generic.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/malloc.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/planner.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/putils.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/rader.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/timer.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/twiddle.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/wisdom.c
+  ${fftw-dependencies_SOURCE_DIR}/fftw/wisdomio.c)
 
 set(fftw_HEADERS
-${WRK_DIR}/checkout/fftw-2.1.5//fftw/fftw.h
-${WRK_DIR}/checkout/fftw-2.1.5//fftw/fftw-int.h
-${WRK_DIR}/checkout/fftw-2.1.5//fftw/config.h
-)
+    ${fftw-dependencies_SOURCE_DIR}//fftw/fftw.h
+    ${fftw-dependencies_SOURCE_DIR}//fftw/fftw-int.h
+    ${fftw-dependencies_SOURCE_DIR}//fftw/config.h)
 
 set(fftw_HEADERS
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fftw.h
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/fftw-int.h
-${WRK_DIR}/checkout/fftw-2.1.5/fftw/config.h
-)
+    ${fftw-dependencies_SOURCE_DIR}/fftw/fftw.h
+    ${fftw-dependencies_SOURCE_DIR}/fftw/fftw-int.h
+    ${fftw-dependencies_SOURCE_DIR}/fftw/config.h)
 
 target_compile_options(fftw PUBLIC "-DFFTW_ENABLE_FLOAT")
 set_target_properties(fftw PROPERTIES PUBLIC_HEADER "${fftw_HEADERS}")
 
-install(TARGETS fftw
-LIBRARY DESTINATION lib
-PUBLIC_HEADER DESTINATION include/fftw
-)
+install(
+  TARGETS fftw
+  LIBRARY DESTINATION lib
+  PUBLIC_HEADER DESTINATION include/fftw)
