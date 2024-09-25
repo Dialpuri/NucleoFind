@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import dataclasses
 import pathlib
+import traceback 
 
 from .nautilus_module import Input, Output, run
 import argparse
 from .__version__ import __version__
 from .predict import predict_map
+
 
 
 @dataclasses.dataclass
