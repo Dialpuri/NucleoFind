@@ -64,12 +64,12 @@
                 <p>E.g. a value of <code>2.5</code> uses only the 2.5 Angstrom and greater reflctions in the map
                 calculation</p>
             </def>
-            <def title="-intensity">
-                Column name of structure factors weights.
+            <def title="-f, -amplitude">
+                Column name of structure factor amplitudes.
                 <p>Default: FWT</p>
             </def>
-            <def title="-phase">
-                Column name of phase weights.
+            <def title="-phi, -phase">
+                Column name of structure factor phases.
                 <p>Default: PHWT</p>
             </def>
              <def title="-no-symmetry">
