@@ -412,8 +412,8 @@ def run():
     parser.add_argument("-o", "-output", help="Output base path, if multiple models, or output file path if single "
                                               "model", required=True)
     parser.add_argument("-r", "-resolution", nargs='?', help="Resolution cutoff")
-    parser.add_argument("-intensity", nargs='?', help="Name of intensity column in MTZ")
-    parser.add_argument("-phase", nargs='?', help="Name of phase column in MTZ")
+    parser.add_argument("-amplitude", "-f", nargs='?', help="Name of amplitude column in MTZ, e.g. FWT")
+    parser.add_argument("-phase", "-phi", nargs='?', help="Name of phase column in MTZ, e.g. PHWT")
     parser.add_argument("-overlap", nargs='?', help="Amount of overlap to use", const=16, default=16, type=int)
     parser.add_argument("-no-symmetry", action=argparse.BooleanOptionalAction, help="Compute predictions "
                                                                                             "for the entire unit cell")
@@ -469,7 +469,7 @@ def run():
                             disable_progress_bar=True if args["silent"] else False,
                             compute_entire_cell=True if args["no_symmetry"] else False)
 
-    prediction.make_prediction(args["i"], [args["intensity"], args["phase"]], overlap=args["overlap"],
+    prediction.make_prediction(args["i"], [args["amplitude"], args["phase"]], overlap=args["overlap"],
                                use_raw_values=True if args["raw"] else False)
 
     if not args["variance"]:

@@ -9,7 +9,7 @@ if (WIN32)
         set(CMAKE_GENERATOR_PLATFORM x64)        
 endif()
 
-project(nautilus LANGUAGES CXX)
+project(nucleofind LANGUAGES CXX)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 if (NOT SKBUILD)
