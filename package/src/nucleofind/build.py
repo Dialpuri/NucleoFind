@@ -9,7 +9,7 @@ import traceback
 from .nautilus_module import Input, Output, run
 import argparse
 from .__version__ import __version__
-from .predict import predict_map
+from .prediction.predict import predict_map
 
 
 @dataclasses.dataclass
@@ -61,14 +61,16 @@ def main():
             split_calculated_sf = ["FWT", "PHWT"]
 
         predict_map(
-            model="phosphate",
+            model="core",
             input=args.mtzin,
-            output="phosphate.map",
+            output="nucleofind-run",
             intensity=split_calculated_sf[0],
             phase=split_calculated_sf[1],
         )
 
-        args.phosin = "phosphate.map"
+        args.phosin = "nucleofind-run/nucleofind-phosphate.map"
+        args.sugarin = "nucleofind-run/nucleofind-sugar.map"
+        args.basein = "nucleofind-run/nucleofind-base.map"
 
     input = Input(
         args.mtzin,
