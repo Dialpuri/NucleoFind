@@ -177,7 +177,7 @@ def extract_model_names(models: List[Path]) -> List[str]:
     return model_names
 
 
-def find_model(model: ModelType | str):
+def find_model(model: ModelType | str | None):
     """Search through site-packages and CCP4/lib/data for a potential model"""
     potential_models = find_all_potential_models()
     if not potential_models:
