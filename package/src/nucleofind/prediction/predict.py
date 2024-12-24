@@ -121,6 +121,7 @@ class NucleoFind:
             self.predicted_grids[MapType(i)] = interpolated_index_array
 
     def save_grid(self, type: MapType, output_path: Path | str):
+        output_path = Path(output_path)
         output_path.mkdir(exist_ok=True, parents=True)
         if type == MapType.all:
             for k, v in self.predicted_grids.items():
@@ -153,3 +154,20 @@ def run():
     nucleofind.save_grid(MapType.phosphate, output_dir)
     nucleofind.save_grid(MapType.sugar, output_dir)
     nucleofind.save_grid(MapType.base, output_dir)
+
+def predict_map(model: str, input: str, output: str, resolution: float = 2.5, intensity: str = "FWT",
+                phase: str = "PHWT", overlap: int = 16):
+    model_path = find_model(model)
+    configuration = Configuration(
+        use_gpu=False,
+        disable_progress_bar=False,
+        compute_entire_unit_cell=True,
+        overlap=overlap,
+        channels=4,
+        use_multiprocessing=True,
+    )
+    prediction = NucleoFind(model_path, configuration=configuration)
+    prediction.predict(input, [intensity, phase], resolution_cutoff=resolution)
+    prediction.save_grid(MapType.phosphate, output)
+    prediction.save_grid(MapType.sugar, output)
+    prediction.save_grid(MapType.base, output)
