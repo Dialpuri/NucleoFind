@@ -7,7 +7,7 @@ class Configuration:
     """Configuration for NucleoFind"""
 
     use_gpu: bool = False
-    use_multiprocessing: bool = True
+    n_threads: int | None = None
     disable_progress_bar: bool = True
     compute_entire_unit_cell: bool = True
     compute_variance: bool = False
