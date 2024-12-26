@@ -24,6 +24,7 @@ def parse_arguments() -> SimpleNamespace:
         required=True,
     )
     parser.add_argument("-r", "-resolution", nargs="?", help="Resolution cutoff")
+    parser.add_argument("-n", "-nthreads", nargs="?", default=None, help="Number of threads to use")
     parser.add_argument(
         "-amplitude", "-f", nargs="?", help="Name of amplitude column in MTZ, e.g. FWT"
     )
