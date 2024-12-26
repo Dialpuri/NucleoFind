@@ -62,6 +62,10 @@
                 <p>E.g. a value of <code>2.5</code> uses only the 2.5 Angstrom and greater reflctions in the map
                 calculation</p>
             </def>
+            <def title="-n, -nthreads">
+                <p>Number of threads to use</p>
+                <p>Default: Max available</p>
+            </def>
             <def title="-f, -amplitude">
                 Column name of structure factor amplitudes.
                 <p>Default: FWT</p>
