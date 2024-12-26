@@ -1,4 +1,5 @@
 import functools
+import logging
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import List, Tuple
@@ -144,6 +145,7 @@ def run():
         disable_progress_bar=args.silent,
         compute_entire_unit_cell=False,
         n_threads=args.n,
+        overlap=args.overlap,
     )
     nucleofind = NucleoFind(model_path, configuration)
     nucleofind.predict(
@@ -155,15 +157,17 @@ def run():
     nucleofind.save_grid(MapType.sugar, output_dir)
     nucleofind.save_grid(MapType.base, output_dir)
 
-def predict_map(model: str, input: str, output: str, resolution: float = 2.5, amplitude: str = "FWT",
+def predict_map(model: str, input: str, output: str, resolution: float = None, amplitude: str = "FWT",
                 phase: str = "PHWT", overlap: int = 16):
+    logging.info(
+        f"Running prediction with model {model}, input {input}, output {output}, resolution {resolution}, amplitude {amplitude}, phase {phase}, overlap {overlap}"
+    )
     model_path = find_model(model)
     configuration = Configuration(
         use_gpu=False,
         disable_progress_bar=False,
-        compute_entire_unit_cell=True,
+        compute_entire_unit_cell=False,
         overlap=overlap,
-        channels=4,
         n_threads=None,
     )
     prediction = NucleoFind(model_path, configuration=configuration)

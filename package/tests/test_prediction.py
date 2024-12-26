@@ -1,10 +1,13 @@
 import os
 import tempfile
-import nucleofind.predict as p
+import nucleofind.prediction.predict as p
+import nucleofind.prediction.config as config
 import pytest
 import hashlib
 from pathlib import Path
 from types import SimpleNamespace
+
+from nucleofind.prediction.config import MapType
 
 
 @pytest.fixture(scope='session')
@@ -14,27 +17,27 @@ def data_base_path():
 
 @pytest.fixture(scope='session')
 def parameters(data_base_path):
-    map_types = ["phosphate", "sugar", 'base']
-    model_paths = [p.find_model(m) for m in map_types]
+    # map_types = ["nano", "core"]
+    model_name = "core"
     mtzin = data_base_path / "hklout.mtz"
     colinfc = "FWT,PHWT"
 
-    with tempfile.TemporaryDirectory() as tmp_directory:
+    with tempfile.TemporaryDirectory(delete=False) as tmp_directory:
         tmp_directory = Path(tmp_directory)
         yield SimpleNamespace(
-            model_paths=model_paths,
-            map_types=map_types,
+            model_name=model_name,
+            map_types=["phosphate", "sugar", "base"],
             mtzin=str(mtzin),
             colinfc=colinfc,
             output=tmp_directory / "prediction"
-        )
+            )
 
 
 @pytest.fixture(scope='session')
 def md5sums():
-    phosphate_map_md5sum = "2c40f9be2942003e938d46a2637a5d7d"
-    sugar_map_md5sum = "7962a9fa8b8b17a17555bc5e683a9f7b"
-    base_map_md5sum = "0f7bfe99ccd8d3e7606d144a1395b141"
+    phosphate_map_md5sum = "478a977c95544a7e616b3148d822c80a"
+    sugar_map_md5sum = "34b4ac22a3331b39783bb8013349a707"
+    base_map_md5sum = "7976c788c4a76222898b02b1d58e8b9a"
     return SimpleNamespace(
         phosphate=phosphate_map_md5sum,
         sugar=sugar_map_md5sum,
@@ -43,7 +46,7 @@ def md5sums():
 
 
 @pytest.fixture(scope='session')
-def predictions_python(parameters):
+def predictions_python(parameters) -> Path:
     """
     Run NucleoFind using the Python API.
 
@@ -54,14 +57,13 @@ def predictions_python(parameters):
         str: The path to the output file.
     """
     output = parameters.output.parent / ("python_" + parameters.output.stem)
-    prediction = p.Prediction(model_paths=parameters.model_paths)
-    prediction.make_prediction(parameters.mtzin, parameters.colinfc.split(","), overlap=32)
-    prediction.save_predicted_map(str(output))
+    fwt, phwt = parameters.colinfc.split(",")
+    p.predict_map(parameters.model_name, parameters.mtzin, output, amplitude=fwt, phase=phwt)
     return output
 
 
 @pytest.fixture(scope='session')
-def predictions_cmdline(parameters):
+def predictions_cmdline(parameters) -> Path:
     """
     Run NucleoFind using the command line interface.
 
@@ -72,7 +74,7 @@ def predictions_cmdline(parameters):
         str: The path to the output file.
     """
     output = parameters.output.parent / ("cmd_" + parameters.output.stem)
-    cmd = f'nucleofind -i "{parameters.mtzin}" -o "{output}" -m all -overlap 32'
+    cmd = f'nucleofind -i "{parameters.mtzin}" -o "{output}" -m core -no-symmetry'
     os.system(cmd)
     return output
 
@@ -111,7 +113,7 @@ def test_cmdline_prediction(predictions_cmdline, parameters, md5sums):
 
 def compare_sums(md5sums, parameters, base_path):
     for map_type in parameters.map_types:
-        output_map_path = base_path.parent / (base_path.name + f"_{map_type}.map")
+        output_map_path = base_path / f"nucleofind-{map_type}.map"
         assert output_map_path.exists()
 
         with open(output_map_path, "rb") as f:
