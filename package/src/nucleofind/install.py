@@ -63,7 +63,7 @@ def run():
         default=output_list[1],
     )
     parser.add_argument("--all", required=False, action="store_true")
-    parser.add_argument("--reinstall", required=False, action="store_true")
+    parser.add_argument("--update", required=False, action="store_true")
     parser.add_argument("-v", "--version", action="version", version=__version__)
 
     args = parser.parse_args()
@@ -74,7 +74,7 @@ def run():
 
     if args.all:
         status = [
-            install_model(type=type, location=args.output, reinstall=args.reinstall)
+            install_model(type=type, location=args.output, reinstall=args.update)
             for type in model.ModelType
         ]
         if not any(status):
@@ -82,5 +82,5 @@ def run():
         return
 
     install_model(
-        type=model.ModelType[args.model], location=args.output, reinstall=args.reinstall
+        type=model.ModelType[args.model], location=args.output, reinstall=args.update
     )
