@@ -7,7 +7,7 @@
 
     <p>
         NucleoFind is a deep-learning based package to segment
-        nucleic acid electron density from X-ray crystallography.
+        nucleic acid density from X-ray crystallography and electron microscopy maps.
     </p>
 
 <!--    <chapter title="Get started">-->
