@@ -189,7 +189,7 @@ def find_model(model: ModelType | str | None):
     model_names = extract_model_names(potential_models)
     if not model:
         show_multiple_model_error(model_names)
-        return
+        sys.exit(1)
 
     if isinstance(model, ModelType):
         specified_model_name = model.name
