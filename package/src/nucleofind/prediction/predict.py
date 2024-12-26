@@ -62,8 +62,8 @@ class NucleoFind:
         )
         #     Compute variance...
 
-        miniters = 1000 if len(slices) > 10_000 else 1
-        max_workers = None if self.configuration.use_multiprocessing else 1
+        miniters = 1_000 if len(slices) > 10_000 else 1
+        max_workers = self.configuration.n_threads
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             results = list(
                 tqdm(
@@ -78,10 +78,9 @@ class NucleoFind:
         ones = np.ones(channels)
         for result in tqdm(results, desc="Processing results"):
             predicted_sub, (i, j, k) = result
-            total_array[i : i + box_size, j : j + box_size, k : k + box_size, :] += (
-                predicted_sub
-            )
-            count_array[i : i + box_size, j : j + box_size, k : k + box_size, :] += ones
+            box_slice = (slice(i, i + box_size), slice(j, j + box_size), slice(k, k + box_size), slice(None))
+            total_array[box_slice] += predicted_sub
+            count_array[box_slice] += ones
 
         predicted_array = total_array / count_array
         argmax_array = np.argmax(predicted_array, axis=-1).squeeze()
@@ -144,6 +143,7 @@ def run():
         use_gpu=args.gpu,
         disable_progress_bar=args.silent,
         compute_entire_unit_cell=False,
+        n_threads=args.n,
     )
     nucleofind = NucleoFind(model_path, configuration)
     nucleofind.predict(
@@ -155,7 +155,7 @@ def run():
     nucleofind.save_grid(MapType.sugar, output_dir)
     nucleofind.save_grid(MapType.base, output_dir)
 
-def predict_map(model: str, input: str, output: str, resolution: float = 2.5, intensity: str = "FWT",
+def predict_map(model: str, input: str, output: str, resolution: float = 2.5, amplitude: str = "FWT",
                 phase: str = "PHWT", overlap: int = 16):
     model_path = find_model(model)
     configuration = Configuration(
@@ -164,10 +164,10 @@ def predict_map(model: str, input: str, output: str, resolution: float = 2.5, in
         compute_entire_unit_cell=True,
         overlap=overlap,
         channels=4,
-        use_multiprocessing=True,
+        n_threads=None,
     )
     prediction = NucleoFind(model_path, configuration=configuration)
-    prediction.predict(input, [intensity, phase], resolution_cutoff=resolution)
+    prediction.predict(input, [amplitude, phase], resolution_cutoff=resolution)
     prediction.save_grid(MapType.phosphate, output)
     prediction.save_grid(MapType.sugar, output)
     prediction.save_grid(MapType.base, output)
