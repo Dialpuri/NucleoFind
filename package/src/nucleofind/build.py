@@ -1,7 +1,5 @@
 #  Copyright (c) 2024 Jordan Dialpuri, Jon Agirre, Kathryn Cowtan, Paul Bond and University of York. All rights reserved
 
-from __future__ import annotations
-
 import dataclasses
 import pathlib
 import traceback
@@ -64,7 +62,7 @@ def main():
             model="core",
             input=args.mtzin,
             output="nucleofind-run",
-            intensity=split_calculated_sf[0],
+            amplitude=split_calculated_sf[0],
             phase=split_calculated_sf[1],
         )
 

@@ -61,9 +61,9 @@ def parameters(data_base_path, permutation, test_example):
         input.pdbin = ""
 
     input.seqin = data_dir / f"{test_example}.fasta"
-    input.phosin = data_dir / "phosphate.map" if permutation[0] else ""
-    input.sugarin = data_dir / "sugar.map" if permutation[1] else ""
-    input.basein = data_dir / "base.map" if permutation[2] else ""
+    input.phosin = data_dir / "nucleofind-phosphate.map" if permutation[0] else ""
+    input.sugarin = data_dir / "nucleofind-sugar.map" if permutation[1] else ""
+    input.basein = data_dir / "nucleofind-base.map" if permutation[2] else ""
     input.colinfo = "FP,SIGFP"
     input.colinfc = "FWT,PHWT"
     input.colinfree = "FREE"
