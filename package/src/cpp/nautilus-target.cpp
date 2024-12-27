@@ -659,7 +659,7 @@ const clipper::MiniMol NucleicAcidTargets::link( const clipper::Xmap<float>& xma
         NucleicAcidDB::Chain chn;
         for ( int r1 = 0; r1 < 2; r1++ ) {
           for ( int r2 = 0; r2 < 2; r2++ ) {
-            // if (l1-r1 < 0) {std::cout << "Early finishing Link Step" << std::endl;continue;};
+            if (l1-r1 < 0) {continue;};
             NucleicAcidDB::NucleicAcid na1 = mol[c1][l1-r1];
             NucleicAcidDB::NucleicAcid na2 = mol[c2][r2];
             clipper::Coord_orth   cref = na1.coord_o3();

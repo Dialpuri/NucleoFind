@@ -250,6 +250,8 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
     find_ml.set_resolution(hkls.resolution().limit()); // Needed for the RSRZ calculation, but if not set defaults to 2
     mol_wrk = find_ml.find();
     log.log("FIND ML", mol_wrk, verbose >= 5);
+    // NautilusUtil::save_minimol(mol_wrk, "find.pdb");
+
     mol_wrk = natools.link(xwrk, mol_wrk);
     log.log("FIND ML LINK", mol_wrk, verbose >= 5);
 
