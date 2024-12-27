@@ -22,7 +22,7 @@ def parameters(data_base_path):
     mtzin = data_base_path / "hklout.mtz"
     colinfc = "FWT,PHWT"
 
-    with tempfile.TemporaryDirectory(delete=False) as tmp_directory:
+    with tempfile.TemporaryDirectory() as tmp_directory:
         tmp_directory = Path(tmp_directory)
         yield SimpleNamespace(
             model_name=model_name,
