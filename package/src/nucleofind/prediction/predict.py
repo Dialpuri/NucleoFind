@@ -51,6 +51,10 @@ class NucleoFind:
         total_array = np.zeros((*work_grid_shape, 4), dtype=np.float32)
         count_array = np.zeros_like(total_array, dtype=np.float32)
 
+        # Variance arrays for Welch's one pass variance method
+        variance_mean = np.zeros_like(total_array, dtype=np.float32)
+        variance_m2 = np.zeros_like(total_array, dtype=np.float32)
+
         channels = self.configuration.channels
         input_name = self.model.get_inputs()[0].name
         output_shape = (box_size, box_size, box_size, channels)
@@ -61,7 +65,6 @@ class NucleoFind:
             box_size,
             work_grid,
         )
-        #     Compute variance...
 
         miniters = 1_000 if len(slices) > 10_000 else 1
         max_workers = self.configuration.n_threads
@@ -83,7 +86,19 @@ class NucleoFind:
             total_array[box_slice] += predicted_sub
             count_array[box_slice] += ones
 
+            if self.configuration.compute_variance:
+                delta_variance = total_array[box_slice] - variance_mean[box_slice]
+                variance_mean[box_slice] += delta_variance / count_array[box_slice]
+                variance_m2[box_slice] += delta_variance * (total_array[box_slice] - variance_mean[box_slice])
+
         predicted_array = total_array / count_array
+        if self.configuration.use_raw_values:
+            return predicted_array.astype(np.float32)
+
+        if self.configuration.compute_variance:
+            variance_array = variance_m2 / (np.subtract(count_array, 1))
+            return variance_array.astype(np.float32)
+
         argmax_array = np.argmax(predicted_array, axis=-1).squeeze()
         return argmax_array.astype(np.float32)
 
@@ -101,17 +116,13 @@ class NucleoFind:
         work_grid, transform = interpolate_grid(input_grid, self.configuration)
         predicted_array = self._run_prediction(work_grid)
 
-        combined_grid = reinterpolate_grid(
-            predicted_array,
-            transform,
-            input_grid,
-            self.configuration.compute_entire_unit_cell,
-        )
-        self.predicted_grids[MapType.combined] = combined_grid
-
         rounded_array = np.round(predicted_array)
         for i in range(1, self.configuration.channels):
-            index_array = (rounded_array == i).astype(np.float32)
+            if self.configuration.use_raw_values or self.configuration.compute_variance:
+                index_array = predicted_array[:, :, :, i].astype(np.float32)
+            else:
+                index_array = (rounded_array == i).astype(np.float32)
+
             interpolated_index_array = reinterpolate_grid(
                 index_array,
                 transform,
@@ -121,21 +132,29 @@ class NucleoFind:
             self.predicted_grids[MapType(i)] = interpolated_index_array
 
     def save_grid(self, type: MapType, output_path: Path | str):
+        """Save the predicted grid to directory specified by output_path, with filename nucleofind-{type}.map."""
         output_path = Path(output_path)
         output_path.mkdir(exist_ok=True, parents=True)
+        logging.info(f"Saving grid of type {type} to {output_path}")
+
+        suffix = ".map"
+        suffix = ".variance.map" if self.configuration.compute_variance else suffix
+        suffix = ".raw.map" if self.configuration.use_raw_values else suffix
+
         if type == MapType.all:
             for k, v in self.predicted_grids.items():
-                save_grid(v, output_path / f"nucleofind-{k.name}.map")
+                save_grid(v, output_path / f"nucleofind-{k.name}{suffix}")
             return
         elif type not in self.predicted_grids:
             raise ValueError(f"No grid of type {type} found.")
 
         save_grid(
-            self.predicted_grids[type], output_path / f"nucleofind-{type.name}.map"
+            self.predicted_grids[type], output_path / f"nucleofind-{type.name}{suffix}",
         )
 
 
 def run():
+    """Run prediction from command line arguments"""
     setup_logging()
     args = parse_arguments()
     model_path = find_model(args.m)
@@ -144,6 +163,8 @@ def run():
         use_gpu=args.gpu,
         disable_progress_bar=args.silent,
         compute_entire_unit_cell=False,
+        use_raw_values=args.raw,
+        compute_variance=args.variance,
         n_threads=args.n,
         overlap=args.overlap,
     )
@@ -159,6 +180,7 @@ def run():
 
 def predict_map(model: str, input: str, output: str, resolution: float = None, amplitude: str = "FWT",
                 phase: str = "PHWT", overlap: int = 16):
+    """Run prediction from Python"""
     logging.info(
         f"Running prediction with model {model}, input {input}, output {output}, resolution {resolution}, amplitude {amplitude}, phase {phase}, overlap {overlap}"
     )
