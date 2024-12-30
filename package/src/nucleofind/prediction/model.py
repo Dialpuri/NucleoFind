@@ -165,6 +165,7 @@ def find_all_potential_models():
 
 
 def extract_model_names(models: List[Path]) -> List[str]:
+    """Extract model names from model paths"""
     model_names = []
     for model in models:
         match = re.search(r"nucleofind-(\w+).onnx", model.name)
