@@ -19,7 +19,7 @@ def parse_arguments() -> SimpleNamespace:
     parser.add_argument(
         "-o",
         "-output",
-        help="Output base path, if multiple models, or output file path if single "
+        help="Output directory, if does not exist it will be created "
         "model",
         required=True,
     )
