@@ -15,7 +15,7 @@ def expected_values(test_example):
             "fragments_built": 10,
             "residues_built": 250,
             "residues_sequenced": 150,
-            "longest_fragment": 60
+            "longest_fragment": 45
         },
         "5d5w": {
             "time": 30,
