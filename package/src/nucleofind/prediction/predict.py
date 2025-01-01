@@ -166,7 +166,7 @@ def run():
     setup_logging()
     args = parse_arguments()
     model_path = find_model(args.m)
-    model_configuration = get_model_config(args.m, args.overlap)
+    model_configuration = get_model_config(model_path, args.overlap)
     configuration = Configuration(
         use_gpu=args.gpu,
         disable_progress_bar=args.silent,

@@ -182,7 +182,7 @@ def extract_model_names(models: List[Path]) -> List[str]:
     return model_names
 
 
-def find_model(model: ModelType | str | None):
+def find_model(model: ModelType | str | None) -> Path | None:
     """Search through site-packages and CCP4/lib/data for a potential model"""
     potential_models = find_all_potential_models()
     if not potential_models:
@@ -208,8 +208,9 @@ def find_model(model: ModelType | str | None):
     show_missing_specified_model_error(specified_model_name)
 
 
-def get_model_config(model_type: str, overlap: int | None) -> SimpleNamespace:
+def get_model_config(model_path: Path, overlap: int | None) -> SimpleNamespace:
     """Get model configuration from model type"""
+    model_type = model_path.stem.removeprefix("nucleofind-")
     if model_type not in ModelType.__members__:
         raise RuntimeError(f"Invalid model type - {model_type}")
     model_type = ModelType[model_type]
