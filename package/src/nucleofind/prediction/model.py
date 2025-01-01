@@ -4,6 +4,7 @@ import sys
 import urllib
 from pathlib import Path
 import logging
+from types import SimpleNamespace
 from typing import Tuple, List
 
 import requests
@@ -23,11 +24,13 @@ class ModelType(Enum):
 
     nano = 1
     core = 2
+    ultra = 3
 
 
 URLS = {
     ModelType.nano: "https://huggingface.co/api/models/Dialpuri/NucleoFind-nano",
     ModelType.core: "https://huggingface.co/api/models/Dialpuri/NucleoFind-core",
+    ModelType.ultra: "https://huggingface.co/api/models/Dialpuri/NucleoFind-ultra",
 }
 
 
@@ -91,10 +94,19 @@ def get_latest_model(type: ModelType) -> str:
     if not siblings:
         raise RuntimeError("Failed to get siblings from model")
 
+    possible_models = []
     for filename in siblings:
         file = filename.get("rfilename", "")
         if file.endswith(".onnx"):
-            return file
+            possible_models.append(file)
+
+    # Get latest model out of list based on date
+    possible_models = sorted(possible_models, reverse=True)
+    latest_model = possible_models[0]
+    logging.debug(
+        "Latest model for %s is %s", type.name, latest_model
+    )
+    return latest_model
 
 
 def download_model(
@@ -202,3 +214,19 @@ def find_model(model: ModelType | str | None):
             return potential_models[model_names.index(name)]
 
     show_missing_specified_model_error(specified_model_name)
+
+
+def get_model_config(model_type: str) -> SimpleNamespace:
+    """Get model configuration from model type"""
+    if model_type not in ModelType.__members__:
+        raise RuntimeError(f"Invalid model type - {model_type}")
+    model_type = ModelType[model_type]
+    match model_type:
+        case ModelType.nano:
+            return SimpleNamespace(box_size=32, spacing=0.7)
+        case ModelType.core:
+            return SimpleNamespace(box_size=32, spacing=0.7)
+        case ModelType.ultra:
+            return SimpleNamespace(box_size=64, spacing=0.7)
+        case _:
+            raise RuntimeError(f"Invalid model type - {model_type}")
