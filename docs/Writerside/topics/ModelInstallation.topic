@@ -23,7 +23,7 @@
         <p>Syntax:</p>
 
         <code-block lang="shell">
-            nucleofind-install -m phosphate
+            nucleofind-install -m core
         </code-block>
     </chapter>
 
@@ -33,9 +33,8 @@
             <def title="-m, --model">
                 Selects a model to download, choose one of:
                 <list>
-                    <li>phosphate</li>
-                    <li>sugar</li>
-                    <li>base</li>
+                    <li>nano</li>
+                    <li>core</li>
                 </list>
             </def>
             <def title="-o, --output">

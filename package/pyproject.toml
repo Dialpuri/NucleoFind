@@ -19,13 +19,14 @@ dependencies=[
     'onnxruntime; platform_system == "Darwin"',
     'tqdm',
     'gemmi',
-    'numpy<2.0.0'
+    'numpy<2.0.0',
+    'requests'
 ]
 [project.urls]
 Homepage = "https://github.com/Dialpuri/NucleoFind"
 
 [project.scripts]
-nucleofind = "nucleofind.predict:run"
+nucleofind = "nucleofind.prediction.predict:run"
 nucleofind-install="nucleofind.install:run"
 nucleofind-clean="nucleofind.clean:run"
 nucleofind-build="nucleofind.build:main"

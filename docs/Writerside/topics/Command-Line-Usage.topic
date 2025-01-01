@@ -11,7 +11,7 @@
 
     <p>
         Once the models for NucleoFind are installed, NucleoFind is ready to run. Use this command line syntax
-        to predict nucleic acid positions from electron density.
+        to predict nucleic acid positions from density.
     </p>
 
     <chapter title="Command" id="command">
@@ -25,12 +25,12 @@
     <chapter title="Example Usage" id="example">
         <p>Simple Syntax:</p>
         <code-block lang="shell">
-            nucleofind -m phosphate -i reflections.mtz -o predicted.map
+            nucleofind -m nano -i reflections.mtz -o predicted.map
         </code-block>
 
         <p>Advanced Syntax:</p>
         <code-block lang="shell">
-            nucleofind -m phosphate -i reflections.mtz -o predicted.map -r 2.5 -intensity F -phase phi -no-symmetry
+            nucleofind -m core -i reflections.mtz -o predicted.map -r 2.5 -amplitude F -phase phi
         </code-block>
     </chapter>
 
@@ -40,29 +40,31 @@
         <deflist type="medium">
             <def title="-i, -input">
                 Path to input file.
-                <p>Formats accepted: MTZ or CCP4 map</p>
+                <p>Formats accepted: MTZ, CCP4, MRC and zipped equivalents</p>
                 <b>Required</b>
             </def>
             <def title="-o, -output">
-                <p>Path to output .map file</p>
-                <p>e.g. <code> -o prediction.map</code></p>
-                <p>If multiple models are specified, the suffix _model.map will be added to the outputs.</p>
-                <p>e.g. <code>-m phosphate,sugar -o prediction</code> outputs two files
-                <code>prediction_phosphate.map</code> and <code>prediction_sugar.map</code>
-                </p>
+                <p>Path to output folder which will contain NucleoFind predicted phosphate, sugar, and base maps.</p>
+                <p>e.g. <code> -o nucleofind-predictions</code></p>
                 <b>Required</b>
             </def>
             <def title="-m ">
-                <p>Name of nucleic acid characteristic to predict</p>
-                <p>e.g. <code> -m phosphate</code></p>
-                <p>e.g. <code> -m phosphate,sugar</code></p>
-                <p>e.g. <code> -m all</code></p>
+                <p>Name of NucleoFind model</p>
+                <p>Available Models:</p>
+                <list>
+                    <li>nano (25M parameters)</li>
+                    <li>core (105M parameters)</li>
+                </list>
                 <p>Optional if only one model is installed, otherwise required.</p>
             </def>
             <def title="-r, -resolution">
                 <p>Resolution cutoff off to use with reflection data</p>
                 <p>E.g. a value of <code>2.5</code> uses only the 2.5 Angstrom and greater reflctions in the map
                 calculation</p>
+            </def>
+            <def title="-n, -nthreads">
+                <p>Number of threads to use</p>
+                <p>Default: Max available</p>
             </def>
             <def title="-f, -amplitude">
                 Column name of structure factor amplitudes.
@@ -74,24 +76,25 @@
             </def>
              <def title="-no-symmetry">
                 <p>Predict over the entire unit cell instead of the asymmetric unit</p>
+                 <p>Default: True</p>
                 <b>Advanced</b>
             </def>
-            <def title="-raw">
-                <p>Use raw predicted values to form the output map.</p>
-                <b>Advanced</b>
-            </def>
-            <def title="-variance">
-                <p>Use point-wise variance values to form the output map.</p>
-                <b>Advanced</b>
-            </def>
+<!--            <def title="-raw">-->
+<!--                <p>Use raw predicted values to form the output map.</p>-->
+<!--                <b>Advanced</b>-->
+<!--            </def>-->
+<!--            <def title="-variance">-->
+<!--                <p>Use point-wise variance values to form the output map.</p>-->
+<!--                <b>Advanced</b>-->
+<!--            </def>-->
             <def title="-gpu">
                 <p>Use GPU acceleration. (Linux only)</p>
                 <b>Advanced</b>
             </def>
-            <def title="-model_path">
-                <p>Path to ONNX model for use with a custom model.</p>
-                <b>Advanced</b>
-            </def>
+<!--            <def title="-model_path">-->
+<!--                <p>Path to ONNX model for use with a custom model.</p>-->
+<!--                <b>Advanced</b>-->
+<!--            </def>-->
             <def title="-debug">
                 <p>Enable debug logging.</p>
             </def>

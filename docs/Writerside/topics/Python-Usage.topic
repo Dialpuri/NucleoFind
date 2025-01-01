@@ -7,7 +7,7 @@
 
     <p>
         One the models for NucleoFind are installed, NucleoFind is ready to run. Use this Python syntax
-        to predict nucleic acid positions from electron density.
+        to predict nucleic acid positions from density.
     </p>
 
     <chapter title="Command" id="command">
@@ -16,12 +16,19 @@
         <code-block lang="python">
             import nucleofind as nf
 
-            nf.predict_map("phosphate", "data/ref.mtz", "data/pred.map", intensity = "FWT", phase = "PHWT", overlap=16)
+            nf.predict_map("core", "data/ref.mtz", "data/nucleic-acids", amplitude = "FWT", phase = "PHWT", overlap=16)
         </code-block>
 
-        <code-block lang="python">
+        The output will be a folder of name <code>data/nucleic-acids</code> containing three CCP4 maps named:
+        <list>
+            <li>nucleofind-phosphate.map</li>
+            <li>nucleofind-sugar.map</li>
+            <li>nucleofind-base.map</li>
+        </list>
 
-        def predict_map(model: str, input: str, output: str, resolution: float = 2.5, intensity: str = "FWT",
+        The signature of the function is shown below:
+        <code-block lang="python">
+        def predict_map(model: str, input: str, output: str, resolution: float = 2.5, amplitude: str = "FWT",
         phase: str = "PHWT", overlap: float = 16):
         </code-block>
     </chapter>
