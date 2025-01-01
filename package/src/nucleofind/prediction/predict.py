@@ -42,7 +42,7 @@ class NucleoFind:
             output_shape
         ), translation
 
-    def _run_prediction(self, work_grid: np.ndarray, overlap: int = 16) -> np.ndarray:
+    def _run_prediction(self, work_grid: np.ndarray) -> np.ndarray:
         """Run prediction on work_grid and calculate the average predicted grid"""
         work_grid_shape = np.array(work_grid.shape)
         slices = precompute_slices(work_grid_shape, overlap=self.configuration.overlap)
@@ -194,19 +194,20 @@ def predict_map(
     resolution: float = None,
     amplitude: str = "FWT",
     phase: str = "PHWT",
-    overlap: int = 16,
+    overlap: int = None,
 ):
     """Run prediction from Python"""
     logging.info(
         f"Running prediction with model {model}, input {input}, output {output}, resolution {resolution}, amplitude {amplitude}, phase {phase}, overlap {overlap}"
     )
     model_path = find_model(model)
+    model_configuration = get_model_config(model, overlap)
     configuration = Configuration(
         use_gpu=False,
         disable_progress_bar=False,
         compute_entire_unit_cell=False,
-        overlap=overlap,
         n_threads=None,
+        **vars(model_configuration),
     )
     prediction = NucleoFind(model_path, configuration=configuration)
     prediction.predict(input, [amplitude, phase], resolution_cutoff=resolution)

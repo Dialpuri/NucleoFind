@@ -16,33 +16,45 @@ def data_base_path():
 
 
 @pytest.fixture(scope='session')
-def parameters(data_base_path):
-    # map_types = ["nano", "core"]
-    model_name = "core"
+def expected_md5sums(model_type):
+    data = {
+        "nano": SimpleNamespace(
+            phosphate = "38cbdd8aaf54dacfb37a06b45dd48b6b",
+            sugar = "b30c9d392ad441ef80fb3914d155310f",
+            base = "43be8bbbef2b691cb7556c6536b9baae"
+        ),
+        "core": SimpleNamespace(
+            phosphate = "478a977c95544a7e616b3148d822c80a",
+            sugar = "34b4ac22a3331b39783bb8013349a707",
+            base = "dea227621d152fdb36280f986284421a"
+        ),
+        "ultra": SimpleNamespace(
+            phosphate = "946df04305b3c46b43a6c1a00def6223",
+            sugar = "15a7808c90210aff7f0707e0429a6db4",
+            base = "bfeb128562d95f6804cc6c4cf424f2b6"
+        )
+
+    }
+    return data[model_type]
+
+@pytest.fixture(scope='session', params=["nano", "core", "ultra"])
+def model_type(request):
+    return request.param
+
+@pytest.fixture(scope='session')
+def parameters(data_base_path, model_type):
     mtzin = data_base_path / "hklout.mtz"
     colinfc = "FWT,PHWT"
 
     with tempfile.TemporaryDirectory() as tmp_directory:
         tmp_directory = Path(tmp_directory)
         yield SimpleNamespace(
-            model_name=model_name,
+            model_name=model_type,
             map_types=["phosphate", "sugar", "base"],
             mtzin=str(mtzin),
             colinfc=colinfc,
             output=tmp_directory / "prediction"
             )
-
-
-@pytest.fixture(scope='session')
-def md5sums():
-    phosphate_map_md5sum = "478a977c95544a7e616b3148d822c80a"
-    sugar_map_md5sum = "34b4ac22a3331b39783bb8013349a707"
-    base_map_md5sum = "7976c788c4a76222898b02b1d58e8b9a"
-    return SimpleNamespace(
-        phosphate=phosphate_map_md5sum,
-        sugar=sugar_map_md5sum,
-        base=base_map_md5sum
-    )
 
 
 @pytest.fixture(scope='session')
@@ -74,12 +86,12 @@ def predictions_cmdline(parameters) -> Path:
         str: The path to the output file.
     """
     output = parameters.output.parent / ("cmd_" + parameters.output.stem)
-    cmd = f'nucleofind -i "{parameters.mtzin}" -o "{output}" -m core -no-symmetry'
+    cmd = f'nucleofind -i "{parameters.mtzin}" -o "{output}" -m {parameters.model_name} -no-symmetry'
     os.system(cmd)
     return output
 
 
-def test_python_prediction(predictions_python, parameters, md5sums):
+def test_python_prediction(predictions_python, parameters, expected_md5sums):
     """
     This function is used to test the predictions made by a Python model. It compares the MD5 sums of the predictions
     to the known MD5 sums.
@@ -92,10 +104,10 @@ def test_python_prediction(predictions_python, parameters, md5sums):
     Raises:
         AssertionError: An error occurs if the calculated prediction MD5 sums do not equal the known MD5 sums.
     """
-    compare_sums(md5sums, parameters, predictions_python)
+    compare_sums(expected_md5sums, parameters, predictions_python)
 
 
-def test_cmdline_prediction(predictions_cmdline, parameters, md5sums):
+def test_cmdline_prediction(predictions_cmdline, parameters, expected_md5sums):
     """
     This function is used to test the predictions made by a command line interface. It compares the MD5 sums of the
     predictions to the known MD5 sums.
@@ -108,7 +120,7 @@ def test_cmdline_prediction(predictions_cmdline, parameters, md5sums):
     Raises:
         AssertionError: An error occurs if the calculated prediction MD5 sums do not equal the known MD5 sums.
        """
-    compare_sums(md5sums, parameters, predictions_cmdline)
+    compare_sums(expected_md5sums, parameters, predictions_cmdline)
 
 
 def compare_sums(md5sums, parameters, base_path):
