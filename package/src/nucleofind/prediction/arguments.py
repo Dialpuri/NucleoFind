@@ -19,12 +19,13 @@ def parse_arguments() -> SimpleNamespace:
     parser.add_argument(
         "-o",
         "-output",
-        help="Output directory, if does not exist it will be created "
-        "model",
+        help="Output directory, if does not exist it will be created model",
         required=True,
     )
     parser.add_argument("-r", "-resolution", nargs="?", help="Resolution cutoff")
-    parser.add_argument("-n", "-nthreads", nargs="?", default=None, help="Number of threads to use")
+    parser.add_argument(
+        "-n", "-nthreads", nargs="?", default=None, help="Number of threads to use"
+    )
     parser.add_argument(
         "-amplitude", "-f", nargs="?", help="Name of amplitude column in MTZ, e.g. FWT"
     )
