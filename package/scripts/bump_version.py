@@ -31,6 +31,7 @@ def update_version_in_file(file_path, old_version, new_version):
 def main():
     parser = argparse.ArgumentParser(description="Bump project version.")
     parser.add_argument("-major", action=argparse.BooleanOptionalAction)
+    parser.add_argument("-dryrun", action=argparse.BooleanOptionalAction)
     parser.add_argument("-minor", action=argparse.BooleanOptionalAction)
     parser.add_argument("-patch", action=argparse.BooleanOptionalAction)
     args = parser.parse_args()
@@ -60,6 +61,8 @@ def main():
     new_version = bump_version(current_version, args)
 
     print(f"Bumping version {current_version} -> {new_version}")
+    if args.dryrun:
+        return
     update_version_in_file(version_file, current_version, new_version)
     update_version_in_file(cfg_file, current_version, new_version)
 
