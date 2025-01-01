@@ -9,7 +9,7 @@ def show_missing_model_error():
     logging.critical("""
     No models have been found in either site_packages or CCP4/lib/data.
     You can install models using the command:
-    nucleofind-install -m phosphate
+    nucleofind-install -m {nano,core,ultra}
         """)
 
 
