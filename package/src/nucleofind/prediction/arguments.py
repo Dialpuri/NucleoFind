@@ -36,8 +36,7 @@ def parse_arguments() -> SimpleNamespace:
         "-overlap",
         nargs="?",
         help="Amount of overlap to use",
-        const=16,
-        default=16,
+        default=None,
         type=int,
     )
     parser.add_argument(

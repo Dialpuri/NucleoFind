@@ -36,7 +36,7 @@ class NucleoFind:
         """
         i, j, k = translation
         input_sub = array[i : i + box_size, j : j + box_size, k : k + box_size]
-        input_sub = input_sub[np.newaxis, ..., np.newaxis]
+        input_sub = input_sub[np.newaxis, ..., np.newaxis].astype(np.float16)
 
         return np.array(self.model.run(None, {input_name: input_sub})).reshape(
             output_shape
@@ -45,7 +45,7 @@ class NucleoFind:
     def _run_prediction(self, work_grid: np.ndarray, overlap: int = 16) -> np.ndarray:
         """Run prediction on work_grid and calculate the average predicted grid"""
         work_grid_shape = np.array(work_grid.shape)
-        slices = precompute_slices(work_grid_shape, overlap)
+        slices = precompute_slices(work_grid_shape, overlap=self.configuration.overlap)
         box_size = self.configuration.box_size
 
         total_array = np.zeros((*work_grid_shape, 4), dtype=np.float32)
@@ -166,7 +166,7 @@ def run():
     setup_logging()
     args = parse_arguments()
     model_path = find_model(args.m)
-    custom_model_configuration = get_model_config(args.m)
+    model_configuration = get_model_config(args.m, args.overlap)
     configuration = Configuration(
         use_gpu=args.gpu,
         disable_progress_bar=args.silent,
@@ -174,10 +174,8 @@ def run():
         use_raw_values=args.raw,
         compute_variance=args.variance,
         n_threads=args.n,
-        overlap=args.overlap,
-        **vars(custom_model_configuration)
+        **vars(model_configuration),
     )
-    print(configuration)
     nucleofind = NucleoFind(model_path, configuration)
     nucleofind.predict(
         args.i,

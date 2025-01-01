@@ -103,9 +103,7 @@ def get_latest_model(type: ModelType) -> str:
     # Get latest model out of list based on date
     possible_models = sorted(possible_models, reverse=True)
     latest_model = possible_models[0]
-    logging.debug(
-        "Latest model for %s is %s", type.name, latest_model
-    )
+    logging.debug("Latest model for %s is %s", type.name, latest_model)
     return latest_model
 
 
@@ -216,17 +214,19 @@ def find_model(model: ModelType | str | None):
     show_missing_specified_model_error(specified_model_name)
 
 
-def get_model_config(model_type: str) -> SimpleNamespace:
+def get_model_config(model_type: str, overlap: int | None) -> SimpleNamespace:
     """Get model configuration from model type"""
     if model_type not in ModelType.__members__:
         raise RuntimeError(f"Invalid model type - {model_type}")
     model_type = ModelType[model_type]
     match model_type:
         case ModelType.nano:
-            return SimpleNamespace(box_size=32, spacing=0.7)
+            return SimpleNamespace(box_size=32)
         case ModelType.core:
-            return SimpleNamespace(box_size=32, spacing=0.7)
+            return SimpleNamespace(box_size=32)
         case ModelType.ultra:
-            return SimpleNamespace(box_size=64, spacing=0.7)
+            return SimpleNamespace(
+                box_size=64, overlap=32 if overlap is None else overlap
+            )  # Allow overlap to be overriden
         case _:
             raise RuntimeError(f"Invalid model type - {model_type}")
