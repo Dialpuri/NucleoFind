@@ -9,7 +9,7 @@ from tqdm import tqdm
 from .load import load_density, load_onnx_model
 from .grid_tools import interpolate_grid, reinterpolate_grid, precompute_slices
 from .arguments import parse_arguments
-from .model import find_model
+from .model import find_model, get_model_config
 from .save import save_grid
 from ..logs import setup_logging
 from .config import Configuration, MapType
@@ -82,14 +82,21 @@ class NucleoFind:
         ones = np.ones(channels)
         for result in tqdm(results, desc="Processing results"):
             predicted_sub, (i, j, k) = result
-            box_slice = (slice(i, i + box_size), slice(j, j + box_size), slice(k, k + box_size), slice(None))
+            box_slice = (
+                slice(i, i + box_size),
+                slice(j, j + box_size),
+                slice(k, k + box_size),
+                slice(None),
+            )
             total_array[box_slice] += predicted_sub
             count_array[box_slice] += ones
 
             if self.configuration.compute_variance:
                 delta_variance = total_array[box_slice] - variance_mean[box_slice]
                 variance_mean[box_slice] += delta_variance / count_array[box_slice]
-                variance_m2[box_slice] += delta_variance * (total_array[box_slice] - variance_mean[box_slice])
+                variance_m2[box_slice] += delta_variance * (
+                    total_array[box_slice] - variance_mean[box_slice]
+                )
 
         predicted_array = total_array / count_array
         if self.configuration.use_raw_values:
@@ -149,7 +156,8 @@ class NucleoFind:
             raise ValueError(f"No grid of type {type} found.")
 
         save_grid(
-            self.predicted_grids[type], output_path / f"nucleofind-{type.name}{suffix}",
+            self.predicted_grids[type],
+            output_path / f"nucleofind-{type.name}{suffix}",
         )
 
 
@@ -158,7 +166,7 @@ def run():
     setup_logging()
     args = parse_arguments()
     model_path = find_model(args.m)
-
+    custom_model_configuration = get_model_config(args.m)
     configuration = Configuration(
         use_gpu=args.gpu,
         disable_progress_bar=args.silent,
@@ -167,7 +175,9 @@ def run():
         compute_variance=args.variance,
         n_threads=args.n,
         overlap=args.overlap,
+        **vars(custom_model_configuration)
     )
+    print(configuration)
     nucleofind = NucleoFind(model_path, configuration)
     nucleofind.predict(
         args.i,
@@ -178,8 +188,16 @@ def run():
     nucleofind.save_grid(MapType.sugar, output_dir)
     nucleofind.save_grid(MapType.base, output_dir)
 
-def predict_map(model: str, input: str, output: str, resolution: float = None, amplitude: str = "FWT",
-                phase: str = "PHWT", overlap: int = 16):
+
+def predict_map(
+    model: str,
+    input: str,
+    output: str,
+    resolution: float = None,
+    amplitude: str = "FWT",
+    phase: str = "PHWT",
+    overlap: int = 16,
+):
     """Run prediction from Python"""
     logging.info(
         f"Running prediction with model {model}, input {input}, output {output}, resolution {resolution}, amplitude {amplitude}, phase {phase}, overlap {overlap}"
