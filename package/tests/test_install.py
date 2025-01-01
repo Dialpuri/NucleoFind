@@ -53,3 +53,8 @@ def test_core_install():
 def test_nano_install():
     perform_installation_test("nano")
 
+@pytest.mark.slow
+def test_ultra_install():
+    perform_installation_test("ultra")
+
+

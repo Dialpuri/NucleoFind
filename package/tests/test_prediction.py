@@ -37,9 +37,12 @@ def expected_md5sums(model_type):
     }
     return data[model_type]
 
-@pytest.fixture(scope='session', params=["nano", "core", "ultra"])
-def model_type(request):
-    return request.param
+def pytest_generate_tests(metafunc):
+    """Generate model matrix with runslow option"""
+    if "model_type" in metafunc.fixturenames:
+        runslow = metafunc.config.getoption("--runslow")
+        params = ["nano", "core", "ultra"] if runslow else ["core"]
+        metafunc.parametrize("model_type", params, ids=params, scope="session")
 
 @pytest.fixture(scope='session')
 def parameters(data_base_path, model_type):
