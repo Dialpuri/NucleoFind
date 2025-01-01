@@ -1,4 +1,4 @@
-name: Wheels
+name: Test Python functions
 
 on:
   pull_request:
