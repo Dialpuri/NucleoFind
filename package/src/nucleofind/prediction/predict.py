@@ -201,7 +201,7 @@ def predict_map(
         f"Running prediction with model {model}, input {input}, output {output}, resolution {resolution}, amplitude {amplitude}, phase {phase}, overlap {overlap}"
     )
     model_path = find_model(model)
-    model_configuration = get_model_config(model, overlap)
+    model_configuration = get_model_config(model_path, overlap)
     configuration = Configuration(
         use_gpu=False,
         disable_progress_bar=False,

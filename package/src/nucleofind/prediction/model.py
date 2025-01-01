@@ -189,7 +189,7 @@ def find_model(model: ModelType | str | None) -> Path | None:
         sys.exit(1)
 
     if not model and len(potential_models) == 1:
-        return potential_models[0]
+        return Path(potential_models[0])
 
     model_names = extract_model_names(potential_models)
     if not model:
@@ -203,7 +203,7 @@ def find_model(model: ModelType | str | None) -> Path | None:
 
     for name in model_names:
         if name == specified_model_name:
-            return potential_models[model_names.index(name)]
+            return Path(potential_models[model_names.index(name)])
 
     show_missing_specified_model_error(specified_model_name)
 
