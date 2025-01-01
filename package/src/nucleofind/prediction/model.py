@@ -27,11 +27,6 @@ class ModelType(Enum):
     ultra = 3
 
 
-URLS = {
-    ModelType.nano: "https://huggingface.co/api/models/Dialpuri/NucleoFind-nano",
-    ModelType.core: "https://huggingface.co/api/models/Dialpuri/NucleoFind-core",
-    ModelType.ultra: "https://huggingface.co/api/models/Dialpuri/NucleoFind-ultra",
-}
 
 
 def calculate_sha256(file_path: Path):
@@ -81,10 +76,9 @@ def is_model_valid(type: ModelType, model_path: Path, latest_model: str):
 
 def get_latest_model(type: ModelType) -> str:
     """Query the HuggingFace API to get URL for latest model"""
-    url = URLS.get(type, None)
-    if not url:
-        raise RuntimeError("Invalid model type")
-
+    base_url = "https://huggingface.co/api/models/Dialpuri/NucleoFind"
+    url = f"{base_url}-{type.name}"
+    logging.debug("Getting latest model for %s from %s", type.name, url)
     response = requests.get(url)
     json = response.json()
     if not json:
