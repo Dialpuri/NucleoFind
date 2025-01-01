@@ -15,4 +15,4 @@ Nucleic acid electron density interpretation remains a difficult problem for com
 
 If you find _NucleoFind_ useful, please cite: 
 
-- Jordan S Dialpuri, Jon Agirre, Kathryn D Cowtan, Paul S Bond, NucleoFind: A Deep-Learning Network for Interpreting Nucleic Acid Electron Density, Nucleic Acid Research, 2024 [https://doi.org/10.1093/nar/gkae715](https://doi.org/10.1093/nar/gkae715)
+- Jordan S Dialpuri, Jon Agirre, Kathryn D Cowtan, Paul S Bond, NucleoFind: a deep-learning network for interpreting nucleic acid electron density, Nucleic Acids Research, Volume 52, Issue 17, 23 September 2024, Page e84,  [https://doi.org/10.1093/nar/gkae715](https://doi.org/10.1093/nar/gkae715)
