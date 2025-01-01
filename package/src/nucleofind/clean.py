@@ -22,7 +22,7 @@ def clean_models():
     print("Pick an option to remove: ")
 
     for index, model in enumerate(found_models):
-        print(f"{index + 1}) {model.name.rstrip('.onnx')}")
+        print(f"{index + 1}) {model.name.removesuffix('.onnx')}")
 
     if len(found_models) > 1:
         print(f"{len(found_models) + 1}) All")

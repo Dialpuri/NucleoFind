@@ -164,6 +164,7 @@ def find_all_potential_models():
 
     if not potential_models:
         show_missing_model_error()
+        sys.exit(1)
 
     return [Path(x) for x in potential_models]
 
@@ -206,6 +207,7 @@ def find_model(model: ModelType | str | None) -> Path | None:
             return Path(potential_models[model_names.index(name)])
 
     show_missing_specified_model_error(specified_model_name)
+    sys.exit(1)
 
 
 def get_model_config(model_path: Path, overlap: int | None) -> SimpleNamespace:
