@@ -13,7 +13,7 @@ class Configuration:
     compute_variance: bool = False
     use_raw_values: bool = False
     spacing: float = 0.7
-    box_size = 32
+    box_size: int = 32
     channels: int = 4
     overlap: int = 16
 
