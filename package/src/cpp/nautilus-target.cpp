@@ -617,9 +617,9 @@ const clipper::MiniMol NucleicAcidTargets::grow( const clipper::Xmap<float>& xma
   float scut = target_sugar().cutoff_sum( fcut );
 
   clipper::Xmap<float> sugar_map;
-  if (predictions.get_sugar_map().has_value()) {
-      sugar_map = predictions.get_sugar_map().value();
-  }
+  // if (predictions.get_sugar_map().has_value()) {
+  //     sugar_map = predictions.get_sugar_map().value();
+  // }
 
   for ( int c = 0; c < mol_new.size(); c++ ) {
     if ( !mol_new[c].exists_property( "NON-NA" ) ) {
@@ -659,7 +659,7 @@ const clipper::MiniMol NucleicAcidTargets::link( const clipper::Xmap<float>& xma
         NucleicAcidDB::Chain chn;
         for ( int r1 = 0; r1 < 2; r1++ ) {
           for ( int r2 = 0; r2 < 2; r2++ ) {
-            if (l1-r1 < 0) {continue;};
+            if (l1-r1 < 0) {continue;}; // skip if the chain is too short i.e when chain has only 2 NAs or fewer
             NucleicAcidDB::NucleicAcid na1 = mol[c1][l1-r1];
             NucleicAcidDB::NucleicAcid na2 = mol[c2][r2];
             clipper::Coord_orth   cref = na1.coord_o3();
@@ -686,7 +686,7 @@ const clipper::MiniMol NucleicAcidTargets::link( const clipper::Xmap<float>& xma
         if ( chn.size() != 0 ) {
           clipper::MPolymer mp;
           for ( int r = 0; r < chn.size(); r++ ) {
-//            std::cout << "Adding chn[" << r << "] to monomer" << std::endl;
+          //  std::cout << "Adding chn[" << r << "] to monomer" << std::endl;
             mp.insert( chn[r].mmonomer() );
 
           }

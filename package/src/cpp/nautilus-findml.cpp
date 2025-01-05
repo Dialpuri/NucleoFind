@@ -462,8 +462,8 @@ float FindML::score_fragment(NucleicAcidDB::ChainFull &fragment, clipper::Xmap<f
     float total_score = 0.0f;
     for (int i = 0; i < fragment.size(); i++) {
         float score = score_density(fragment[i], xmap, i == fragment.size() - 1);
-//         score += score_sugar(fragment[i]);
-//         score += score_base(fragment[i]);
+        score += score_sugar(fragment[i]);
+        score += score_base(fragment[i]);
         fragment[i].score = score;
         total_score += score;
     }
