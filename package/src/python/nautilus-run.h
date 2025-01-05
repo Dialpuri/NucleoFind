@@ -295,7 +295,7 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
         mol_wrk = run_cycle(nhit, srchst, verbose, natools, seq_wrk, mol_wrk, xwrk, log, predictions);
 
         int current_count = NautilusUtil::count_well_modelled_nas(mol_wrk, xwrk, hkls.resolution().limit());
-        std::cout << "Cycle "<< cyc+1 << " built " << best_na_count << " residues with RSRZ >= -1" << std::endl;
+        std::cout << "Cycle "<< cyc+1 << " built " << current_count << " residues with RSRZ >= -1" << std::endl;
 
         if (current_count > best_na_count) {
             std::cout << "Taking model from old cycle " << cyc + 1 << "\n";
