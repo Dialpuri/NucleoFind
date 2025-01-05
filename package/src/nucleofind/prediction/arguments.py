@@ -20,11 +20,12 @@ def parse_arguments() -> SimpleNamespace:
         "-o",
         "-output",
         help="Output directory, if does not exist it will be created model",
-        required=True,
+        default="nucleofind-output",
+        required=False,
     )
     parser.add_argument("-r", "-resolution", nargs="?", help="Resolution cutoff")
     parser.add_argument(
-        "-n", "-nthreads", nargs="?", default=None, help="Number of threads to use"
+        "-n", "-nthreads", nargs="?", default=None, type=int, help="Number of threads to use"
     )
     parser.add_argument(
         "-amplitude", "-f", nargs="?", help="Name of amplitude column in MTZ, e.g. FWT"
