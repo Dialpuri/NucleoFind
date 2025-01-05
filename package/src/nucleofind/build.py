@@ -39,7 +39,7 @@ def main():
     parser.add_argument("-phosin", required=True)
     parser.add_argument("-sugarin", required=False, default="")
     parser.add_argument("-basein", required=False, default="")
-    parser.add_argument("-colin-fo", required=True)
+    parser.add_argument("-colin-fo", required=False, default="")
     parser.add_argument("-colin-fc", required=True)
     parser.add_argument("-colin-free", required=False, default="")
     parser.add_argument("-xmlout", required=False, default="")
