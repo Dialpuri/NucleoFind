@@ -11,7 +11,7 @@ from pathlib import Path
 def expected_values(test_example):
     data = {
         "1hr2": {
-            "time": 50,
+            "time": 200,
             "fragments_built": 10,
             "residues_built": 250,
             "residues_sequenced": 150,

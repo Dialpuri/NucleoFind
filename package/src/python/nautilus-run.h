@@ -265,9 +265,10 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
 
         ModelTidy::chain_renumber(mol_wrk, seq_wrk);
         NucleicAcidTools::chain_sort(mol_wrk);
-        NucleicAcidTools::symm_match(mol_wrk, mol_wrk_in);
+        if (mol_wrk_in.size() > 0) {
+            NucleicAcidTools::symm_match(mol_wrk, mol_wrk_in);
+        }
         NucleicAcidTools::residue_label(mol_wrk);
-
 
         for (int cyc = 0; cyc < cycles; cyc++) {
             std::cout << "ML Based cycle " << clipper::String(cyc + 1, 3) << std::endl << std::endl;

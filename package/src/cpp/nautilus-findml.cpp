@@ -422,36 +422,36 @@ float FindML::score_density(NucleicAcidDB::NucleicAcidFull &chain, clipper::Xmap
 
 float FindML::score_sugar(NucleicAcidDB::NucleicAcidFull &chain) {
     if (!predictions.get_sugar_map().has_value()) return 0;
-    clipper::Xmap<float> xsugarpred = predictions.get_sugar_map().value();
+    const clipper::Xmap<float>* xsugarpred = predictions.get_sugar_map_ptr();
     float score = 0.0f;
-    if (!chain.C5p1.is_null()) score += xsugarpred.interp<clipper::Interp_cubic>(chain.C5p1.coord_frac(xwrk.cell()));
-    if (!chain.C4p1.is_null()) score += xsugarpred.interp<clipper::Interp_cubic>(chain.C4p1.coord_frac(xwrk.cell()));
-    if (!chain.O4p1.is_null()) score += xsugarpred.interp<clipper::Interp_cubic>(chain.O4p1.coord_frac(xwrk.cell()));
-    if (!chain.C3p1.is_null()) score += xsugarpred.interp<clipper::Interp_cubic>(chain.C3p1.coord_frac(xwrk.cell()));
-    if (!chain.O3p1.is_null()) score += xsugarpred.interp<clipper::Interp_cubic>(chain.O3p1.coord_frac(xwrk.cell()));
-    if (!chain.C2p1.is_null()) score += xsugarpred.interp<clipper::Interp_cubic>(chain.C2p1.coord_frac(xwrk.cell()));
-    if (!chain.C1p1.is_null()) score += xsugarpred.interp<clipper::Interp_cubic>(chain.C1p1.coord_frac(xwrk.cell()));
+    if (!chain.C5p1.is_null()) score += xsugarpred->interp<clipper::Interp_cubic>(chain.C5p1.coord_frac(xwrk.cell()));
+    if (!chain.C4p1.is_null()) score += xsugarpred->interp<clipper::Interp_cubic>(chain.C4p1.coord_frac(xwrk.cell()));
+    if (!chain.O4p1.is_null()) score += xsugarpred->interp<clipper::Interp_cubic>(chain.O4p1.coord_frac(xwrk.cell()));
+    if (!chain.C3p1.is_null()) score += xsugarpred->interp<clipper::Interp_cubic>(chain.C3p1.coord_frac(xwrk.cell()));
+    if (!chain.O3p1.is_null()) score += xsugarpred->interp<clipper::Interp_cubic>(chain.O3p1.coord_frac(xwrk.cell()));
+    if (!chain.C2p1.is_null()) score += xsugarpred->interp<clipper::Interp_cubic>(chain.C2p1.coord_frac(xwrk.cell()));
+    if (!chain.C1p1.is_null()) score += xsugarpred->interp<clipper::Interp_cubic>(chain.C1p1.coord_frac(xwrk.cell()));
     return score;
 }
 
 float FindML::score_base(NucleicAcidDB::NucleicAcidFull &chain) {
     if (!predictions.get_base_map().has_value()) return 0;
-    clipper::Xmap<float> xbasepred = predictions.get_base_map().value();
+    const clipper::Xmap<float>* xbasepred = predictions.get_base_map_ptr();
     float score = 0.0f;
-    if (!chain.N1_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.N1_1.coord_frac(xwrk.cell()));
-    if (!chain.N2_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.N2_1.coord_frac(xwrk.cell()));
-    if (!chain.N3_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.N3_1.coord_frac(xwrk.cell()));
-    if (!chain.N4_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.N4_1.coord_frac(xwrk.cell()));
-    if (!chain.N6_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.N6_1.coord_frac(xwrk.cell()));
-    if (!chain.N7_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.N7_1.coord_frac(xwrk.cell()));
-    if (!chain.N9_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.N9_1.coord_frac(xwrk.cell()));
-    if (!chain.C2_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.C2_1.coord_frac(xwrk.cell()));
-    if (!chain.C4_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.C4_1.coord_frac(xwrk.cell()));
-    if (!chain.C5_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.C5_1.coord_frac(xwrk.cell()));
-    if (!chain.C6_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.C6_1.coord_frac(xwrk.cell()));
-    if (!chain.C8_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.C8_1.coord_frac(xwrk.cell()));
-    if (!chain.O2_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.O2_1.coord_frac(xwrk.cell()));
-    if (!chain.O6_1.is_null()) score += xbasepred.interp<clipper::Interp_cubic>(chain.O6_1.coord_frac(xwrk.cell()));
+    if (!chain.N1_1.is_null()) score += xbasepred->interp<clipper::Interp_cubic>(chain.N1_1.coord_frac(xwrk.cell()));
+    if (!chain.N2_1.is_null()) score += xbasepred->interp<clipper::Interp_cubic>(chain.N2_1.coord_frac(xwrk.cell()));
+    if (!chain.N3_1.is_null()) score += xbasepred->interp<clipper::Interp_cubic>(chain.N3_1.coord_frac(xwrk.cell()));
+    if (!chain.N4_1.is_null()) score += xbasepred->interp<clipper::Interp_cubic>(chain.N4_1.coord_frac(xwrk.cell()));
+    if (!chain.N6_1.is_null()) score += xbasepred->interp<clipper::Interp_cubic>(chain.N6_1.coord_frac(xwrk.cell()));
+    if (!chain.N7_1.is_null()) score += xbasepred->interp<clipper::Interp_cubic>(chain.N7_1.coord_frac(xwrk.cell()));
+    if (!chain.N9_1.is_null()) score += xbasepred->interp<clipper::Interp_cubic>(chain.N9_1.coord_frac(xwrk.cell()));
+    if (!chain.C2_1.is_null()) score += xbasepred->interp<clipper::Interp_cubic>(chain.C2_1.coord_frac(xwrk.cell()));
+    if (!chain.C4_1.is_null()) score += xbasepred->interp<clipper::Interp_cubic>(chain.C4_1.coord_frac(xwrk.cell()));
+    if (!chain.C5_1.is_null()) score += xbasepred->interp<clipper::Interp_cubic>(chain.C5_1.coord_frac(xwrk.cell()));
+    if (!chain.C6_1.is_null()) score += xbasepred->interp<clipper::Interp_cubic>(chain.C6_1.coord_frac(xwrk.cell()));
+    if (!chain.C8_1.is_null()) score += xbasepred->interp<clipper::Interp_cubic>(chain.C8_1.coord_frac(xwrk.cell()));
+    if (!chain.O2_1.is_null()) score += xbasepred->interp<clipper::Interp_cubic>(chain.O2_1.coord_frac(xwrk.cell()));
+    if (!chain.O6_1.is_null()) score += xbasepred->interp<clipper::Interp_cubic>(chain.O6_1.coord_frac(xwrk.cell()));
 
     return score;
 }
@@ -1011,6 +1011,8 @@ clipper::MiniMol FindML::remove_low_confidence(clipper::MiniMol &mol) {
     return mol_final;
 }
 
+#include <chrono>
+
 PlacedFragmentResult
 FindML::place_fragments(const clipper::MiniMol &phosphate_peaks, const std::vector<int> &positions) {
     float score = 0;
@@ -1101,7 +1103,10 @@ clipper::MiniMol FindML::find() {
 
     std::map<std::pair<int, int>, std::vector<NucleicAcidDB::NucleicAcidFull>> placed_fragments;
     std::vector<std::vector<int>> placed_fragment_indices;
+    int count = 0;
+    std::cout << "Beginning to place fragments" << std::endl;
     for (const auto &[fwd, bck]: pairs) {
+        std::cout << "\r" << count++ << " of " << pairs.size()-1 << " potential fragments placed" << std::flush;
         PlacedFragmentResult forward_result = place_fragments(phosphate_peaks, fwd);
         PlacedFragmentResult backward_result = place_fragments(phosphate_peaks, bck);
 
@@ -1113,6 +1118,7 @@ clipper::MiniMol FindML::find() {
             placed_fragment_indices.emplace_back(bck);
         }
     }
+    std::cout << std::endl;
 
     clipper::MiniMol filtered_chain = form_organised_chains(placed_fragments, placed_fragment_indices);
 //     NautilusUtil::save_minimol(filtered_chain, "filtered_chain.pdb");
