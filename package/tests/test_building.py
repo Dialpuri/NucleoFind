@@ -35,8 +35,7 @@ def data_base_path():
 
 @pytest.fixture(scope='session', params=[
     {"map_combination": [1, 0, 0]},
-    {"map_combination": [1, 1, 0]},
-    {"map_combination": [1, 0, 1]}
+    {"map_combination": [1, 1, 1]},
 ])
 def permutation(request):
     return request.param['map_combination']

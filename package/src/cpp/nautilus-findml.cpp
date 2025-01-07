@@ -457,19 +457,22 @@ float FindML::score_base(NucleicAcidDB::NucleicAcidFull &chain) {
 }
 
 
-float FindML::score_fragment(NucleicAcidDB::ChainFull &fragment, clipper::Xmap<float> &xmap) {
+float FindML::score_fragment(NucleicAcidDB::ChainFull &fragment, clipper::Xmap<float> &xmap, bool use_predicted_maps) {
 
     float total_score = 0.0f;
     for (int i = 0; i < fragment.size(); i++) {
         float score = score_density(fragment[i], xmap, i == fragment.size() - 1);
-        score += score_sugar(fragment[i]);
-        score += score_base(fragment[i]);
+        if (use_predicted_maps) {
+            score += score_sugar(fragment[i]);
+            score += score_base(fragment[i]);
+        }
         fragment[i].score = score;
         total_score += score;
     }
     fragment.chain_score = total_score;
     return total_score;
 }
+
 
 NucleicAcidDB::ChainFull
 FindML::refine_fragment(NucleicAcidDB::ChainFull &original_fragment, float translation_range, float translation_step) {
@@ -507,7 +510,7 @@ FindML::refine_fragment(NucleicAcidDB::ChainFull &original_fragment, float trans
         NucleicAcidDB::ChainFull test_fragment = com_fragment;
         test_fragment.transform(refined_rtop);
 
-        float refined_score = score_fragment(test_fragment, xwrk);
+        float refined_score = score_fragment(test_fragment, xwrk, false);
 
         if (refined_score > best_score) {
             best_chain = test_fragment;
@@ -1029,6 +1032,7 @@ FindML::place_fragments(const clipper::MiniMol &phosphate_peaks, const std::vect
         std::vector<clipper::Coord_orth> triplet_pos = {p1, p2, p3};
 
         float max_score = -1e8f;
+        float max_predicted_score = -1e8f;
         int best_offset = -1;
 
         for (int j = 0; j < nadb.size() - 2; j++) {
@@ -1042,10 +1046,14 @@ FindML::place_fragments(const clipper::MiniMol &phosphate_peaks, const std::vect
             fragment.transform(align);
             fragment.alignment = align;
 
-            float total_score = score_fragment(fragment, xwrk);
+            float total_score = score_fragment(fragment, xwrk, false);
             if (total_score > max_score) {
-                max_score = total_score;
-                best_offset = j;
+                float predicted_score = score_fragment(fragment, xwrk, true);
+                if (predicted_score > max_predicted_score) {
+                    max_score = total_score;
+                    max_predicted_score = predicted_score;
+                    best_offset = j;
+                }
             }
         }
 

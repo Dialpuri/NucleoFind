@@ -114,7 +114,7 @@ private:
 
     static clipper::Coord_orth calculate_com(NucleicAcidDB::ChainFull &chain);
 
-    float score_fragment(NucleicAcidDB::ChainFull &fragment, clipper::Xmap<float> &xmap);
+    float score_fragment(NucleicAcidDB::ChainFull &fragment, clipper::Xmap<float> &xmap, bool use_predicted_maps);
 
     static float score_density(NucleicAcidDB::NucleicAcidFull &chain, clipper::Xmap<float> &xmap, bool terminal);
 
