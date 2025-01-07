@@ -36,9 +36,10 @@ def main():
     parser.add_argument("-seqin", required=False, default="")
     parser.add_argument("-pdbin", required=False, default="")
     parser.add_argument("-pdbout", required=True)
-    parser.add_argument("-phosin", required=True)
+    parser.add_argument("-phosin", required=False)
     parser.add_argument("-sugarin", required=False, default="")
     parser.add_argument("-basein", required=False, default="")
+    parser.add_argument("-preddirin", required=False)
     parser.add_argument("-colin-fo", required=False, default="")
     parser.add_argument("-colin-fc", required=True)
     parser.add_argument("-colin-free", required=False, default="")
@@ -47,6 +48,9 @@ def main():
     parser.add_argument("-v", "--version", action="version", version=__version__)
 
     args = parser.parse_args()
+
+    if not args.phosin and not args.preddirin:
+        parser.error("Please specify a predicted map, either -phosin, -sugarin, -basein or -preddirin")
 
     if args.phosin == "auto":
         print(
@@ -69,6 +73,11 @@ def main():
         args.phosin = "nucleofind-run/nucleofind-phosphate.map"
         args.sugarin = "nucleofind-run/nucleofind-sugar.map"
         args.basein = "nucleofind-run/nucleofind-base.map"
+
+    if args.preddirin:
+        args.phosin = f"{args.preddirin}/nucleofind-phosphate.map"
+        args.sugarin = f"{args.preddirin}/nucleofind-sugar.map"
+        args.basein = f"{args.preddirin}/nucleofind-base.map"
 
     input = Input(
         args.mtzin,

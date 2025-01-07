@@ -1011,7 +1011,6 @@ clipper::MiniMol FindML::remove_low_confidence(clipper::MiniMol &mol) {
     return mol_final;
 }
 
-#include <chrono>
 
 PlacedFragmentResult
 FindML::place_fragments(const clipper::MiniMol &phosphate_peaks, const std::vector<int> &positions) {
