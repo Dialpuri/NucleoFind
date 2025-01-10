@@ -416,6 +416,75 @@ int NautilusUtil::count_nas(clipper::MiniMol& mol) {
   return nas;
 }
 
+int NautilusUtil::count_well_modelled_nas(clipper::MiniMol &mol, clipper::Xmap<float> xphospred, clipper::Xmap<float> xsugarpred,
+                                          clipper::Xmap<float> xbasepred) {
+
+    bool use_phosphate = false;
+    bool use_sugar = false;
+    bool use_base = false;
+    if (!xphospred.cell().is_null()) {use_phosphate = true;}
+    if (!xsugarpred.cell().is_null()) {use_sugar = true;}
+    if (!xbasepred.cell().is_null()) {use_base = true;}
+
+
+    clipper::Cell cell = xphospred.cell();
+    int well_modelled = 0;
+    for ( int c = 0; c < mol.size(); c++ )
+        if ( !mol[c].exists_property( "NON-NA" ) ) {
+            for ( int r = 0; r < mol[c].size(); r++ ){
+                int supported_atoms = 0;
+                int total_atoms = 0;
+
+                for (int a = 0; a < mol[c][r].size(); a++) {
+                    clipper::MAtom atom = mol[c][r][a];
+                    std::string id = atom.id().trim();
+                    AtomType type = get_atom_type(id);
+                    if (type == unknown) continue;
+                    float value = 0;
+                    if (type == phosphate && use_phosphate) {
+                        value = xphospred.interp<clipper::Interp_cubic>(atom.coord_orth().coord_frac(cell));
+                        total_atoms += 1;
+                    }
+                    else if (type == sugar && use_sugar) {
+                        value = xsugarpred.interp<clipper::Interp_cubic>(atom.coord_orth().coord_frac(cell));
+                        total_atoms += 1;
+                    }
+                    else if (type == base && use_base) {
+                        value = xbasepred.interp<clipper::Interp_cubic>(atom.coord_orth().coord_frac(cell));
+                        total_atoms += 1;
+                    }
+                    if (value != 0) {
+                        supported_atoms += 1;
+                    }
+                }
+                float allowed_percentage = 0.6;
+                if (supported_atoms >= (allowed_percentage * total_atoms)) {
+                    well_modelled += 1;
+                }
+            }
+        }
+    return well_modelled;
+}
+
+AtomType NautilusUtil::get_atom_type(std::string &atom_name) {
+    std::vector<std::string> phosphate_atoms = {"P", "OP1", "OP2"};
+    std::vector<std::string> sugar_atoms = {"C1'", "C2'", "C3'", "C4'", "C5'", "O4'"};
+    std::vector<std::string> base_atoms = {"C1", "C2","C3","C4", "C5", "C6", "C7", "C8",
+        "N1", "N2", "N3", "N4", "N5", "N6", "N7", "N8", "N9", "O2", "O4","O6"};
+
+    if (std::find(phosphate_atoms.begin(), phosphate_atoms.end(), atom_name) != phosphate_atoms.end()) {
+        return phosphate;
+    }
+    if (std::find(sugar_atoms.begin(), sugar_atoms.end(), atom_name) != sugar_atoms.end()) {
+        return sugar;
+    }
+    if (std::find(base_atoms.begin(), base_atoms.end(), atom_name) != base_atoms.end()) {
+        return base;
+    }
+    return unknown;
+
+}
+
 float NautilusUtil::calculate_rscc(clipper::MiniMol&mol, const clipper::Xmap<float>& xmap, float res) {
   clipper::Cell cell = xmap.cell();
   clipper::Spacegroup spg = xmap.spacegroup();

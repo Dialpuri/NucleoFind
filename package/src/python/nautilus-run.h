@@ -281,9 +281,9 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
 
     clipper::MiniMol best_model = mol_wrk;
 
-    int best_na_count = NautilusUtil::count_well_modelled_nas(mol_wrk, xwrk, hkls.resolution().limit());
+    int best_na_count = NautilusUtil::count_well_modelled_nas(mol_wrk, xphospred, xsugarpred, xbasepred);
 
-    std::cout << "Built " << best_na_count << " residues with RSRZ >= -1" << std::endl;
+    std::cout << "Built " << best_na_count << " residues with positive predicted density" << std::endl;
 
     for (int cyc = 0; cyc < cycles; cyc++) {
         std::cout << "Internal cycle " << clipper::String(cyc + 1, 3) << std::endl << std::endl; // edited
@@ -295,17 +295,17 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
 
         mol_wrk = run_cycle(nhit, srchst, verbose, natools, seq_wrk, mol_wrk, xwrk, log, predictions);
 
-        int current_count = NautilusUtil::count_well_modelled_nas(mol_wrk, xwrk, hkls.resolution().limit());
-        std::cout << "Cycle "<< cyc+1 << " built " << current_count << " residues with RSRZ >= -1" << std::endl;
+        int pred_na_count = NautilusUtil::count_well_modelled_nas(mol_wrk, xphospred, xsugarpred, xbasepred);
+        std::cout << "Cycle "<< cyc+1 << " built " << pred_na_count << " residues with positive predicted density" << std::endl;
 
-        if (current_count > best_na_count) {
+        if (pred_na_count > best_na_count) {
             std::cout << "Taking model from old cycle " << cyc + 1 << "\n";
             best_model = mol_wrk;
-            best_na_count = current_count;
+            best_na_count = pred_na_count;
         }
     }
 
-    std::cout << "Taking best model from all cycles with " << best_na_count << " nucleic acids residues with RSRZ >= -1 built." << std::endl;
+    std::cout << "Taking best model from all cycles with " << best_na_count << " nucleic acids residues with positive built." << std::endl;
     mol_wrk = best_model;
 
     // move to match input model

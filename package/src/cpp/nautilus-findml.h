@@ -32,6 +32,11 @@ public:
         return std::nullopt;
     }
 
+    [[nodiscard]] const clipper::Xmap<float>* get_phosphate_map_ptr() const {
+        if (!phosphate.cell().is_null()) {return &phosphate;}
+        return nullptr;
+    }
+
     [[nodiscard]] const clipper::Xmap<float>* get_sugar_map_ptr() const {
         if (!sugar.cell().is_null()) {return &sugar;}
         return nullptr;

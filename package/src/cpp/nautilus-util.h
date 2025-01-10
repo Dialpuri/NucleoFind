@@ -10,6 +10,10 @@
 #include <clipper/core/map_interp.h>
 #include <map>
 
+enum AtomType {
+    phosphate, sugar, base, unknown
+};
+
 class NautilusUtil {
  public:
   static void set_reference( clipper::String& pdb );
@@ -194,6 +198,11 @@ class NautilusUtil {
     static int count_well_modelled_nas(clipper::MiniMol& mol, clipper::Xmap<float>& xwrk, float res);
 
     static int count_nas(clipper::MiniMol& mol);
+
+    static int count_well_modelled_nas(clipper::MiniMol& mol, clipper::Xmap<float> xphospred, clipper::Xmap<float> xsugarpred,
+                                       clipper::Xmap<float> xbasepred);
+
+    static AtomType get_atom_type(std::string& atom_name);
 };
 
 

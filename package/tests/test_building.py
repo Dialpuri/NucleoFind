@@ -11,14 +11,14 @@ from pathlib import Path
 def expected_values(test_example):
     data = {
         "1hr2": {
-            "time": 200,
+            "time": 50,
             "fragments_built": 10,
             "residues_built": 250,
             "residues_sequenced": 150,
             "longest_fragment": 45
         },
         "5d5w": {
-            "time": 30,
+            "time": 10,
             "fragments_built": 1,
             "residues_built": 5,
             "residues_sequenced": 4,
