@@ -11,6 +11,7 @@ def bump_version(version, args):
 
     if args.minor:
         minor += 1
+        patch = 0
 
     if args.patch:
         patch += 1

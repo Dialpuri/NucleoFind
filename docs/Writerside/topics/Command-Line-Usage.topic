@@ -53,8 +53,7 @@
                 <p>Available Models:</p>
                 <list>
                     <li>nano (25M parameters)</li>
-                    <li>core (105M parameters)</li>
-                    <li>ultra (415M parameters)</li>
+                    <li>core (75M parameters)</li>
                 </list>
                 <p>Optional if only one model is installed, otherwise required.</p>
             </def>
