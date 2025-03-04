@@ -13,9 +13,9 @@ class Configuration:
     compute_variance: bool = False
     use_raw_values: bool = False
     spacing: float = 0.7
-    box_size: int = 32
+    box_size: int = 128
     channels: int = 4
-    overlap: int = 16
+    overlap: int = 64
 
 
 class MapType(enum.Enum):

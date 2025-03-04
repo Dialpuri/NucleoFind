@@ -19,21 +19,15 @@ def data_base_path():
 def expected_md5sums(model_type):
     data = {
         "nano": SimpleNamespace(
-            phosphate = "38cbdd8aaf54dacfb37a06b45dd48b6b",
-            sugar = "b30c9d392ad441ef80fb3914d155310f",
-            base = "43be8bbbef2b691cb7556c6536b9baae"
+            phosphate = "615b7f3ee576dd19f2cd3ffc762013ff",
+            sugar = "cf60e8d12058021046cad1a1f5e17e65",
+            base = "a2737fd6cc3f08a12e468d888485af16"
         ),
         "core": SimpleNamespace(
-            phosphate = "478a977c95544a7e616b3148d822c80a",
-            sugar = "34b4ac22a3331b39783bb8013349a707",
-            base = "dea227621d152fdb36280f986284421a"
-        ),
-        "ultra": SimpleNamespace(
-            phosphate = "946df04305b3c46b43a6c1a00def6223",
-            sugar = "15a7808c90210aff7f0707e0429a6db4",
-            base = "bfeb128562d95f6804cc6c4cf424f2b6"
+            phosphate = "7351570fa904c36d806c4d1c20681c76",
+            sugar = "fdc128322bed205b39eb7f9fc39ff8a5",
+            base = "3ddd3206e340540e1471ef6f42132266"
         )
-
     }
     return data[model_type]
 

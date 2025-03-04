@@ -21,11 +21,8 @@ from .errors import (
 
 class ModelType(Enum):
     """Types of NucleoFind Model available"""
-
     nano = 1
     core = 2
-    ultra = 3
-
 
 
 
@@ -218,12 +215,8 @@ def get_model_config(model_path: Path, overlap: int | None) -> SimpleNamespace:
     model_type = ModelType[model_type]
     match model_type:
         case ModelType.nano:
-            return SimpleNamespace(box_size=32)
+            return SimpleNamespace(box_size=128, overlap=64 if overlap is None else overlap)
         case ModelType.core:
-            return SimpleNamespace(box_size=32)
-        case ModelType.ultra:
-            return SimpleNamespace(
-                box_size=64, overlap=32 if overlap is None else overlap
-            )  # Allow overlap to be overriden
+            return SimpleNamespace(box_size=128, overlap=64 if overlap is None else overlap)
         case _:
             raise RuntimeError(f"Invalid model type - {model_type}")
