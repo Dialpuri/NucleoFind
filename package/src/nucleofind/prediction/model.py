@@ -21,7 +21,6 @@ from .errors import (
 
 class ModelType(Enum):
     """Types of NucleoFind Model available"""
-
     nano = 1
     core = 2
 
