@@ -39,7 +39,7 @@ endif()
 
 set(WRK_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
-if(DEFINED ENV{nucleofind-ccp4})
+if(CCP4BUILD)
   find_package(
     CCP4
     REQUIRED
@@ -51,7 +51,7 @@ if(DEFINED ENV{nucleofind-ccp4})
     clipper-minimol
     clipper-contrib
     ccp4c)
-  find_package(gemmi_cpp)
+  find_package(gemmi-cpp)
 
   include_directories(${CCP4_INCLUDE_DIRS} ${CCP4_INCLUDE_DIRS}/clipper)
 
@@ -131,7 +131,7 @@ target_link_libraries(
          mmdb2
          gemmi_cpp)
 
-if(DEFINED ENV{nucleofind-ccp4})
+if(CCP4BUILD)
   target_link_libraries(nautilus_lib PUBLIC ccp4c)
 else()
   target_link_libraries(nautilus_lib PUBLIC ccp4)
@@ -213,7 +213,7 @@ target_link_libraries(
           mmdb2
           gemmi_cpp)
 
-if(DEFINED ENV{nucleofind-ccp4})
+if(CCP4BUILD)
   target_link_libraries(nautilus_module PUBLIC ccp4c)
 else()
   target_link_libraries(nautilus_module PUBLIC ccp4)
