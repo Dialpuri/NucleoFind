@@ -19,7 +19,7 @@ dependencies=[
     'onnxruntime; platform_system == "Darwin"',
     'tqdm',
     'gemmi',
-    'numpy<2.0.0',
+    'numpy',
     'requests'
 ]
 [project.urls]
