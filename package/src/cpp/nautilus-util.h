@@ -9,6 +9,7 @@
 #include <clipper/clipper-ccp4.h>
 #include <clipper/core/map_interp.h>
 #include <map>
+#include <algorithm>
 
 enum AtomType {
     phosphate, sugar, base, unknown
