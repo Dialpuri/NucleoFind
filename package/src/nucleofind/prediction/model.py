@@ -36,7 +36,7 @@ def calculate_sha256(file_path: Path):
         return file_hash.hexdigest()
 
 
-def calculate_size(file_path: Path):
+def calculate_size(file_path: Path) -> int:
     """Calculate size of file"""
     logging.debug("Calculating size for %s", file_path)
     return file_path.stat().st_size
@@ -59,7 +59,7 @@ def get_latest_model_metadata(type: ModelType, latest_model: str) -> Tuple[str, 
     return sha256, size
 
 
-def is_model_valid(type: ModelType, model_path: Path, latest_model: str):
+def is_model_valid(type: ModelType, model_path: Path, latest_model: str) -> bool:
     """Compare current model hash with latest model hash"""
     current_model_hash = calculate_sha256(model_path)
     current_model_size = calculate_size(model_path)
