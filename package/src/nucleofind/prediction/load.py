@@ -65,7 +65,7 @@ def load_onnx_model(
     sess_options.intra_op_num_threads = 1
     try:
         return rt.InferenceSession(
-            model_path, providers=providers, sess_options=sess_options
+            str(model_path), providers=providers, sess_options=sess_options
         )
     except OSError as e:
         logging.critical(

@@ -1,6 +1,6 @@
 import functools
 import logging
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 from pathlib import Path
 from typing import List, Tuple
 import numpy as np
@@ -68,16 +68,19 @@ class NucleoFind:
 
         miniters = 1_000 if len(slices) > 10_000 else 1
         max_workers = self.configuration.n_threads
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            results = list(
-                tqdm(
-                    executor.map(process_sample_worker, slices),
-                    total=len(slices),
-                    desc="Predicting",
-                    miniters=miniters,
-                    disable=self.configuration.disable_progress_bar,
+        if max_workers == 1:
+            results = list(tqdm(map(process_sample_worker, slices), total=len(slices), desc="Predicting", miniters=miniters, disable=self.configuration.disable_progress_bar))
+        else:
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                results = list(
+                    tqdm(
+                        executor.map(process_sample_worker, slices),
+                        total=len(slices),
+                        desc="Predicting",
+                        miniters=miniters,
+                        disable=self.configuration.disable_progress_bar,
+                    )
                 )
-            )
 
         ones = np.ones(channels)
         for result in tqdm(results, desc="Processing results"):
@@ -206,7 +209,7 @@ def predict_map(
         use_gpu=False,
         disable_progress_bar=False,
         compute_entire_unit_cell=False,
-        n_threads=None,
+        n_threads=1,
         **vars(model_configuration),
     )
     prediction = NucleoFind(model_path, configuration=configuration)
