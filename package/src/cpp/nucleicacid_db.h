@@ -105,7 +105,7 @@ namespace NucleicAcidDB {
         // output some debug info
         void debug() const;
 
-        void dump_chain_to_pdb(std::string file_path);
+        void save_to_pdb(std::string file_path, const clipper::Cell& cell, const clipper::Spacegroup& spg);
 
         clipper::MPolymer extract_polymer(int id);
 

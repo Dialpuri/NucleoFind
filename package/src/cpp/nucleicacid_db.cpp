@@ -365,6 +365,17 @@ namespace NucleicAcidDB {
         return {atoms};
     }
 
+    void ChainFull::save_to_pdb(std::string file_path, const clipper::Cell &cell, const clipper::Spacegroup &spg) {
+        clipper::MiniMol mol = {spg, cell};
+        clipper::MPolymer mp;
+        for (int i = 0; i < this->size(); i++) {
+            mp.insert(this->operator[](i).get_mmonomer());
+        }
+        mol.insert(mp);
+        NautilusUtil::save_minimol(mol, file_path);
+
+    }
+
 
     void ChainFull::transform(const clipper::RTop_orth &rtop) {
         for (int r = 0; r < dbmonomers.size(); r++)
