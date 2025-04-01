@@ -44,8 +44,8 @@ class NucleicAcidTargets {
   static float score_sugar_from_predictions(const clipper::Xmap<float>& xmap, const NucleicAcidDB::NucleicAcid &na) ;
 
   float score_phosphate( const clipper::Xmap<float>& xmap, const NucleicAcidDB::NucleicAcid& na1, const NucleicAcidDB::NucleicAcid& na2 ) const;
-  NucleicAcidDB::NucleicAcid next_na_group(const clipper::Xmap<float>& xmap, const NucleicAcidDB::NucleicAcid& na, const clipper::Xmap<float> &sugar_map ) const;
-  NucleicAcidDB::NucleicAcid prev_na_group(const clipper::Xmap<float>& xmap, const NucleicAcidDB::NucleicAcid& na, const clipper::Xmap<float> &sugar_map ) const;
+  NucleicAcidDB::NucleicAcid next_na_group(const clipper::Xmap<float>& xmap, const NucleicAcidDB::NucleicAcid& na) const;
+  NucleicAcidDB::NucleicAcid prev_na_group(const clipper::Xmap<float>& xmap, const NucleicAcidDB::NucleicAcid& na ) const;
   const NucleicAcidTarget& target_sugar() const { return target_s; }
   const NucleicAcidTarget& target_phosphate() const { return target_p; }
 
@@ -53,7 +53,7 @@ class NucleicAcidTargets {
 
   const clipper::MiniMol phosphate( const clipper::Xmap<float>& xmap, const clipper::MiniMol& mol, const clipper::MiniMol& mol_pho );
   const clipper::MiniMol find( const clipper::Xmap<float>& xmap, const clipper::MiniMol& mol, int nsugar, int nphosp, double step );
-  const clipper::MiniMol grow( const clipper::Xmap<float>& xmap, const clipper::MiniMol& mol, int ngrow, double fcut, PredictedMaps& predictions) const;
+  const clipper::MiniMol grow( const clipper::Xmap<float>& xmap, const clipper::MiniMol& mol, int ngrow, double fcut) const;
   const clipper::MiniMol link( const clipper::Xmap<float>& xmap, const clipper::MiniMol& mol ) const;
   const clipper::MiniMol prune( clipper::MiniMol& mol ) const;
   const clipper::MiniMol rebuild_chain( const clipper::Xmap<float>& xmap, const clipper::MiniMol& mol ) const;

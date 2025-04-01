@@ -553,10 +553,10 @@ NucleicAcidDB::ChainFull FindML::refine_fragment_coordinates(NucleicAcidDB::Chai
 clipper::MiniMol FindML::remove_bases(clipper::MiniMol &mol) {
 
     std::vector<std::string> safe_list_pyr = {" C1'", " C2'", " C3'", " C4'", " C5'", " O3'", " O4'", " O5'", " P  ",
-                                              " N1 ",};
+                                              " N1 ", " OP1", " OP2"};
 
     std::vector<std::string> safe_list_pur = {" C1'", " C2'", " C3'", " C4'", " C5'", " O3'", " O4'", " O5'", " P  ",
-                                              " N9 ",};
+                                              " N9 "," OP1", " OP2"};
 
     clipper::MiniMol safe_mol = {mol.spacegroup(), mol.cell()};
 
@@ -1128,7 +1128,7 @@ clipper::MiniMol FindML::find() {
     std::cout << std::endl;
 
     clipper::MiniMol filtered_chain = form_organised_chains(placed_fragments, placed_fragment_indices);
-//     NautilusUtil::save_minimol(filtered_chain, "filtered_chain.pdb");
+     // NautilusUtil::save_minimol(filtered_chain, "filtered_chain.pdb");
     clipper::MiniMol base_removed_mol = remove_bases(filtered_chain);
 //    NautilusUtil::save_minimol(base_removed_mol, "base_removed_mol.pdb");
     clipper::MiniMol low_confidence_removed_model = remove_low_confidence(base_removed_mol);

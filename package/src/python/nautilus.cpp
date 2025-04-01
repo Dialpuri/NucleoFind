@@ -32,4 +32,6 @@ nb::class_<NautilusOutput>(m, "Output")
             .def(nb::init< const std::string&, const std::string&  >()); // pdbout, xmlout
 
 m.def("run", &run, "input"_a, "output"_a, "cycles"_a, "Run nucleofind-build");
+m.def("run_find", &run_find, "input"_a, "output"_a, "cycles"_a, "Run nucleofind-build find algorithm");
+m.def("run_complete", &run_complete, "input"_a, "output"_a, "cycles"_a, "Run nucleofind-build completion algorithm");
 }
