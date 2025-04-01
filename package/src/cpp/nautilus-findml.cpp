@@ -303,7 +303,7 @@ FindML::find_triplet_coordinates(const clipper::MiniMol &phosphate_peaks, const 
 
     TripletCoordinates return_list;
 
-    float target_angle = 150;
+    float target_angle = 140;
     float target_range = 30;
 
     for (int atom = 0; atom < phosphate_peaks[p][m].size(); atom++) {
@@ -464,7 +464,7 @@ float FindML::score_fragment(NucleicAcidDB::ChainFull &fragment, clipper::Xmap<f
         float score = score_density(fragment[i], xmap, i == fragment.size() - 1);
         if (use_predicted_maps) {
             score += score_sugar(fragment[i]);
-            score += score_base(fragment[i]);
+            // score += 0.5 * score_base(fragment[i]);
         }
         fragment[i].score = score;
         total_score += score;
