@@ -121,19 +121,21 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
     mtzfile.close_read();
 
     // do anisotropy correction
-    clipper::U_aniso_orth uaniso(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-    if (input.get_fobs().has_value()) for (HRI ih = hkls.first(); !ih.last(); ih.next()) wrk_f[ih].f() = fphi[ih].f();
-    // scale obs data
-    typedef clipper::SFscale_aniso<float> SFscale;
-    SFscale sfscl(3.0, SFscale::SHARPEN);
-    sfscl(wrk_f);
-    uaniso = sfscl.u_aniso_orth(SFscale::F);
-    // scale map coeffs
-    Compute_scale_u_aniso_fphi compute_aniso(1.0, -uaniso);
-    if (input.get_fc().has_value()) fphi.compute(fphi, compute_aniso);
-    // output
-    std::cout << std::endl << "Applying anisotropy correction:" << std::endl << uaniso.format() << std::endl
-              << std::endl;
+    if (doanis) {
+        clipper::U_aniso_orth uaniso(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        if (input.get_fobs().has_value()) for (HRI ih = hkls.first(); !ih.last(); ih.next()) wrk_f[ih].f() = fphi[ih].f();
+        // scale obs data
+        typedef clipper::SFscale_aniso<float> SFscale;
+        SFscale sfscl(3.0, SFscale::SHARPEN);
+        sfscl(wrk_f);
+        uaniso = sfscl.u_aniso_orth(SFscale::F);
+        // scale map coeffs
+        Compute_scale_u_aniso_fphi compute_aniso(1.0, -uaniso);
+        if (input.get_fc().has_value()) fphi.compute(fphi, compute_aniso);
+        // output
+        std::cout << std::endl << "Applying anisotropy correction:" << std::endl << uaniso.format() << std::endl
+                << std::endl;
+    }
 
 
     // apply free flag

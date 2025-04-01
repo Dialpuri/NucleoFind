@@ -19,6 +19,7 @@ class InputParameters:
     sugarin: str | pathlib.Path = ""
     basein: str | pathlib.Path = ""
     colinfo: str | pathlib.Path = ""
+    colinphifom: str | pathlib.Path = ""
     colinfc: str | pathlib.Path = ""
     colinfree: str | pathlib.Path = ""
     cycles: int = 3
@@ -41,7 +42,8 @@ def main():
     parser.add_argument("-basein", required=False, default="")
     parser.add_argument("-preddirin", required=False)
     parser.add_argument("-colin-fo", required=False, default="")
-    parser.add_argument("-colin-fc", required=True)
+    parser.add_argument("-colin-fc", required=False, default="")
+    parser.add_argument("-colin-phifom", required=False, default="")
     parser.add_argument("-colin-free", required=False, default="")
     parser.add_argument("-xmlout", required=False, default="")
     parser.add_argument("-cycles", required=False, default=3)
@@ -57,7 +59,13 @@ def main():
         print(
             "Before building, NucleoFind will predict a phosphate map and output it into the current working directory"
         )
-        split_calculated_sf = args.colin_fc.split(",")
+        split_calculated_sf = []
+        if args.colin_fc:
+            split_calculated_sf = args.colin_fc.split(",")
+        if args.colin_fo and args.colin_phifom:
+            F = args.colin_fo.split(",")[0]
+            PHI = args.colin_phifom.split(",")[0]
+            split_calculated_sf = [F, PHI]
 
         if not split_calculated_sf:
             print("No Calculated SFs provided, attempting to use FWT and PHWT")
@@ -80,6 +88,9 @@ def main():
         args.sugarin = f"{args.preddirin}/nucleofind-sugar.map"
         args.basein = f"{args.preddirin}/nucleofind-base.map"
 
+    if not args.colin_fc and not args.colin_phifom: 
+        raise ValueError("Please specify columns for the phases, either FC or PHI,FOM")
+    
     input = Input(
         args.mtzin,
         args.seqin,
@@ -89,7 +100,7 @@ def main():
         args.basein,
         args.colin_fo,
         "",
-        "",
+        args.colin_phifom,
         args.colin_fc,
         args.colin_free,
     )
@@ -117,7 +128,7 @@ def build(input_parameters: InputParameters, output_parameters: OutputParameters
         str(input_parameters.basein),
         str(input_parameters.colinfo),
         str(""),
-        str(""),
+        str(input_parameters.colinphifom),
         str(input_parameters.colinfc),
         str(input_parameters.colinfree),
     )
