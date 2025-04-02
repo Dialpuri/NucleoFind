@@ -8,3 +8,6 @@ data
 docs/.idea
 .idea
 checkout
+
+.venv*
+debug

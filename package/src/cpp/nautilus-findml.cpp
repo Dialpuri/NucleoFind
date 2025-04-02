@@ -915,7 +915,7 @@ clipper::MiniMol FindML::remove_clashing_protein(clipper::MiniMol &na_chain) {
                     ));
                     clipper::Coord_orth co = cf.coord_orth(na_chain.cell());
                     if ((na_chain[p][m][a].coord_orth()-co).lengthsq() > 2.25) {
-                        std::cout << chain.id() << " " << residue.id() << " " << atom.name() << " found near " << na_chain[p][m].id() << " " << na_chain[p][m][a].name() << std::endl;
+                        // std::cout << chain.id() << " " << residue.id() << " " << atom.name() << " found near " << na_chain[p][m].id() << " " << na_chain[p][m][a].name() << std::endl;
                         continue;
                     }
 
