@@ -304,7 +304,7 @@ FindML::find_triplet_coordinates(const clipper::MiniMol &phosphate_peaks, const 
     TripletCoordinates return_list;
 
     float target_angle = 140;
-    float target_range = 30;
+    float target_range = 45;
 
     for (int atom = 0; atom < phosphate_peaks[p][m].size(); atom++) {
 
@@ -779,14 +779,14 @@ FindML::PairedChainIndices FindML::organise_triplets_to_chains(TripletCoordinate
         merging = false;
         for (auto it1 = chains.begin(); it1 != chains.end(); ++it1) {
             for (auto it2 = it1 + 1; it2 != chains.end(); ++it2) {
-                if (std::equal((*it1).end() - 3, (*it1).end(), (*it2).begin())) {
-                    (*it1).insert((*it1).end(), (*it2).begin() + 3, (*it2).end());
+                if (std::equal(it1->end() - 3, it1->end(), it2->begin())) {
+                    it1->insert(it1->end(), it2->begin() + 3, it2->end());
                     it2 = chains.erase(it2);
                     merging = true;
                     break;
                 }
-                if (std::equal((*it1).begin(), (*it1).begin() + 3, (*it2).end() - 3)) {
-                    (*it2).insert((*it2).end(), (*it1).begin() + 3, (*it1).end());
+                if (std::equal(it1->begin(), it1->begin() + 3, it2->end() - 3)) {
+                    it2->insert(it2->end(), it1->begin() + 3, it1->end());
                     it1 = chains.erase(it1);
                     merging = true;
                     break;
@@ -911,10 +911,11 @@ clipper::MiniMol FindML::remove_clashing_protein(clipper::MiniMol &na_chain) {
                     clipper::MAtom atom = residue[nearby_atom.atom()];
 
                     clipper::Coord_frac cf = atom.coord_orth().coord_frac(na_chain.cell());
-                    cf.symmetry_copy_near(na_chain.spacegroup(), na_chain.cell(), na_chain[p][m][a].coord_orth().coord_frac(na_chain.cell()
+                    cf = cf.symmetry_copy_near(na_chain.spacegroup(), na_chain.cell(), na_chain[p][m][a].coord_orth().coord_frac(na_chain.cell()
                     ));
                     clipper::Coord_orth co = cf.coord_orth(na_chain.cell());
                     if ((na_chain[p][m][a].coord_orth()-co).lengthsq() > 2.25) {
+                        std::cout << chain.id() << " " << residue.id() << " " << atom.name() << " found near " << na_chain[p][m].id() << " " << na_chain[p][m][a].name() << std::endl;
                         continue;
                     }
 
@@ -941,20 +942,20 @@ clipper::MiniMol FindML::remove_clashing_protein(clipper::MiniMol &na_chain) {
             clipper::MMonomer residue = mol[p][m];
             std::vector<std::string> key = {chain.id(), residue.type(), std::to_string(residue.seqnum())};
             if (to_remove.find(key) != to_remove.end()) {
-//                clipper::MMonomer backbone_only;
-//                backbone_only.set_type(mol[p][m].type());
-//                backbone_only.set_id(mol[p][m].id());
-//
-//                for (int a = 0; a < mol[p][m].size(); a++) {
-//                    if (allowed_atoms.find(mol[p][m][a].id().trim()) != allowed_atoms.end()) {
-//                        backbone_only.insert(mol[p][m][a]);
-//                    }
-//                }
-//
-//                if (backbone_only.size() != 0) {
-//                    mp.insert(backbone_only);
-//                    count += 1;
-//                }
+                clipper::MMonomer backbone_only;
+                backbone_only.set_type(mol[p][m].type());
+                backbone_only.set_id(mol[p][m].id());
+
+                for (int a = 0; a < mol[p][m].size(); a++) {
+                    if (allowed_atoms.find(mol[p][m][a].id().trim()) != allowed_atoms.end()) {
+                        backbone_only.insert(mol[p][m][a]);
+                    }
+                }
+
+                if (backbone_only.size() != 0) {
+                    mp.insert(backbone_only);
+                    count += 1;
+                }
 
                 continue;
             }
@@ -1113,7 +1114,7 @@ clipper::MiniMol FindML::find() {
     int count = 0;
     std::cout << "Beginning to place fragments" << std::endl;
     for (const auto &[fwd, bck]: pairs) {
-        std::cout << "\r" << count++ << " of " << pairs.size()-1 << " potential fragments placed" << std::flush;
+        std::cout << "\r" << count++ << " of " << pairs.size() << " potential fragments placed" << std::flush;
         PlacedFragmentResult forward_result = place_fragments(phosphate_peaks, fwd);
         PlacedFragmentResult backward_result = place_fragments(phosphate_peaks, bck);
 
@@ -1131,9 +1132,9 @@ clipper::MiniMol FindML::find() {
      // NautilusUtil::save_minimol(filtered_chain, "filtered_chain.pdb");
     clipper::MiniMol base_removed_mol = remove_bases(filtered_chain);
 //    NautilusUtil::save_minimol(base_removed_mol, "base_removed_mol.pdb");
-    clipper::MiniMol low_confidence_removed_model = remove_low_confidence(base_removed_mol);
+    // clipper::MiniMol low_confidence_removed_model = remove_low_confidence(base_removed_mol);
 //             NautilusUtil::save_minimol(low_confidence_removed_model, "low_confidence_removed_model.pdb");
-    clipper::MiniMol clash_removed_mol = remove_clashing_protein(low_confidence_removed_model);
+    clipper::MiniMol clash_removed_mol = remove_clashing_protein(base_removed_mol);
     // NautilusUtil::save_minimol(clash_removed_mol, "clash_removed_mol.pdb");
 
     return clash_removed_mol;
