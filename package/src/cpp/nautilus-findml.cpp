@@ -770,6 +770,7 @@ FindML::PairedChainIndices FindML::organise_triplets_to_chains(TripletCoordinate
     std::vector<std::vector<int>> chains;
     std::set<std::vector<int>> completed_triplets;
 
+
     /**Go through each triplet and look to see whether there is a chain where it can be added to the front or back, if there is
      * do so. If not, create a new chain for that triplet.
      * Should create a large chain of triplets, but the output can be split depending on the start points.
@@ -797,6 +798,8 @@ FindML::PairedChainIndices FindML::organise_triplets_to_chains(TripletCoordinate
 
         completed_triplets.insert(triplet_ids);
     }
+
+
 
     /*chains could have become split depending on starting point, bring them together*/
     bool merging = true;
@@ -829,76 +832,96 @@ FindML::PairedChainIndices FindML::organise_triplets_to_chains(TripletCoordinate
     //     }
     //     std::cout << std::endl;
     // }
-
-    std::unordered_map<int,  std::vector<std::vector<std::vector<int>>::iterator>> start_indices;
-    std::unordered_map<int,  std::vector<std::vector<std::vector<int>>::iterator>> end_indices;
-    std::vector<std::vector<int>> joined_chains;
-
-    for (auto it = chains.begin(); it != chains.end(); ++it) {
-        start_indices[it->front()].emplace_back(it);
-        end_indices[it->back()].emplace_back(it);
-    }
-
-    std::set<std::vector<std::vector<int>>::iterator> merged;
-    std::set<std::vector<std::vector<int>>::iterator> to_remove;
-    for (auto it = chains.begin(); it != chains.end(); ++it) {
-        if (merged.find(it) != merged.end()) continue;
-        merged.insert(it);
-
-        std::set<int> current_chain = {it->begin(), it->end()};
-        int end = it->back();
-
-        if (start_indices.find(end) != start_indices.end()) {
-            auto alternate_indices = start_indices[end];
-            for (auto& alternate_index: alternate_indices) {
-                std::set<int> alternate_chain = {alternate_index->begin(), alternate_index->end()};
-                if (merged.find(alternate_index) == merged.end() && current_chain != alternate_chain) {
-                    it->insert(it->end(), alternate_index->begin() + 1, alternate_index->end());
-                    merged.insert(it);
-                    to_remove.insert(alternate_index);
-                    // std::cout << "adding for removal: " << &alternate_index << std::endl;
-                    // for (auto& x: *alternate_index) {
-                    //     std::cout << x << ",";
-                    // }
-                    // std::cout << std::endl;
-                    break;
-                }
-            }
-        }
-
-        int start = it->front();
-        if (end_indices.find(start) != end_indices.end()) {
-            auto alternate_indices = start_indices[start];
-            for (auto& alternate_index: alternate_indices) {
-                std::set<int> alternate_chain = {alternate_index->begin(), alternate_index->end()};
-                if (merged.find(alternate_index) == merged.end() && current_chain != alternate_chain) {
-                    it->insert(it->begin(), alternate_index->rbegin(), alternate_index->rend() - 1);
-                    merged.insert(it);
-                    to_remove.insert(alternate_index);
-
-                    // std::cout << "adding for removal: " << &alternate_index << std::endl;
-                    // for (auto& x: *alternate_index) {
-                    //     std::cout << x << ",";
-                    // }
-                    // std::cout << std::endl;
-                    break;
-                }
-            }
-        }
-
-        if (to_remove.find(it) != to_remove.end()) {
-            continue;
-        }
-        // std::cout << "===Adding: " << &it << std::endl;
-        // for (auto& x: *it) {
-        //     std::cout << x << ",";
-        // }
-        // std::cout << std::endl;
-        joined_chains.push_back(*it);
-    }
-
-
+    //
+    // std::unordered_map<int,  std::vector<std::vector<std::vector<int>>::iterator>> start_indices;
+    // std::unordered_map<int,  std::vector<std::vector<std::vector<int>>::iterator>> end_indices;
+    // std::vector<std::vector<int>> joined_chains;
+    //
+    // for (auto it = chains.begin(); it != chains.end(); ++it) {
+    //     start_indices[it->front()].emplace_back(it);
+    //     end_indices[it->back()].emplace_back(it);
+    // }
+    //
+    // std::set<std::vector<std::vector<int>>::iterator> merged;
+    // std::set<std::vector<std::vector<int>>::iterator> to_remove;
+    // for (auto it = chains.begin(); it != chains.end(); ++it) {
+    //     if (merged.find(it) != merged.end()) continue;
+    //     merged.insert(it);
+    //
+    //     std::set<int> current_chain = {it->begin(), it->end()};
+    //     int end = it->back();
+    //
+    //     if (start_indices.find(end) != start_indices.end()) {
+    //         auto alternate_indices = start_indices[end];
+    //         for (auto& alternate_index: alternate_indices) {
+    //             std::set<int> alternate_chain = {alternate_index->begin(), alternate_index->end()};
+    //             if (merged.find(alternate_index) == merged.end() && current_chain != alternate_chain) {
+    //                 it->insert(it->end(), alternate_index->begin() + 1, alternate_index->end());
+    //                 merged.insert(it);
+    //                 to_remove.insert(alternate_index);
+    //                 // std::cout << "adding for removal: " << &alternate_index << std::endl;
+    //                 // for (auto& x: *alternate_index) {
+    //                 //     std::cout << x << ",";
+    //                 // }
+    //                 // std::cout << std::endl;
+    //                 break;
+    //             }
+    //         }
+    //     }
+    //
+    //     int start = it->front();
+    //     if (end_indices.find(start) != end_indices.end()) {
+    //         auto alternate_indices = start_indices[start];
+    //         for (auto& alternate_index: alternate_indices) {
+    //             std::set<int> alternate_chain = {alternate_index->begin(), alternate_index->end()};
+    //             if (merged.find(alternate_index) == merged.end() && current_chain != alternate_chain) {
+    //                 it->insert(it->begin(), alternate_index->rbegin(), alternate_index->rend() - 1);
+    //                 merged.insert(it);
+    //                 to_remove.insert(alternate_index);
+    //
+    //                 // std::cout << "adding for removal: " << &alternate_index << std::endl;
+    //                 // for (auto& x: *alternate_index) {
+    //                 //     std::cout << x << ",";
+    //                 // }
+    //                 // std::cout << std::endl;
+    //                 break;
+    //             }
+    //         }
+    //     }
+    //
+    //     if (to_remove.find(it) != to_remove.end()) {
+    //         continue;
+    //     }
+    //     // std::cout << "===Adding: " << &it << std::endl;
+    //     // for (auto& x: *it) {
+    //     //     std::cout << x << ",";
+    //     // }
+    //     // std::cout << std::endl;
+    //     joined_chains.push_back(*it);
+    // }
+    //
+    //
     // std::cout << "After join" <<  std::endl;
+    // for (const auto& element : joined_chains) {
+    //     for (auto& x: element) {
+    //         std::cout << x << ",";
+    //     }
+    //     std::cout << std::endl;
+    // }
+    //
+    // for (auto& chain: joined_chains) {
+    //     std::set<std::vector<int>> seen_triplets;
+    //     int l_ptr = 0;
+    //     for (l_ptr = 0; l_ptr < chain.size()-2; ++l_ptr) {
+    //         auto new_triplet = {chain[l_ptr], chain[l_ptr+1], chain[l_ptr+2]};
+    //         if (seen_triplets.find(new_triplet) != seen_triplets.end()) {
+    //             chain.erase(chain.begin() + l_ptr, chain.end());
+    //             break;
+    //         }
+    //         seen_triplets.insert(new_triplet);
+    //     }
+    // }
+    // std::cout << "After clean" <<  std::endl;
     // for (const auto& element : joined_chains) {
     //     for (auto& x: element) {
     //         std::cout << x << ",";
@@ -909,12 +932,12 @@ FindML::PairedChainIndices FindML::organise_triplets_to_chains(TripletCoordinate
     std::map<std::set<int>, int> paired_map = {};
     PairedChainIndices pairs;
 
-    for (int chain_idx = 0; chain_idx < joined_chains.size(); chain_idx++) {
-        std::set<int> set = {joined_chains[chain_idx].begin(), joined_chains[chain_idx].end()};
+    for (int chain_idx = 0; chain_idx < chains.size(); chain_idx++) {
+        std::set<int> set = {chains[chain_idx].begin(), chains[chain_idx].end()};
         if (paired_map.find(set) == paired_map.end()) {
             paired_map.insert({set, chain_idx});
         } else {
-            pairs.emplace_back(joined_chains[paired_map[set]], joined_chains[chain_idx]);
+            pairs.emplace_back(chains[paired_map[set]], chains[chain_idx]);
         }
     }
 
