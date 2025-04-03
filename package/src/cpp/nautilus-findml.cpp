@@ -1054,20 +1054,20 @@ clipper::MiniMol FindML::remove_clashing_protein(clipper::MiniMol &na_chain) {
             clipper::MMonomer residue = molwrk[p][m];
             std::vector<std::string> key = {chain.id(), residue.type(), std::to_string(residue.seqnum())};
             if (to_remove.find(key) != to_remove.end()) {
-                clipper::MMonomer backbone_only;
-                backbone_only.set_type(molwrk[p][m].type());
-                backbone_only.set_id(molwrk[p][m].id());
-
-                for (int a = 0; a < molwrk[p][m].size(); a++) {
-                    if (allowed_atoms.find(molwrk[p][m][a].id().trim()) != allowed_atoms.end()) {
-                        backbone_only.insert(molwrk[p][m][a]);
-                    }
-                }
-
-                if (backbone_only.size() != 0) {
-                    mp.insert(backbone_only);
-                    count += 1;
-                }
+                // clipper::MMonomer backbone_only;
+                // backbone_only.set_type(molwrk[p][m].type());
+                // backbone_only.set_id(molwrk[p][m].id());
+                //
+                // for (int a = 0; a < molwrk[p][m].size(); a++) {
+                //     if (allowed_atoms.find(molwrk[p][m][a].id().trim()) != allowed_atoms.end()) {
+                //         backbone_only.insert(molwrk[p][m][a]);
+                //     }
+                // }
+                //
+                // if (backbone_only.size() != 0) {
+                //     mp.insert(backbone_only);
+                //     count += 1;
+                // }
 
                 continue;
             }
