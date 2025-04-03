@@ -293,7 +293,7 @@ FindML::find_triplet_coordinates(const clipper::MiniMol &phosphate_peaks, const 
     bool use_sugar_map = false;
     clipper::MAtomNonBond sugar_non_bond;
     if (!sugar_peaks.is_null()) {
-        sugar_non_bond = clipper::MAtomNonBond(sugar_peaks, 2);
+        sugar_non_bond = clipper::MAtomNonBond(sugar_peaks, 1);
         use_sugar_map = true;
     }
 
@@ -303,8 +303,8 @@ FindML::find_triplet_coordinates(const clipper::MiniMol &phosphate_peaks, const 
 
     TripletCoordinates return_list;
 
-    float target_angle = 140;
-    float target_range = 45;
+    float target_lower_bound = 95;
+    float target_upper_bound = 170;
 
     for (int atom = 0; atom < phosphate_peaks[p][m].size(); atom++) {
 
@@ -351,13 +351,12 @@ FindML::find_triplet_coordinates(const clipper::MiniMol &phosphate_peaks, const 
                 double angle = acos(AB_x_BC);
                 double angle_d = clipper::Util::rad2d(angle);
 
-                if (target_angle - target_range < angle_d && angle_d < target_angle + target_range) {
+                if (target_lower_bound < angle_d && angle_d < target_upper_bound) {
                     if (use_sugar_map) {
                         clipper::Coord_orth AB_center = first_atom_orth + 0.5 * (m_atom_orth - first_atom_orth);
                         clipper::Coord_orth BC_center = m_atom_orth + 0.5 * (third_atom_orth - m_atom_orth);
-
-                        if (!sugar_non_bond.atoms_near(AB_center, 2).empty() &&
-                            !sugar_non_bond.atoms_near(BC_center, 2).empty()) {
+                        if (!sugar_non_bond.atoms_near(AB_center, 1).empty() &&
+                            !sugar_non_bond.atoms_near(BC_center, 1).empty()) {
                             return_list.push_back({{first_atom.atom(), first_atom_orth},
                                                    {atom,              m_atom_orth},
                                                    {third_atom.atom(), third_atom_orth}});
@@ -824,15 +823,98 @@ FindML::PairedChainIndices FindML::organise_triplets_to_chains(TripletCoordinate
         }
     }
 
+    // for (const auto& element : chains) {
+    //     for (auto& x: element) {
+    //         std::cout << x << ",";
+    //     }
+    //     std::cout << std::endl;
+    // }
+
+    std::unordered_map<int,  std::vector<std::vector<std::vector<int>>::iterator>> start_indices;
+    std::unordered_map<int,  std::vector<std::vector<std::vector<int>>::iterator>> end_indices;
+    std::vector<std::vector<int>> joined_chains;
+
+    for (auto it = chains.begin(); it != chains.end(); ++it) {
+        start_indices[it->front()].emplace_back(it);
+        end_indices[it->back()].emplace_back(it);
+    }
+
+    std::set<std::vector<std::vector<int>>::iterator> merged;
+    std::set<std::vector<std::vector<int>>::iterator> to_remove;
+    for (auto it = chains.begin(); it != chains.end(); ++it) {
+        if (merged.find(it) != merged.end()) continue;
+        merged.insert(it);
+
+        std::set<int> current_chain = {it->begin(), it->end()};
+        int end = it->back();
+
+        if (start_indices.find(end) != start_indices.end()) {
+            auto alternate_indices = start_indices[end];
+            for (auto& alternate_index: alternate_indices) {
+                std::set<int> alternate_chain = {alternate_index->begin(), alternate_index->end()};
+                if (merged.find(alternate_index) == merged.end() && current_chain != alternate_chain) {
+                    it->insert(it->end(), alternate_index->begin() + 1, alternate_index->end());
+                    merged.insert(it);
+                    to_remove.insert(alternate_index);
+                    // std::cout << "adding for removal: " << &alternate_index << std::endl;
+                    // for (auto& x: *alternate_index) {
+                    //     std::cout << x << ",";
+                    // }
+                    // std::cout << std::endl;
+                    break;
+                }
+            }
+        }
+
+        int start = it->front();
+        if (end_indices.find(start) != end_indices.end()) {
+            auto alternate_indices = start_indices[start];
+            for (auto& alternate_index: alternate_indices) {
+                std::set<int> alternate_chain = {alternate_index->begin(), alternate_index->end()};
+                if (merged.find(alternate_index) == merged.end() && current_chain != alternate_chain) {
+                    it->insert(it->begin(), alternate_index->rbegin(), alternate_index->rend() - 1);
+                    merged.insert(it);
+                    to_remove.insert(alternate_index);
+
+                    // std::cout << "adding for removal: " << &alternate_index << std::endl;
+                    // for (auto& x: *alternate_index) {
+                    //     std::cout << x << ",";
+                    // }
+                    // std::cout << std::endl;
+                    break;
+                }
+            }
+        }
+
+        if (to_remove.find(it) != to_remove.end()) {
+            continue;
+        }
+        // std::cout << "===Adding: " << &it << std::endl;
+        // for (auto& x: *it) {
+        //     std::cout << x << ",";
+        // }
+        // std::cout << std::endl;
+        joined_chains.push_back(*it);
+    }
+
+
+    // std::cout << "After join" <<  std::endl;
+    // for (const auto& element : joined_chains) {
+    //     for (auto& x: element) {
+    //         std::cout << x << ",";
+    //     }
+    //     std::cout << std::endl;
+    // }
+
     std::map<std::set<int>, int> paired_map = {};
     PairedChainIndices pairs;
 
-    for (int chain_idx = 0; chain_idx < chains.size(); chain_idx++) {
-        std::set<int> set = {chains[chain_idx].begin(), chains[chain_idx].end()};
+    for (int chain_idx = 0; chain_idx < joined_chains.size(); chain_idx++) {
+        std::set<int> set = {joined_chains[chain_idx].begin(), joined_chains[chain_idx].end()};
         if (paired_map.find(set) == paired_map.end()) {
             paired_map.insert({set, chain_idx});
         } else {
-            pairs.emplace_back(chains[paired_map[set]], chains[chain_idx]);
+            pairs.emplace_back(joined_chains[paired_map[set]], joined_chains[chain_idx]);
         }
     }
 
@@ -1116,28 +1198,29 @@ clipper::MiniMol FindML::find() {
 //    NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
     //NautilusUtil::save_minimol(sugar_peaks, "sugar_peaks.pdb");
     //NautilusUtil::save_minimol(base_peaks, "base_peaks.pdb");
+    clipper::MiniMol sugar_mol = generate_molecule_from_gridpoints(xsugarpred, 0.3);
 
-    TripletCoordinates phosphate_triplets = find_triplet_coordinates(phosphate_peaks, sugar_peaks);
-//    draw_triplets(phosphate_triplets, phosphate_peaks, "triplets-ext.pdb");
-//     NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
+    TripletCoordinates phosphate_triplets = find_triplet_coordinates(phosphate_peaks, sugar_mol);
+    // draw_triplets(phosphate_triplets, phosphate_peaks, "triplets-ext.pdb");
+    //  NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
     std::cout << phosphate_triplets.size() << " phosphate triplets found\n";
 
     PairedChainIndices pairs = organise_triplets_to_chains(phosphate_triplets);
 
-//    for (const auto& pair : pairs) {
-//        std::cout << "Pair:" << std::endl;
-//        std::cout << "First vector: ";
-//        for (const auto& element : pair.first) {
-//            std::cout << element << " ";
-//        }
-//        std::cout << std::endl;
-//
-//        std::cout << "Second vector: ";
-//        for (const auto& element : pair.second) {
-//            std::cout << element << " ";
-//        }
-//        std::cout << std::endl << std::endl;
-//    }
+    // for (const auto& pair : pairs) {
+    //     std::cout << "Pair:" << std::endl;
+    //     std::cout << "First vector: ";
+    //     for (const auto& element : pair.first) {
+    //         std::cout << element << " ";
+    //     }
+    //     std::cout << std::endl;
+    //
+    //     std::cout << "Second vector: ";
+    //     for (const auto& element : pair.second) {
+    //         std::cout << element << " ";
+    //     }
+    //     std::cout << std::endl << std::endl;
+    // }
 
     std::map<std::pair<int, int>, std::vector<NucleicAcidDB::NucleicAcidFull>> placed_fragments;
     std::vector<std::vector<int>> placed_fragment_indices;
