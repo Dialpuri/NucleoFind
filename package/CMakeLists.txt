@@ -92,7 +92,12 @@ add_library(
   ${WRK_DIR}/src/cpp/nautilus-util.cpp
   ${WRK_DIR}/src/cpp/nucleicacid_db.cpp
   ${WRK_DIR}/src/cpp/nautilus-findml.cpp
-  ${WRK_DIR}/src/cpp/nautilus-findml.h)
+  ${WRK_DIR}/src/cpp/nautilus-findml.h
+        ${WRK_DIR}/src/cpp/nucleofind/predicted-maps.h
+        ${WRK_DIR}/src/cpp/nucleofind/predicted-maps.cpp
+        ${WRK_DIR}/src/cpp/nucleofind/nucleofind.h
+        ${WRK_DIR}/src/cpp/nucleofind/nucleofind.cpp
+)
 
 # add_executable(cnautilus ${WRK_DIR}/src/cpp/cnautilus.cpp)
 # set_target_properties(cnautilus PROPERTIES OUTPUT_NAME nautilus)

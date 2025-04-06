@@ -1,6 +1,10 @@
 #include <clipper/clipper-ccp4.h>
 #include <clipper/clipper-contrib.h>
 #include <clipper/clipper-minimol.h>
+#include <gemmi/ccp4.hpp>
+#include <gemmi/to_cif.hpp>    // cif::Document -> file
+#include <gemmi/to_mmcif.hpp>  // Structure -> cif::Document
+
 #include <algorithm>
 
 #include "../cpp/nucleicacid_db.h"
@@ -14,6 +18,8 @@
 #include "../cpp/nautilus-util.h"
 #include "../cpp/nautilus-mlfind.h"
 #include "../cpp/nautilus-findml.h"
+#include "../cpp/nucleofind/nucleofind.h"
+#include "../cpp/nucleofind/predicted-maps.h"
 
 clipper::MiniMol &
 run_cycle(int nhit, double srchst, int verbose, NucleicAcidTargets &natools, const clipper::MMoleculeSequence &seq_wrk,
@@ -523,12 +529,17 @@ void run_find(NautilusInput &input, NautilusOutput &output, int cycles) {
     clipper::Xmap<float> xphospred;
     clipper::Xmap<float> xsugarpred;
     clipper::Xmap<float> xbasepred;
+    gemmi::Ccp4<> phosphate_map;
+    gemmi::Ccp4<> sugar_map;
+    gemmi::Ccp4<> base_map;
 
     if (input.get_phosphate_prediction_path().has_value()) {
         clipper::CCP4MAPfile mapfile;
         mapfile.open_read(input.get_phosphate_prediction_path().value());
         mapfile.import_xmap(xphospred);
         mapfile.close_read();
+
+        phosphate_map = gemmi::read_ccp4_map(input.get_phosphate_prediction_path().value(), true);
     }
 
     if (input.get_sugar_prediction_path().has_value()) {
@@ -536,6 +547,9 @@ void run_find(NautilusInput &input, NautilusOutput &output, int cycles) {
         mapfile.open_read(input.get_sugar_prediction_path().value());
         mapfile.import_xmap(xsugarpred);
         mapfile.close_read();
+
+        sugar_map = gemmi::read_ccp4_map(input.get_sugar_prediction_path().value(), true);
+
     }
 
     if (input.get_base_prediction_path().has_value()) {
@@ -543,12 +557,32 @@ void run_find(NautilusInput &input, NautilusOutput &output, int cycles) {
         mapfile.open_read(input.get_base_prediction_path().value());
         mapfile.import_xmap(xbasepred);
         mapfile.close_read();
+
+        base_map = gemmi::read_ccp4_map(input.get_base_prediction_path().value(), true);
     }
 
     PredictedMaps predictions = {xphospred, xsugarpred, xbasepred};
 
     mol_wrk = NucleicAcidTools::flag_chains(mol_wrk);
     clipper::MiniMol mol_wrk_original = mol_wrk;
+
+    NucleoFind::PredictedMaps predicted_maps = {phosphate_map.grid, sugar_map.grid, base_map.grid};
+    auto points = NucleoFind::PredictedMapToPoint::create_atoms_at_gridpoints(phosphate_map.grid, 0.1);
+    auto x = NucleoFind::PredictedMapToPoint::find_peaks(points, phosphate_map.grid);
+    auto x1 = create_gemmi_structure(x);
+    std::ofstream os("groups.pdb");
+    write_pdb(x1, os);
+    auto y = NucleoFind::PredictedMapToPoint::assimilate_peaks(x, phosphate_map.grid);
+    y = NucleoFind::PredictedMapToPoint::assimilate_peaks(y, phosphate_map.grid);
+    auto y1 = create_gemmi_structure(y);
+
+    std::ofstream os3("peaks.pdb");
+    write_pdb(y1, os3);
+    // gemmi::cif::write_cif_to_stream(os, gemmi::make_mmcif_document(s));
+
+
+
+    exit(-1);
 
     FindML find_ml = FindML(mol_wrk, xwrk, predictions);
     find_ml.load_library_from_file(ippdb_ref);

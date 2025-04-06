@@ -17,7 +17,7 @@ else
     echo "Checking out gemmi"
     git clone https://github.com/project-gemmi/gemmi.git gemmi
     cd gemmi
-    git checkout v0.6.5
+    git checkout v0.7.1
     cd ..
     echo
 fi
