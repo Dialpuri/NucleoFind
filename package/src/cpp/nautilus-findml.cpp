@@ -303,7 +303,7 @@ FindML::find_triplet_coordinates(const clipper::MiniMol &phosphate_peaks, const 
 
     TripletCoordinates return_list;
 
-    float target_lower_bound = 95;
+    float target_lower_bound = 110;
     float target_upper_bound = 170;
 
     for (int atom = 0; atom < phosphate_peaks[p][m].size(); atom++) {
@@ -1224,26 +1224,26 @@ clipper::MiniMol FindML::find() {
     clipper::MiniMol sugar_mol = generate_molecule_from_gridpoints(xsugarpred, 0.3);
 
     TripletCoordinates phosphate_triplets = find_triplet_coordinates(phosphate_peaks, sugar_mol);
-    // draw_triplets(phosphate_triplets, phosphate_peaks, "triplets-ext.pdb");
-    //  NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
+    draw_triplets(phosphate_triplets, phosphate_peaks, "triplets-ext.pdb");
+    NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
     std::cout << phosphate_triplets.size() << " phosphate triplets found\n";
 
     PairedChainIndices pairs = organise_triplets_to_chains(phosphate_triplets);
 
-    // for (const auto& pair : pairs) {
-    //     std::cout << "Pair:" << std::endl;
-    //     std::cout << "First vector: ";
-    //     for (const auto& element : pair.first) {
-    //         std::cout << element << " ";
-    //     }
-    //     std::cout << std::endl;
-    //
-    //     std::cout << "Second vector: ";
-    //     for (const auto& element : pair.second) {
-    //         std::cout << element << " ";
-    //     }
-    //     std::cout << std::endl << std::endl;
-    // }
+    for (const auto& pair : pairs) {
+        std::cout << "Pair:" << std::endl;
+        std::cout << "First vector: ";
+        for (const auto& element : pair.first) {
+            std::cout << element << " ";
+        }
+        std::cout << std::endl;
+
+        std::cout << "Second vector: ";
+        for (const auto& element : pair.second) {
+            std::cout << element << " ";
+        }
+        std::cout << std::endl << std::endl;
+    }
 
     std::map<std::pair<int, int>, std::vector<NucleicAcidDB::NucleicAcidFull>> placed_fragments;
     std::vector<std::vector<int>> placed_fragment_indices;

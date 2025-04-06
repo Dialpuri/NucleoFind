@@ -8,6 +8,7 @@
 #include <gemmi/ccp4.hpp>
 #include <gemmi/model.hpp>
 #include "nucleofind-utils.h"
+#include "nelder-mead.h"
 
 namespace NucleoFind {
     class PredictedMaps {
@@ -52,14 +53,25 @@ namespace NucleoFind {
         }
     };
 
-    class PredictedMapToPoint {
+    class MapToPoints {
     public:
+        static gemmi::Residue locate_peaks(gemmi::Grid<>& xwrk, gemmi::Grid<>& xpred, double threshold);
 
+    private:
         static std::vector<gemmi::Grid<>::Point> create_atoms_at_gridpoints(gemmi::Grid<> &grid, double threshold);
         static gemmi::Residue find_peaks(std::vector<gemmi::Grid<>::Point> &points, gemmi::Grid<> &grid);
-        static gemmi::Residue assimilate_peaks(gemmi::Residue &residue, gemmi::Grid<> &grid);
         static gemmi::Grid<>::Point gradient_ascent(gemmi::Grid<>::Point& point, gemmi::Grid<>& grid, int iteration);
+        static gemmi::Residue assimilate_peaks(gemmi::Residue &residue, gemmi::Grid<> &grid);
+        static gemmi::Residue refine_peaks(gemmi::Residue &residue, gemmi::Grid<> &grid, gemmi::Grid<>& xwrk);
+    };
 
+    class DensityRefiner {
+    public:
+        DensityRefiner(gemmi::Grid<>& xwrk, gemmi::Grid<>& restraint_map): xwrk(xwrk), restraint_map(restraint_map) {};
+        gemmi::Position refine_position(gemmi::Position& position, bool use_restraints=true);
+    private:
+        gemmi::Grid<>& xwrk;
+        gemmi::Grid<>& restraint_map;
     };
 }
 

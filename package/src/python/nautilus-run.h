@@ -4,8 +4,10 @@
 #include <gemmi/ccp4.hpp>
 #include <gemmi/to_cif.hpp>    // cif::Document -> file
 #include <gemmi/to_mmcif.hpp>  // Structure -> cif::Document
+#include <gemmi/fourier.hpp>  // for get_size_for_hkl, get_f_phi_on_grid, ...
 
 #include <algorithm>
+#include <gemmi/refln.hpp>
 
 #include "../cpp/nucleicacid_db.h"
 #include "../cpp/nautilus-tools.h"
@@ -561,34 +563,38 @@ void run_find(NautilusInput &input, NautilusOutput &output, int cycles) {
         base_map = gemmi::read_ccp4_map(input.get_base_prediction_path().value(), true);
     }
 
+    gemmi::Mtz mtz = gemmi::read_mtz_file(input.get_mtz_path());
+
+
+    const gemmi::Mtz::Column& f = mtz.get_column_with_label("FWT");
+    const gemmi::Mtz::Column& phi = mtz.get_column_with_label("PHWT");
+    gemmi::FPhiProxy<gemmi::MtzDataProxy> gemmi_fphi(gemmi::MtzDataProxy{mtz}, f.idx, phi.idx);
+    gemmi::Grid<> xgrid = transform_f_phi_to_map2<float>(gemmi_fphi, {}, 1.5, {});
+
+    gemmi::Ccp4<> m;
+    m.grid = xgrid;
+    m.update_ccp4_header();
+    m.write_ccp4_map("xgrid.map");
+
     PredictedMaps predictions = {xphospred, xsugarpred, xbasepred};
 
     mol_wrk = NucleicAcidTools::flag_chains(mol_wrk);
     clipper::MiniMol mol_wrk_original = mol_wrk;
 
     NucleoFind::PredictedMaps predicted_maps = {phosphate_map.grid, sugar_map.grid, base_map.grid};
-    auto points = NucleoFind::PredictedMapToPoint::create_atoms_at_gridpoints(phosphate_map.grid, 0.1);
-    auto x = NucleoFind::PredictedMapToPoint::find_peaks(points, phosphate_map.grid);
-    auto x1 = create_gemmi_structure(x);
-    std::ofstream os("groups.pdb");
-    write_pdb(x1, os);
-    auto y = NucleoFind::PredictedMapToPoint::assimilate_peaks(x, phosphate_map.grid);
-    y = NucleoFind::PredictedMapToPoint::assimilate_peaks(y, phosphate_map.grid);
-    auto y1 = create_gemmi_structure(y);
-
-    std::ofstream os3("peaks.pdb");
-    write_pdb(y1, os3);
-    // gemmi::cif::write_cif_to_stream(os, gemmi::make_mmcif_document(s));
+    gemmi::Residue phosphate_peaks = NucleoFind::MapToPoints::locate_peaks(xgrid, phosphate_map.grid, 0.1);
 
 
 
     exit(-1);
+
 
     FindML find_ml = FindML(mol_wrk, xwrk, predictions);
     find_ml.load_library_from_file(ippdb_ref);
     find_ml.set_resolution(hkls.resolution().limit()); // Needed for the RSRZ calculation, but if not set defaults to 2
     mol_wrk = find_ml.find();
     log.log("FIND ML", mol_wrk, verbose >= 5);
+
 //    NautilusUtil::save_minimol(mol_wrk, "find.pdb");
     NucleicAcidJoin na_join;
     mol_wrk = na_join.join(mol_wrk);

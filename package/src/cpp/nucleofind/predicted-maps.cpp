@@ -10,7 +10,16 @@
 #include <gemmi/neighbor.hpp>
 
 
-std::vector<gemmi::Grid<>::Point> NucleoFind::PredictedMapToPoint::create_atoms_at_gridpoints(gemmi::Grid<> &grid, double threshold) {
+gemmi::Residue NucleoFind::MapToPoints::locate_peaks(gemmi::Grid<> &xwrk, gemmi::Grid<> &xpred,
+    double threshold) {
+    std::vector<gemmi::Grid<>::Point> points = create_atoms_at_gridpoints(xpred, threshold);
+    gemmi::Residue peaks = find_peaks(points, xpred);
+    gemmi::Residue assimilated_peaks = assimilate_peaks(peaks, xpred);
+    assimilated_peaks = assimilate_peaks(assimilated_peaks, xpred);
+    return std::move(refine_peaks(assimilated_peaks, xpred, xwrk));;
+}
+
+std::vector<gemmi::Grid<>::Point> NucleoFind::MapToPoints::create_atoms_at_gridpoints(gemmi::Grid<> &grid, double threshold) {
     std::vector<gemmi::Grid<>::Point> points;
     for (int i = 0; i < grid.nu; i++) {
         for (int j = 0; j < grid.nv; j++) {
@@ -26,7 +35,7 @@ std::vector<gemmi::Grid<>::Point> NucleoFind::PredictedMapToPoint::create_atoms_
 }
 
 
-gemmi::Residue NucleoFind::PredictedMapToPoint::find_peaks(std::vector<gemmi::Grid<>::Point> &points,
+gemmi::Residue NucleoFind::MapToPoints::find_peaks(std::vector<gemmi::Grid<>::Point> &points,
                                                            gemmi::Grid<> &grid) {
     std::unordered_set<gemmi::Grid<>::Point, PointHash, PointEqual> visited_points = {};
     gemmi::Residue peaks;
@@ -45,13 +54,12 @@ gemmi::Residue NucleoFind::PredictedMapToPoint::find_peaks(std::vector<gemmi::Gr
     return peaks;
 }
 
-gemmi::Residue NucleoFind::PredictedMapToPoint::assimilate_peaks(gemmi::Residue &residue, gemmi::Grid<> &grid) {
+gemmi::Residue NucleoFind::MapToPoints::assimilate_peaks(gemmi::Residue &residue, gemmi::Grid<> &grid) {
     gemmi::Model model = create_gemmi_model(residue);
     gemmi::NeighborSearch ns = {model, grid.unit_cell, 2.0};
     ns.populate();
 
     std::set<int> checked_atoms;
-
     gemmi::Residue peaks;
     peaks.seqid = gemmi::SeqId("0");
     peaks.name = "X";
@@ -66,23 +74,50 @@ gemmi::Residue NucleoFind::PredictedMapToPoint::assimilate_peaks(gemmi::Residue 
 
         for (const auto& near: nearby) {
             if (near->atom_idx == a) continue;
-            centroid += near->pos;
+            auto im = grid.unit_cell.find_nearest_pbc_position(residue.atoms[a].pos, near->pos, near->image_idx);
+            centroid += im;
             count++;
             checked_atoms.insert(near->atom_idx);
         }
 
         centroid /= count;
-        float length = (centroid - residue.atoms[a].pos).length();
-        std::cout << a << " " << length << std::endl;
         peaks.atoms.emplace_back(create_gemmi_atom(centroid, std::to_string(a)));
-
     }
-
     return peaks;
 }
 
+gemmi::Residue NucleoFind::MapToPoints::refine_peaks(gemmi::Residue &residue, gemmi::Grid<> &grid,
+    gemmi::Grid<> &xwrk) {
+    DensityRefiner refiner(xwrk, grid);
+    for (auto & atom : residue.atoms) {
+        atom.pos = refiner.refine_position(atom.pos, true);
+    }
+    return residue;
+}
 
-gemmi::Grid<>::Point NucleoFind::PredictedMapToPoint::gradient_ascent(gemmi::Grid<>::Point &point, gemmi::Grid<> &grid, int iteration) {
+gemmi::Position NucleoFind::DensityRefiner::refine_position(gemmi::Position &position, bool use_restraints) {
+
+    auto lambda = [&](std::vector<double>& x) -> double {
+        gemmi::Position current_position = {x[0], x[1], x[2]};
+        if (use_restraints) {
+            return this->restraint_map.interpolate_value(current_position) > 0 ? -this->xwrk.interpolate_value(current_position) : INT_MAX;
+        }
+        return this->xwrk.interpolate_value(current_position);
+    };
+    std::vector<double> initial_values = {position.x, position.y, position.z};
+    std::vector<std::vector<double>> initial_simplex = {
+        {initial_values[0], initial_values[1], initial_values[2]},
+        {initial_values[0]+0.1, initial_values[1], initial_values[2]},
+        {initial_values[0], initial_values[1]+0.1, initial_values[2]},
+        {initial_values[0], initial_values[1], initial_values[2]+0.1}
+    };
+    std::vector<double> final_values = nelder_mead::find_min(lambda, initial_values, false, initial_simplex, 1e-8, 1e-8, 100, 100000);
+    gemmi::Position final_position = {final_values[0], final_values[1], final_values[2]};
+    return final_position;
+}
+
+
+gemmi::Grid<>::Point NucleoFind::MapToPoints::gradient_ascent(gemmi::Grid<>::Point &point, gemmi::Grid<> &grid, int iteration) {
     constexpr int max_iter = 100;
     if (iteration > max_iter) {
         return point;

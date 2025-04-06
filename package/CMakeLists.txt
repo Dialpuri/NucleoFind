@@ -74,7 +74,9 @@ endif()
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR} ${WRK_DIR}/checkout/mmdb2
   ${WRK_DIR}/checkout/clipper ${WRK_DIR}/clipper
-  ${WRK_DIR}/checkout/libccp4/ccp4 ${WRK_DIR}/checkout/gemmi/include)
+  ${WRK_DIR}/checkout/libccp4/ccp4 ${WRK_DIR}/checkout/gemmi/include
+        ${WRK_DIR}/src/third-party
+)
 
 link_directories(${WRK_DIR}/mmdb2 ${WRK_DIR}/clipper ${WRK_DIR}/ccp4
                  ${WRK_DIR}/src ${CMAKE_BINARY_DIR})
