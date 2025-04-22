@@ -380,7 +380,6 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
 };
 
 void run_find(NautilusInput &input, NautilusOutput &output, int cycles) {
-
     CCP4Program prog("nucleofind-build", "0.1", "$Date: 2024/02/26");
     prog.set_termination_message("Failed");
 
@@ -582,12 +581,10 @@ void run_find(NautilusInput &input, NautilusOutput &output, int cycles) {
     clipper::MiniMol mol_wrk_original = mol_wrk;
 
     NucleoFind::PredictedMaps predicted_maps = {phosphate_map.grid, sugar_map.grid, base_map.grid};
-    gemmi::Residue phosphate_peaks = NucleoFind::MapToPoints::locate_peaks(xgrid, phosphate_map.grid, 0.1);
-
-
+    NucleoFind::Find find = {xgrid, predicted_maps};
+    find.find();
 
     exit(-1);
-
 
     FindML find_ml = FindML(mol_wrk, xwrk, predictions);
     find_ml.load_library_from_file(ippdb_ref);

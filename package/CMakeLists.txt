@@ -99,6 +99,8 @@ add_library(
         ${WRK_DIR}/src/cpp/nucleofind/predicted-maps.cpp
         ${WRK_DIR}/src/cpp/nucleofind/nucleofind.h
         ${WRK_DIR}/src/cpp/nucleofind/nucleofind.cpp
+        ${WRK_DIR}/src/cpp/nucleofind/backbone-tracing.cpp
+        ${WRK_DIR}/src/cpp/nucleofind/backbone-tracing.h
 )
 
 # add_executable(cnautilus ${WRK_DIR}/src/cpp/cnautilus.cpp)
@@ -136,7 +138,8 @@ target_link_libraries(
          rfftw
          fftw
          mmdb2
-         gemmi_cpp)
+         gemmi_cpp
+)
 
 if(CCP4BUILD)
   target_link_libraries(nautilus_lib PUBLIC ccp4c)

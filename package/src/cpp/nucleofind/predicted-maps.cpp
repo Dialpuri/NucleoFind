@@ -7,6 +7,7 @@
 #include <iostream>
 #include <set>
 #include <unordered_set>
+#include <clipper/core/coords.h>
 #include <gemmi/neighbor.hpp>
 
 
@@ -74,7 +75,8 @@ gemmi::Residue NucleoFind::MapToPoints::assimilate_peaks(gemmi::Residue &residue
 
         for (const auto& near: nearby) {
             if (near->atom_idx == a) continue;
-            auto im = grid.unit_cell.find_nearest_pbc_position(residue.atoms[a].pos, near->pos, near->image_idx);
+            auto im = symmetry_copy_near(residue.atoms[a].pos, near->pos, grid.unit_cell, grid.spacegroup);
+            // auto im = grid.unit_cell.find_nearest_pbc_position(residue.atoms[a].pos, near->pos, near->image_idx);
             centroid += im;
             count++;
             checked_atoms.insert(near->atom_idx);
