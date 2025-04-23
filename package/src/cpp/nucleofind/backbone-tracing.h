@@ -35,6 +35,15 @@ namespace NucleoFind {
             edges.push_back(edge);
         }
 
+        void remove_edge(const std::shared_ptr<Edge>& edge_to_remove) {
+            auto new_end = std::remove_if(edges.begin(), edges.end(),
+                [&](const std::shared_ptr<Edge>& edge) {
+                    return edge == edge_to_remove;
+                }
+            );
+            edges.erase(new_end, edges.end());
+        }
+
         int degree() const {
             return edges.size();
         }
@@ -60,8 +69,9 @@ namespace NucleoFind {
             generate_graph();
             generate_adjacency_list();
             // print_stats();
-            // create_linked_structure();
             identify_and_resolve_branches();
+            create_linked_structure();
+
         }
 
         void generate_sugar_nonbond() {
@@ -93,9 +103,13 @@ namespace NucleoFind {
         // Model building functions
         double fit_and_score_fragment(int n1, int n2, int n3);
 
+        std::vector<double> fit_and_score_fragment_individually(int n1, int n2, int n3);
+
         double extract_library_fragment_and_score(int l, std::vector<clipper::Coord_orth> &reference_coords);
 
         double score_monomers(std::vector<clipper::MMonomer>& monomers);
+
+        std::vector<double> score_monomers_individually(std::vector<clipper::MMonomer>& monomers);
 
         double score_monomer(clipper::MMonomer& monomer);
 
@@ -132,6 +146,15 @@ namespace NucleoFind {
                 }
             }
             return result;
+        }
+
+        std::shared_ptr<Node> find_node_by_point_index(int point_index) const {
+            for (const auto& node : nodes) {
+                if (node->point_index == point_index) {
+                    return node;
+                }
+            }
+            return nullptr;
         }
 
         std::vector<int> find_branch_points() const {
@@ -177,6 +200,8 @@ namespace NucleoFind {
         std::vector<std::shared_ptr<Edge>> edges;
         std::unordered_map<int, std::vector<std::shared_ptr<Edge>>> adjacency;
     };
+
+
 }
 
 #endif //BACKBONE_TRACING_H
