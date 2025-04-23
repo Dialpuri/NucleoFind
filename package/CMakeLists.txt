@@ -101,6 +101,8 @@ add_library(
         ${WRK_DIR}/src/cpp/nucleofind/nucleofind.cpp
         ${WRK_DIR}/src/cpp/nucleofind/backbone-tracing.cpp
         ${WRK_DIR}/src/cpp/nucleofind/backbone-tracing.h
+        ${WRK_DIR}/src/cpp/nucleofind/fragment-library.cpp
+        ${WRK_DIR}/src/cpp/nucleofind/fragment-library.h
 )
 
 # add_executable(cnautilus ${WRK_DIR}/src/cpp/cnautilus.cpp)

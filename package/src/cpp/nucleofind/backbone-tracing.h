@@ -10,10 +10,13 @@
 #include "nucleofind-utils.h"
 #include <iostream>
 #include <unordered_set>
+#include <clipper/minimol/minimol_utils.h>
 #include <gemmi/neighbor.hpp>
 #include <gemmi/to_cif.hpp>
 #include <gemmi/to_mmcif.hpp>
 #include <gemmi/to_pdb.hpp>
+
+#include "fragment-library.h"
 
 namespace NucleoFind {
 
@@ -40,58 +43,65 @@ namespace NucleoFind {
         std::vector<std::shared_ptr<Edge>> edges;
     };
 
-    struct BackboneGraph {
-
-        BackboneGraph(gemmi::Residue& input, gemmi::Grid<>& xgrid, double max_distance = 8.0): input(input), xgrid(xgrid), max_distance(max_distance) {
-            generate_graph();
-            // print_stats();
-            create_linked_structure();
+    struct BackboneTracer {
+        BackboneTracer(clipper::MiniMol& mol,
+                        clipper::Xmap<float>& xgrid,
+                        PredictedMaps& predicted_maps): mol(mol), xgrid(xgrid), predicted_maps(predicted_maps) {
+            library = TriNucleotideLibrary("/Users/dialpuri/Downloads/collated.cif");
+            initialise_tracer();
         };
 
     private:
 
-        void generate_graph() {
-            nodes.reserve(input.atoms.size());
+        // Initialisation functions
+        void initialise_tracer() {
+            input = mol[0][0];
+            generate_sugar_nonbond();
+            generate_graph();
+            generate_adjacency_list();
+            // print_stats();
+            // create_linked_structure();
+            identify_and_resolve_branches();
+        }
 
-            gemmi::Model model = create_gemmi_model(input);
-            gemmi::Structure s = split_atoms_into_structure(input, xgrid.unit_cell, xgrid.spacegroup);
+        void generate_sugar_nonbond() {
+            clipper::Xmap<float> sugar = *predicted_maps.get_sugar_map();
+            clipper::MiniMol sugar_mol = MapToPoints::create_mol_at_gridpoints(sugar, 0.1);
+            predicted_sugar_positions = clipper::MAtomNonBond(sugar_mol, 1);
+        }
 
-            gemmi::NeighborSearch ns = gemmi::NeighborSearch(model, xgrid.unit_cell, max_distance).populate();
-
-            for (int a = 0; a < input.atoms.size(); a++) {
-                nodes.push_back(std::make_shared<Node>(a));
+        void generate_adjacency_list() {
+            for (const auto& edge : edges) {
+                adjacency[edge->source].push_back(edge);
             }
-
-            for (int a = 0; a < input.atoms.size(); a++) {
-                auto nearby = ns.find_atoms(input.atoms[a].pos, '*', 0, max_distance);
-
-                for (const auto& near: nearby) {
-
-                    if (near->atom_idx == a) continue;
-
-                    auto symm_copy_near = symmetry_copy_near(near->pos, input.atoms[a].pos, xgrid.unit_cell, xgrid.spacegroup);
-                    // input.atoms[near->atom_idx].pos = symm_copy_near;
-
-                    std::cout << "Distance between " << a << "-" << near->atom_idx << " is " << (input.atoms[a].pos - symm_copy_near).length() << std::endl;
-
-                    auto edge = std::make_shared<Edge>(a, near->atom_idx, (input.atoms[a].pos-near->pos).length());
-                    edges.push_back(edge);
-
-                    nodes[a]->add_edge(edge);
-                    nodes[near->atom_idx]->add_edge(edge);
-                }
-
-
-            }
-
-            auto fs= split_atoms_into_structure(input, xgrid.unit_cell, xgrid.spacegroup);
-            std::ofstream ofs;
-            ofs.open("final.cif");
-            gemmi::cif::write_cif_to_stream(ofs, make_mmcif_document(s));
-            ofs.close();
         }
 
 
+        // Graph generation functions
+        void generate_graph();
+
+        void determine_edge(int source_atom, int target_atom, clipper::Coord_orth &current_atom_orth,
+                   clipper::Coord_orth &target_atom_orth);
+
+        void find_nearby_nodes(const clipper::MAtomNonBond& nb, int a);
+
+
+        // Branch resolution functions
+        void identify_and_resolve_branches();
+
+
+        // Model building functions
+        double fit_and_score_fragment(int n1, int n2, int n3);
+
+        double extract_library_fragment_and_score(int l, std::vector<clipper::Coord_orth> &reference_coords);
+
+        double score_monomers(std::vector<clipper::MMonomer>& monomers);
+
+        double score_monomer(clipper::MMonomer& monomer);
+
+        static double score_to_grid(const clipper::Coord_orth& coord, const clipper::Xmap<float>* grid);
+
+        // Graph Structure Utility Functions
         const std::vector<std::shared_ptr<Node>>& get_nodes() const {
             return nodes;
         }
@@ -107,7 +117,7 @@ namespace NucleoFind {
             return nullptr;
         }
 
-        std::optional<gemmi::Position> get_position(int index) const {
+        std::optional<clipper::Coord_orth> get_position(int index) const {
             if (index >= 0 && index < nodes.size()) {
                 return positions[index];
             }
@@ -127,7 +137,7 @@ namespace NucleoFind {
         std::vector<int> find_branch_points() const {
             std::vector<int> result;
             for (int i = 0; i < nodes.size(); i++) {
-                if (nodes[i]->degree() > 2) {
+                if (nodes[i]->degree() > 4) {
                     result.push_back(i);
                 }
             }
@@ -135,111 +145,37 @@ namespace NucleoFind {
         }
 
         std::vector<int> find_end_points() const {
-            return find_node_by_degree(1);
-        }
-
-        std::vector<std::vector<int>> find_connected_components() const {
-            std::vector<std::vector<int>> components;
-            std::unordered_set<int> visited;
-
-            for (size_t i = 0; i < nodes.size(); ++i) {
-                if (visited.count(i) > 0) continue;
-
-                // Start a new component
-                std::vector<int> component;
-                std::queue<int> queue;
-
-                queue.push(i);
-                visited.insert(i);
-
-                while (!queue.empty()) {
-                    int current = queue.front();
-                    queue.pop();
-                    component.push_back(current);
-
-                    // Visit all neighbors
-                    for (const auto& edge : nodes[current]->edges) {
-                        int neighbor = (edge->source == current) ? edge->target : edge->source;
-
-                        if (visited.count(neighbor) == 0) {
-                            visited.insert(neighbor);
-                            queue.push(neighbor);
-                        }
-                    }
-                }
-
-                components.push_back(component);
-            }
-
-            return components;
-        }
-
-        void create_linked_structure() {
-            auto s = create_gemmi_structure(input);
-
-            for (auto i = 0; i < edges.size(); i++) {
-                gemmi::AtomAddress a1 = {"A", input.seqid, input.name, std::to_string(edges[i]->source)};
-                gemmi::AtomAddress a2 = {"A", input.seqid, input.name, std::to_string(edges[i]->target)};
-                gemmi::Connection connection = {
-                    std::to_string(i),
-                    "",
-                    gemmi::Connection::Covale,
-                    gemmi::Asu::Any,
-                    a1,
-                    a2,
-                    edges[i]->distance
-                };
-                s.connections.push_back(connection);
-                std::cout << "Connecting " << edges[i]->source << " to " << edges[i]->target << " " << edges[i]->distance <<  std::endl;
-            }
-
-            std::ofstream of;
-            of.open("triplets.pdb");
-            gemmi::write_pdb(s, of);
-            of.close();
+            return find_node_by_degree(2);
         }
 
 
-        void print_stats() const {
-            std::cout << "Graph Statistics:" << std::endl;
-            std::cout << "  Nodes: " << nodes.size() << std::endl;
-            std::cout << "  Edges: " << edges.size() << std::endl;
+        // Debugging functions
 
-            // Degree distribution
-            std::unordered_map<int, int> degreeCount;
-            for (const auto& node : nodes) {
-                degreeCount[node->degree()]++;
-            }
+        void create_linked_structure();
 
-            std::cout << "  Degree distribution:" << std::endl;
-            for (const auto& pair : degreeCount) {
-                std::cout << "    Degree " << pair.first << ": " << pair.second << " nodes" << std::endl;
-            }
+        void print_stats() const;
 
-            // Connected components
-            // std::vector<std::vector<int>> components = find_connected_components();
-            // std::cout << "  Connected components: " << components.size() << std::endl;
-            // for (size_t i = 0; i < components.size(); ++i) {
-            //     std::cout << "    Component " << i << ": " << components[i].size() << " nodes" << std::endl;
-            // }
-
-            // Branch points
-            std::vector<int> branchPoints = find_branch_points();
-            std::cout << "  Branch points: " << branchPoints.size() << std::endl;
-
-            // End points
-            std::vector<int> endPoints = find_end_points();
-            std::cout << "  End points: " << endPoints.size() << std::endl;
-        }
 
 
     private:
-        gemmi::Residue input;
-        gemmi::Grid<> xgrid;
-        std::vector<gemmi::Position> positions;
+        // Parameters
+        double max_distance = 8.0;
+
+        // Clipper members
+        clipper::MMonomer input;
+        clipper::MiniMol mol;
+        clipper::Xmap<float> xgrid;
+        PredictedMaps& predicted_maps;
+        clipper::MAtomNonBond predicted_sugar_positions; // Used to determine if an edge is valid
+
+        // Library members
+        TriNucleotideLibrary library;
+
+        // Graph members
+        std::vector<clipper::Coord_orth> positions;
         std::vector<std::shared_ptr<Node>> nodes;
         std::vector<std::shared_ptr<Edge>> edges;
-        double max_distance;
+        std::unordered_map<int, std::vector<std::shared_ptr<Edge>>> adjacency;
     };
 }
 

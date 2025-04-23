@@ -89,7 +89,7 @@ def main():
         args.basein = f"{args.preddirin}/nucleofind-base.map"
 
     if not args.colin_fc and not args.colin_phifom: 
-        raise ValueError("Please specify columns for the phases, either FC or PHI,FOM")
+        raise ValueError("Please specify columns for the phases, either FWT,PHWT or PHI,FOM")
     
     input = Input(
         args.mtzin,

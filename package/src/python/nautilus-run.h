@@ -580,8 +580,8 @@ void run_find(NautilusInput &input, NautilusOutput &output, int cycles) {
     mol_wrk = NucleicAcidTools::flag_chains(mol_wrk);
     clipper::MiniMol mol_wrk_original = mol_wrk;
 
-    NucleoFind::PredictedMaps predicted_maps = {phosphate_map.grid, sugar_map.grid, base_map.grid};
-    NucleoFind::Find find = {xgrid, predicted_maps};
+    NucleoFind::PredictedMaps predicted_maps = {xphospred, xsugarpred, xbasepred};
+    NucleoFind::Find find = {xwrk, predicted_maps};
     find.find();
 
     exit(-1);
