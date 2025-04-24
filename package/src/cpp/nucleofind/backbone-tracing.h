@@ -44,6 +44,25 @@ namespace NucleoFind {
             edges.erase(new_end, edges.end());
         }
 
+        void remove_edge(int n) {
+            auto new_end = std::remove_if(edges.begin(), edges.end(),
+                [&](const std::shared_ptr<Edge>& edge) {
+                    return edge->target == n || edge->source == n;
+                }
+            );
+            edges.erase(new_end, edges.end());
+        }
+
+        std::vector<std::shared_ptr<Edge>> find_outgoing_edges() const {
+            std::vector<std::shared_ptr<Edge>> outgoing_edges;
+            for (auto& edge: edges) {
+                if (edge->source == point_index) {
+                    outgoing_edges.push_back(edge);
+                }
+            }
+            return outgoing_edges;
+        }
+
         int degree() const {
             return edges.size();
         }
@@ -60,6 +79,12 @@ namespace NucleoFind {
             initialise_tracer();
         };
 
+        void build() {
+            identify_and_resolve_branches();
+            print_stats();
+            build_chains();
+        }
+
     private:
 
         // Initialisation functions
@@ -68,11 +93,9 @@ namespace NucleoFind {
             generate_sugar_nonbond();
             generate_graph();
             generate_adjacency_list();
-            // print_stats();
-            identify_and_resolve_branches();
-            create_linked_structure();
-
+            // create_linked_structure();
         }
+
 
         void generate_sugar_nonbond() {
             clipper::Xmap<float> sugar = *predicted_maps.get_sugar_map();
@@ -87,7 +110,7 @@ namespace NucleoFind {
         }
 
 
-        // Graph generation functions
+        // Graph functions
         void generate_graph();
 
         void determine_edge(int source_atom, int target_atom, clipper::Coord_orth &current_atom_orth,
@@ -95,12 +118,16 @@ namespace NucleoFind {
 
         void find_nearby_nodes(const clipper::MAtomNonBond& nb, int a);
 
+        void traverse_chain(std::shared_ptr<Node>& node, std::vector<int> &chain);
 
-        // Branch resolution functions
+
+        // Model building main functions
         void identify_and_resolve_branches();
 
+        void build_chains();
 
-        // Model building functions
+
+        // Model building utility functions
         double fit_and_score_fragment(int n1, int n2, int n3);
 
         std::vector<double> fit_and_score_fragment_individually(int n1, int n2, int n3);
@@ -116,38 +143,6 @@ namespace NucleoFind {
         static double score_to_grid(const clipper::Coord_orth& coord, const clipper::Xmap<float>* grid);
 
         // Graph Structure Utility Functions
-        const std::vector<std::shared_ptr<Node>>& get_nodes() const {
-            return nodes;
-        }
-
-        const std::vector<std::shared_ptr<Edge>>& get_edges() const {
-            return edges;
-        }
-
-        std::shared_ptr<Node> get_node(int index) const {
-            if (index >= 0 && index < nodes.size()) {
-                return nodes[index];
-            }
-            return nullptr;
-        }
-
-        std::optional<clipper::Coord_orth> get_position(int index) const {
-            if (index >= 0 && index < nodes.size()) {
-                return positions[index];
-            }
-            return std::nullopt;
-        }
-
-        std::vector<int> find_node_by_degree(int degree) const {
-            std::vector<int> result;
-            for (int i = 0; i < nodes.size(); i++) {
-                if (nodes[i]->degree() == degree) {
-                    result.push_back(i);
-                }
-            }
-            return result;
-        }
-
         std::shared_ptr<Node> find_node_by_point_index(int point_index) const {
             for (const auto& node : nodes) {
                 if (node->point_index == point_index) {
@@ -157,18 +152,14 @@ namespace NucleoFind {
             return nullptr;
         }
 
-        std::vector<int> find_branch_points() const {
-            std::vector<int> result;
-            for (int i = 0; i < nodes.size(); i++) {
-                if (nodes[i]->degree() > 4) {
-                    result.push_back(i);
+        std::vector<std::shared_ptr<Node>> find_nodes_by_degree(int degree) const {
+            std::vector<std::shared_ptr<Node>> results;
+            for (const auto& node : nodes) {
+                if (node->degree() == degree) {
+                    results.push_back(node);
                 }
             }
-            return result;
-        }
-
-        std::vector<int> find_end_points() const {
-            return find_node_by_degree(2);
+            return results;
         }
 
 

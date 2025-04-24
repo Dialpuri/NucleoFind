@@ -107,8 +107,9 @@ inline clipper::MMonomer create_clipper_monomer(std::vector<clipper::MAtom>& ato
     monomer.set_id(seqid);
     monomer.set_seqnum(seqid);
     monomer.set_type(name);
-    for (auto& atom: atoms) {
-        monomer.insert(atom);
+    for (int a = 0; a < atoms.size(); a++) {
+        atoms[a].set_id(a);
+        monomer.insert(atoms[a]);
     }
     return monomer;
 }

@@ -10,7 +10,7 @@ void NucleoFind::BackboneTracer::determine_edge(int source_atom, int target_atom
                                                 clipper::Coord_orth &current_atom_orth,
                                                 clipper::Coord_orth &target_atom_orth) {
     float distance = clipper::Coord_orth::length(current_atom_orth, target_atom_orth);
-    if (distance < 4 || distance > 8) return;
+    if (distance < 3 || distance > 8) return;
 
     clipper::Vec3<> midpoint = (current_atom_orth + target_atom_orth) * 0.5;
     auto midpoint_orth = clipper::Coord_orth(midpoint);
@@ -28,7 +28,6 @@ void NucleoFind::BackboneTracer::find_nearby_nodes(const clipper::MAtomNonBond &
     clipper::Coord_orth current_atom_coord_orth = input[a].coord_orth();
     clipper::Coord_frac current_atom_coord_frac = current_atom_coord_orth.coord_frac(xgrid.cell());
     std::vector<clipper::MAtomIndexSymmetry> nearby = nb(current_atom_coord_orth, max_distance);
-
     for (const auto &near: nearby) {
         if (near.atom() == a) continue;
         clipper::Coord_orth nearby_atom_coord_orth = input[near.atom()].coord_orth();
@@ -50,6 +49,7 @@ void NucleoFind::BackboneTracer::generate_graph() {
     }
 
     for (int a = 0; a < input.size(); a++) {
+
         find_nearby_nodes(nb, a);
     }
 }
@@ -201,6 +201,7 @@ void NucleoFind::BackboneTracer::identify_and_resolve_branches() {
     for (auto &branch_node: branch_nodes) {
         auto node = find_node_by_point_index(branch_node);
 
+        // which nodes are nearby
         std::unordered_set<int> nearby_nodes_s = {};
         for (auto& edge: node->edges) {
             nearby_nodes_s.insert(edge->source);
@@ -209,6 +210,7 @@ void NucleoFind::BackboneTracer::identify_and_resolve_branches() {
 
         std::vector<int> nearby_nodes = {nearby_nodes_s.begin(), nearby_nodes_s.end()};
 
+        // go through all permutations of nearby nodes with i, branch_node, j and score
         std::unordered_set<int> best_triplet = {};
         double best_score = INT_MIN;
         for (int i = 0; i < nearby_nodes.size(); i++) {
@@ -221,66 +223,65 @@ void NucleoFind::BackboneTracer::identify_and_resolve_branches() {
                 }
             }
         }
-        std::unordered_set<int> difference;
+
+        // find points(s) which were found nearby and are not part of the best triplet
+        std::unordered_set<int> differences;
         for (const auto& elem : nearby_nodes_s) {
             if (best_triplet.find(elem) == best_triplet.end()) {
-                difference.insert(elem);
+                differences.insert(elem);
             }
         }
 
+        // remove edges between branch point and nodes found in difference
         auto new_end = std::remove_if(edges.begin(), edges.end(), [&](const std::shared_ptr<Edge>& edge) {
-            bool contains_wrong_node = difference.find(edge->target) != difference.end() || difference.find(edge->source) != difference.end();
+            bool contains_wrong_node = differences.find(edge->target) != differences.end() || differences.find(edge->source) != differences.end();
             bool contains_midpoint = edge->target == branch_node || edge->source == branch_node;
             return contains_wrong_node && contains_midpoint;
        });
        edges.erase(new_end, edges.end());
 
+        for (auto& difference: differences) {
+            const std::shared_ptr<Node> difference_node = find_node_by_point_index(difference);
+            difference_node->remove_edge(branch_node);
+            node->remove_edge(difference);
+        }
+
     }
 
+    // clean lone nodes
+    auto node_removal = std::remove_if(nodes.begin(), nodes.end(), [](const std::shared_ptr<Node>& node) {
+        return node->degree() == 0;
+    });
+    nodes.erase(node_removal, nodes.end());
+}
 
-    // std::cout << "Branch point detected after " << node1 << " and " << node2 << std::endl;
-    // std::cout << "choices are: " << std::endl;
-    //
-    // double best_score = INT_MIN;
-    // int best_node = -1;
-    // for (auto& edge2 : it2->second) {
-    //     auto node3 = edge2->target;
-    //     if (node3 == node1) continue;
-    //     double score = fit_and_score_fragment(node1, node2, node3);
-    //     std::cout << "\t" << node3 << " with score=" << score << std::endl;
-    //     if (score > best_score) {
-    //         best_score = score;
-    //         best_node = node3;
-    //     }
-    // }
-    //
-    // std::cout << "Decision:" << node1 << " " << node2 << " -> " << best_node << " with score = " << best_score << std::endl;
-    //
-    // std::unordered_set<int> incorrect_branched_nodes = {};
-    // for (auto& edge2 : it2->second) {
-    //     auto node3 = edge2->target;
-    //     if (node3 == node1 || node3 == best_node) continue;
-    //     incorrect_branched_nodes.insert(node3);
-    //     std::shared_ptr<Node> current_node = find_node_by_point_index(node3);
-    //     current_node->remove_edge(edge2);
-    //
-    //     std::cout << "to remove: " << node3 << std::endl;
-    // }
-    //
-    //
-    // auto new_end = std::remove_if(edges.begin(), edges.end(), [&](const std::shared_ptr<Edge>& edge) {
-    //     // when source == node2 and target == node3
-    //     // when source == node3 and target == node2
-    //         bool source_is_wrong = incorrect_branched_nodes.find(edge->source) != incorrect_branched_nodes.end();
-    //         bool target_is_wrong = incorrect_branched_nodes.find(edge->target) != incorrect_branched_nodes.end();
-    //         if (source_is_wrong || target_is_wrong) {
-    //             std::cout << "Removing " << edge->source << " - " << edge->target << std::endl;
-    //         }
-    //         return source_is_wrong || target_is_wrong;
-    // });
-    // edges.erase(new_end, edges.end());
+void NucleoFind::BackboneTracer::traverse_chain(std::shared_ptr<Node> &node, std::vector<int> &chain) {
 
-    // }
+    // for a given node, look at all neighbours, the first edge will be the forward direction and the second edge will be the backward direction
+    chain.push_back(node->point_index);
+    auto outgoing_edges = node->find_outgoing_edges();
+    for (auto& edge: outgoing_edges) {
+        auto next_node = find_node_by_point_index(edge->target);
+        if (std::find(chain.begin(), chain.end(), next_node->point_index) != chain.end()) {
+            continue;
+        }
+        traverse_chain(next_node, chain);
+    }
+}
+
+void NucleoFind::BackboneTracer::build_chains() {
+
+    // nodes with 2 edges are end points, nodes with 4 edges are mid points
+    auto start_nodes = find_nodes_by_degree(2);
+
+    for (auto& node: start_nodes) {
+        std::vector<int> chain = {};
+        traverse_chain(node, chain);
+        for (auto& x: chain) {
+            std::cout << x << "->";
+        }
+        std::cout << std::endl;
+    }
 }
 
 
@@ -324,34 +325,8 @@ void NucleoFind::BackboneTracer::create_linked_structure() {
 }
 
 void NucleoFind::BackboneTracer::print_stats() const {
-    std::cout << "Graph Statistics:" << std::endl;
+    std::cout << "Statistics:" << std::endl;
     std::cout << "  Nodes: " << nodes.size() << std::endl;
     std::cout << "  Edges: " << edges.size() << std::endl;
-
-    // Degree distribution
-    std::unordered_map<int, int> degreeCount;
-    for (const auto &node: nodes) {
-        degreeCount[node->degree()]++;
-    }
-
-    std::cout << "  Degree distribution:" << std::endl;
-    for (const auto &pair: degreeCount) {
-        std::cout << "    Degree " << pair.first << ": " << pair.second << " nodes" << std::endl;
-    }
-
-    // Connected components
-    // std::vector<std::vector<int>> components = find_connected_components();
-    // std::cout << "  Connected components: " << components.size() << std::endl;
-    // for (size_t i = 0; i < components.size(); ++i) {
-    //     std::cout << "    Component " << i << ": " << components[i].size() << " nodes" << std::endl;
-    // }
-
-    // Branch points
-    std::vector<int> branchPoints = find_branch_points();
-    std::cout << "  Branch points: " << branchPoints.size() << std::endl;
-
-    // End points
-    std::vector<int> endPoints = find_end_points();
-    std::cout << "  End points: " << endPoints.size() << std::endl;
 }
 

@@ -13,5 +13,6 @@ void NucleoFind::Find::find() {
 
 
     BackboneTracer b = {phosphate_peaks, m_xwrk, m_predicted_maps};
+    b.build();
 
 }
