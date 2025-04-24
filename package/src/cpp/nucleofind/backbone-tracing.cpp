@@ -59,6 +59,14 @@ double NucleoFind::BackboneTracer::score_to_grid(const clipper::Coord_orth &coor
     return grid->interp<clipper::Interp_linear>(coord.coord_frac(grid->cell()));
 }
 
+clipper::Coord_orth NucleoFind::BackboneTracer::get_symmetry_copy(clipper::Coord_orth &target,
+    clipper::Coord_orth &reference) {
+    clipper::Coord_frac target_f = target.coord_frac(xgrid.cell());
+    clipper::Coord_frac reference_f = reference.coord_frac(xgrid.cell());
+    target_f = target_f.symmetry_copy_near(xgrid.spacegroup(), xgrid.cell(), reference_f);
+    return target_f.coord_orth(xgrid.cell());
+}
+
 double NucleoFind::BackboneTracer::score_monomer(clipper::MMonomer &monomer) {
     double score = 0.0;
 
@@ -113,6 +121,39 @@ double NucleoFind::BackboneTracer::extract_library_fragment_and_score(
     std::vector<clipper::MMonomer> library_fragment_monomers = library_fragment.transform(rtop);
     return score_monomers(library_fragment_monomers);
 }
+
+NucleoFind::FragmentResult NucleoFind::BackboneTracer::extract_library_fragment_score_and_return(
+    int l, std::vector<clipper::Coord_orth> &reference_coords) {
+    TriNucleotide library_fragment = library[l];
+    std::vector<clipper::Coord_orth> library_fragment_positions = library_fragment.get_phosphates();
+    clipper::RTop_orth rtop = {library_fragment_positions, reference_coords};
+    std::vector<clipper::MMonomer> library_fragment_monomers = library_fragment.transform(rtop);
+    return {score_monomers(library_fragment_monomers), library_fragment_monomers};
+}
+
+NucleoFind::FragmentResult NucleoFind::BackboneTracer::fit_best_fragment(int n1, int n2, int n3) {
+    double score = INT_MIN;
+    clipper::Coord_orth p1 = input[n1].coord_orth();
+    clipper::Coord_orth p2 = input[n2].coord_orth();
+    clipper::Coord_orth p3 = input[n3].coord_orth();
+
+    p2 = get_symmetry_copy(p2, p1);
+    p3 = get_symmetry_copy(p3, p1);
+
+    std::vector<clipper::Coord_orth> trial_fragment_positions_forward = {p1, p2, p3};
+    FragmentResult best_result;
+
+    for (int l = 0; l < library.size(); l++) {
+        FragmentResult result = extract_library_fragment_score_and_return(l, trial_fragment_positions_forward);
+        if (result.score > score) {
+            score = result.score;
+            best_result = result;
+        }
+    }
+    std::cout << "Best fragment for " << n1 << " " << n2 << " " << n3 << " = " << best_result.score << std::endl;
+    return best_result;
+}
+
 
 double NucleoFind::BackboneTracer::fit_and_score_fragment(int n1, int n2, int n3) {
     double score = INT_MIN;
@@ -255,6 +296,17 @@ void NucleoFind::BackboneTracer::identify_and_resolve_branches() {
     nodes.erase(node_removal, nodes.end());
 }
 
+NucleoFind::FragmentResult NucleoFind::BackboneTracer::build_chain(std::vector<int> &chain) {
+    FragmentResult result;
+    for (int i = 0; i < chain.size()-2; i+=2) {
+        FragmentResult fragment = fit_best_fragment(chain[i], chain[i+1], chain[i+2]);
+        result.append(fragment);
+    }
+    return result;
+}
+
+
+
 void NucleoFind::BackboneTracer::traverse_chain(std::shared_ptr<Node> &node, std::vector<int> &chain) {
 
     // for a given node, look at all neighbours, the first edge will be the forward direction and the second edge will be the backward direction
@@ -269,19 +321,61 @@ void NucleoFind::BackboneTracer::traverse_chain(std::shared_ptr<Node> &node, std
     }
 }
 
+std::vector<std::vector<int>> NucleoFind::BackboneTracer::find_unique_chains(const std::vector<std::vector<int>> &chains) {
+    std::set<std::set<int>> seen;
+    std::vector<std::vector<int>> result;
+
+    for (const auto& chain : chains) {
+        if (chain.empty()) continue;
+
+        std::set<int> current_chain = {chain.begin(), chain.end()};
+        if (seen.find(current_chain) == seen.end()) {
+            seen.insert(current_chain);
+            result.push_back(chain);
+        }
+    }
+
+    return result;
+}
+
 void NucleoFind::BackboneTracer::build_chains() {
 
     // nodes with 2 edges are end points, nodes with 4 edges are mid points
     auto start_nodes = find_nodes_by_degree(2);
 
+    // go through and find chains
+    std::vector<std::vector<int>> chains;
     for (auto& node: start_nodes) {
         std::vector<int> chain = {};
         traverse_chain(node, chain);
-        for (auto& x: chain) {
-            std::cout << x << "->";
-        }
-        std::cout << std::endl;
+        chains.push_back(chain);
     }
+
+    // remove backward representations
+    std::vector<std::vector<int>> chains_without_duplicates = find_unique_chains(chains);
+
+    // check that it is exactly half
+    if (chains_without_duplicates.size() != chains.size() / 2) {
+        throw std::runtime_error("Mismatch in chains, something has gone wrong.");
+    }
+
+    clipper::MiniMol mol = {xgrid.spacegroup(), xgrid.cell()};
+
+    for (int c = 0; c < chains_without_duplicates.size(); c++) {
+        std::cout << c << "/" << chains_without_duplicates.size() << std::endl;
+        auto [fwd_score, fwd_polymer] = build_chain(chains_without_duplicates[c]);
+        auto [bck_score, bck_polymer] = build_chain(chains_without_duplicates[c]);
+
+        std::string chain_index = nth_letter(c);
+        if (fwd_score > bck_score) {
+            mol.insert(create_clipper_polymer(fwd_polymer, chain_index));
+        }
+        else {
+            mol.insert(create_clipper_polymer(bck_polymer, chain_index));
+        }
+    }
+
+    NautilusUtil::save_minimol(mol, "build.pdb");
 }
 
 

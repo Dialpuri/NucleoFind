@@ -10,6 +10,8 @@
 #include "nucleofind-utils.h"
 #include <iostream>
 #include <unordered_set>
+#include <set>
+
 #include <clipper/minimol/minimol_utils.h>
 #include <gemmi/neighbor.hpp>
 #include <gemmi/to_cif.hpp>
@@ -71,6 +73,23 @@ namespace NucleoFind {
         std::vector<std::shared_ptr<Edge>> edges;
     };
 
+    struct FragmentResult {
+        FragmentResult(FragmentResult& other) {
+            score = other.score;
+            monomers = other.monomers;
+        };
+        FragmentResult() = default;
+        FragmentResult(double score, std::vector<clipper::MMonomer>& monomers): score(score), monomers(monomers) {};
+
+        void append(FragmentResult& other) {
+            score += other.score;
+            monomers.insert(monomers.end(), other.monomers.begin(), other.monomers.end());
+        }
+
+        double score;
+        std::vector<clipper::MMonomer> monomers;
+    };
+
     struct BackboneTracer {
         BackboneTracer(clipper::MiniMol& mol,
                         clipper::Xmap<float>& xgrid,
@@ -81,7 +100,7 @@ namespace NucleoFind {
 
         void build() {
             identify_and_resolve_branches();
-            print_stats();
+            // print_stats();
             build_chains();
         }
 
@@ -120,19 +139,27 @@ namespace NucleoFind {
 
         void traverse_chain(std::shared_ptr<Node>& node, std::vector<int> &chain);
 
+        static std::vector<std::vector<int>>  find_unique_chains(const std::vector<std::vector<int>>& chains);
+
 
         // Model building main functions
         void identify_and_resolve_branches();
 
         void build_chains();
 
+        FragmentResult build_chain(std::vector<int> &chain);
+
 
         // Model building utility functions
+        FragmentResult fit_best_fragment(int n1, int n2, int n3);
+
         double fit_and_score_fragment(int n1, int n2, int n3);
 
         std::vector<double> fit_and_score_fragment_individually(int n1, int n2, int n3);
 
         double extract_library_fragment_and_score(int l, std::vector<clipper::Coord_orth> &reference_coords);
+
+        FragmentResult extract_library_fragment_score_and_return(int l, std::vector<clipper::Coord_orth> &reference_coords);
 
         double score_monomers(std::vector<clipper::MMonomer>& monomers);
 
@@ -141,6 +168,8 @@ namespace NucleoFind {
         double score_monomer(clipper::MMonomer& monomer);
 
         static double score_to_grid(const clipper::Coord_orth& coord, const clipper::Xmap<float>* grid);
+
+        clipper::Coord_orth get_symmetry_copy(clipper::Coord_orth& target, clipper::Coord_orth& reference);
 
         // Graph Structure Utility Functions
         std::shared_ptr<Node> find_node_by_point_index(int point_index) const {

@@ -121,12 +121,12 @@ inline clipper::MPolymer create_clipper_polymer(clipper::MMonomer& monomer) {
     return mpol;
 }
 
-inline clipper::MPolymer create_clipper_polymer(std::vector<clipper::MMonomer>& monomers) {
+inline clipper::MPolymer create_clipper_polymer(std::vector<clipper::MMonomer>& monomers, std::string id = "A") {
     clipper::MPolymer mpol;
     for (auto& monomer: monomers) {
         mpol.insert(monomer);
     }
-    mpol.set_id("A");
+    mpol.set_id(id);
     return mpol;
 }
 
@@ -153,6 +153,10 @@ inline clipper::MiniMol create_clipper_minimol(std::vector<clipper::MMonomer>& m
     return mol;
 }
 
+inline std::string nth_letter(int index) {
+    std::string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    return std::string(1, alphabet[index]);
+}
 // inline gemmi::Structure split_atoms_into_structure(gemmi::Residue& residue, gemmi::UnitCell& cell, const gemmi::SpaceGroup* spg) {
 //     gemmi::Structure structure;
 //     structure.cell = cell;

@@ -81,7 +81,7 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
     CCP4Program prog("nucleofind-build", "0.1", "$Date: 2024/02/26");
     prog.set_termination_message("Failed");
 
-    std::cout << std::endl << "Copyright Jordan Dialpuri, Kevin Cowtan and University of York." << std::endl
+    std::cout << std::endl << "Copyright Jordan Dialpuri, Kathryn Cowtan, Jon Agirre, Paul Bond and University of York." << std::endl
               << std::endl;
     prog.summary_beg();
     std::cout << "$TEXT:Reference: $$ Please reference $$" << std::endl << std::endl
@@ -383,7 +383,7 @@ void run_find(NautilusInput &input, NautilusOutput &output, int cycles) {
     CCP4Program prog("nucleofind-build", "0.1", "$Date: 2024/02/26");
     prog.set_termination_message("Failed");
 
-    std::cout << std::endl << "Copyright Jordan Dialpuri, Kevin Cowtan and University of York." << std::endl
+    std::cout << std::endl << "Copyright Jordan Dialpuri, Kathryn Cowtan, Jon Agirre, Paul Bond and University of York." << std::endl
               << std::endl;
     prog.summary_beg();
     std::cout << "$TEXT:Reference: $$ Please reference $$" << std::endl << std::endl
