@@ -826,8 +826,8 @@ void run_complete(NautilusInput &input, NautilusOutput &output, int cycles) {
     int nas_found = NautilusUtil::count_nas(mol_wrk);
     if (nas_found > 0) {
         NucleicAcidJoin na_join;
-        mol_wrk = na_join.join(mol_wrk);
-        log.log("FIND ML JOIN", mol_wrk, verbose >= 5);
+        // mol_wrk = na_join.join(mol_wrk);
+        // log.log("FIND ML JOIN", mol_wrk, verbose >= 5);
 
         mol_wrk = natools.link(xwrk, mol_wrk);
         log.log("FIND ML LINK", mol_wrk, verbose >= 5);
