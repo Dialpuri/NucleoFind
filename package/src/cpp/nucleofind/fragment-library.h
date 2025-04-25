@@ -54,6 +54,8 @@ namespace NucleoFind {
     private:
         void add_library(const std::string& library_path);
 
+        clipper::MMonomer swap_n9_for_n1(clipper::MMonomer& monomer);
+
         std::vector<TriNucleotide> library;
 
     };

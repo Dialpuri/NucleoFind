@@ -33,7 +33,16 @@ void NucleoFind::TriNucleotideLibrary::add_library(const std::string &library_pa
         monomer1.set_type("U");
         monomer2.set_type("U");
         monomer3.set_type("U");
+        monomer1 = swap_n9_for_n1(monomer1);
+        monomer2 = swap_n9_for_n1(monomer2);
+        monomer3 = swap_n9_for_n1(monomer3);
         library.emplace_back( monomer1, monomer2, monomer3 );
     }
 
+}
+
+clipper::MMonomer NucleoFind::TriNucleotideLibrary::swap_n9_for_n1(clipper::MMonomer &monomer) {
+    int in9 = monomer.lookup( " N9 ", clipper::MM::ANY);
+    if (in9 != -1) monomer[in9].set_name("N1");
+    return monomer;
 }
