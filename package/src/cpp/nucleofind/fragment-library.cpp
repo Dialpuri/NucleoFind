@@ -30,6 +30,9 @@ void NucleoFind::TriNucleotideLibrary::add_library(const std::string &library_pa
         clipper::MMonomer monomer1 = mol[c][0];
         clipper::MMonomer monomer2 = mol[c][1];
         clipper::MMonomer monomer3 = mol[c][2];
+        monomer1.set_type("U");
+        monomer2.set_type("U");
+        monomer3.set_type("U");
         library.emplace_back( monomer1, monomer2, monomer3 );
     }
 
