@@ -825,7 +825,7 @@ void run_complete(NautilusInput &input, NautilusOutput &output, int cycles) {
 
     int nas_found = NautilusUtil::count_nas(mol_wrk);
     if (nas_found > 0) {
-        NucleicAcidJoin na_join;
+        // NucleicAcidJoin na_join;
         // mol_wrk = na_join.join(mol_wrk);
         // log.log("FIND ML JOIN", mol_wrk, verbose >= 5);
 
@@ -849,6 +849,7 @@ void run_complete(NautilusInput &input, NautilusOutput &output, int cycles) {
     }
 
     clipper::MiniMol best_model = mol_wrk;
+    clipper::MiniMol ml_model = mol_wrk;
 
     int best_na_count = NautilusUtil::count_well_modelled_nas(mol_wrk, xphospred, xsugarpred, xbasepred);
 
@@ -859,7 +860,10 @@ void run_complete(NautilusInput &input, NautilusOutput &output, int cycles) {
 
         mol_wrk = NucleicAcidTools::flag_chains(mol_wrk);
 
-        mol_wrk = natools.find(xwrk, mol_wrk, nhit / 2, nhit / 2, srchst);
+        // TODO - STOP THE INTERNAL FIND FROM MESSING THINGS UP !
+        clipper::MiniMol nautilus_find = natools.find(xwrk, mol_wrk, nhit / 2, nhit / 2, srchst);
+        mol_wrk = NucleoFind::Find::aggregate(ml_model, nautilus_find);
+
         log.log("FIND", mol_wrk, verbose >= 5);
 
         mol_wrk = run_cycle(nhit, srchst, verbose, natools, seq_wrk, mol_wrk, xwrk, log, false);
