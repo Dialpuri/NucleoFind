@@ -56,6 +56,7 @@ class NucleicAcidTargets {
   const clipper::MiniMol grow( const clipper::Xmap<float>& xmap, const clipper::MiniMol& mol, int ngrow, double fcut) const;
   const clipper::MiniMol link( const clipper::Xmap<float>& xmap, const clipper::MiniMol& mol ) const;
   const clipper::MiniMol prune( clipper::MiniMol& mol ) const;
+  const clipper::MiniMol strong_prune( clipper::MiniMol& mol ) const;
   const clipper::MiniMol rebuild_chain( const clipper::Xmap<float>& xmap, const clipper::MiniMol& mol ) const;
 
  private:

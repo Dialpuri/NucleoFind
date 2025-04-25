@@ -18,6 +18,11 @@ clipper::MiniMol NucleoFind::Find::find(clipper::MiniMol &mol_wrk) {
 
 clipper::MiniMol NucleoFind::Find::aggregate(clipper::MiniMol &find_result, clipper::MiniMol &mol) {
 
+    if (mol.size() == 0) {
+        NucleicAcidTools::chain_label(find_result, clipper::MMDBManager::Default);
+        NucleicAcidTools::residue_label(find_result);
+        return NucleicAcidTools::flag_chains(find_result);
+    }
     clipper::MAtomNonBond nb = {mol, 4};
 
     std::set<std::tuple<int,int>> to_remove = {};

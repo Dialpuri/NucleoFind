@@ -453,6 +453,8 @@ clipper::MiniMol NucleoFind::BackboneTracer::build_chains() {
         // std::cout << "Built forward chain with score: " << std::accumulate(fwd_score.begin(), fwd_score.end(), 0.0) << std::endl;
         // std::cout << "Build backward chain with score: " << std::accumulate(bck_score.begin(), bck_score.end(), 0.0) << std::endl;
 
+        if (fwd_polymer.empty() || bck_polymer.empty()) continue;
+
         std::string chain_index = nth_letter(c);
         if (fwd_score > bck_score) {
             mol.insert(create_clipper_polymer(fwd_polymer, chain_index));

@@ -25,7 +25,7 @@
 
 clipper::MiniMol &
 run_cycle(int nhit, double srchst, int verbose, NucleicAcidTargets &natools, const clipper::MMoleculeSequence &seq_wrk,
-          clipper::MiniMol &mol_wrk, const clipper::Xmap<float> &xwrk, NautilusLog &log) {
+          clipper::MiniMol &mol_wrk, const clipper::Xmap<float> &xwrk, NautilusLog &log, bool strong_prune) {
     // grow chains
 
     int nas_found = NautilusUtil::count_nas(mol_wrk);
@@ -34,17 +34,17 @@ run_cycle(int nhit, double srchst, int verbose, NucleicAcidTargets &natools, con
     mol_wrk = natools.grow(xwrk, mol_wrk, 25, 0.001);
     log.log("GROW", mol_wrk, verbose >= 5);
 
-//    NautilusUtil::save_minimol(mol_wrk, "grow.pdb");
-
+    // NautilusUtil::save_minimol(mol_wrk, "grow.pdb");
     ModelTidy::chain_renumber(mol_wrk, seq_wrk);
     NucleicAcidTools::chain_sort(mol_wrk);
     NucleicAcidTools::residue_label(mol_wrk);
 
     // join
-    NucleicAcidJoin na_join;
-    mol_wrk = na_join.join(mol_wrk);
-    log.log("JOIN", mol_wrk, verbose >= 5);
-
+    if (!strong_prune) {
+        NucleicAcidJoin na_join;
+        mol_wrk = na_join.join(mol_wrk);
+        log.log("JOIN", mol_wrk, verbose >= 5);
+    }
 //    NautilusUtil::save_minimol(mol_wrk, "join.pdb");
     // link
     mol_wrk = natools.link(xwrk, mol_wrk);
@@ -53,7 +53,11 @@ run_cycle(int nhit, double srchst, int verbose, NucleicAcidTargets &natools, con
 //    NautilusUtil::save_minimol(mol_wrk, "link.pdb");
 
     // prune
-    mol_wrk = natools.prune(mol_wrk);
+    if (strong_prune) {
+        mol_wrk = natools.strong_prune(mol_wrk);
+    } else {
+        mol_wrk = natools.prune(mol_wrk);
+    }
     log.log("PRUNE", mol_wrk, verbose >= 5);
 
 //    NautilusUtil::save_minimol(mol_wrk, "prune.pdb");
@@ -258,15 +262,16 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
     NucleoFind::PredictedMaps predicted_maps = {xphospred, xsugarpred, xbasepred};
     NucleoFind::Find find = {xwrk, predicted_maps};
     mol_wrk = find.find(mol_wrk);
-    // NautilusUtil::save_minimol(mol_wrk, "find.pdb");
+    NautilusUtil::save_minimol(mol_wrk, "find.pdb");
     log.log("FIND ML", mol_wrk, verbose >= 5);
 //    NautilusUtil::save_minimol(mol_wrk, "find.pdb");
 
     int nas_found = NautilusUtil::count_nas(mol_wrk);
     if (nas_found > 0) {
-        NucleicAcidJoin na_join;
-        mol_wrk = na_join.join(mol_wrk);
-        log.log("FIND ML JOIN", mol_wrk, verbose >= 5);
+        // NucleicAcidJoin na_join;
+        // mol_wrk = na_join.join(mol_wrk);
+        // log.log("FIND ML JOIN", mol_wrk, verbose >= 5);
+        // NautilusUtil::save_minimol(mol_wrk, "find-join.pdb");
 
         mol_wrk = natools.link(xwrk, mol_wrk);
         log.log("FIND ML LINK", mol_wrk, verbose >= 5);
@@ -280,7 +285,7 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
 
         for (int cyc = 0; cyc < cycles; cyc++) {
             std::cout << "ML Based cycle " << clipper::String(cyc + 1, 3) << std::endl << std::endl;
-            mol_wrk = run_cycle(nhit, srchst, verbose, natools, seq_wrk, mol_wrk, xwrk, log);
+            mol_wrk = run_cycle(nhit, srchst, verbose, natools, seq_wrk, mol_wrk, xwrk, log, false);
             NucleicAcidTools::chain_label(mol_wrk, clipper::MMDBManager::CIF);
             mol_wrk = NucleicAcidTools::chain_sort(mol_wrk);
             NucleicAcidTools::residue_label(mol_wrk);
@@ -301,7 +306,7 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
         mol_wrk = natools.find(xwrk, mol_wrk, nhit / 2, nhit / 2, srchst);
         log.log("FIND", mol_wrk, verbose >= 5);
 
-        mol_wrk = run_cycle(nhit, srchst, verbose, natools, seq_wrk, mol_wrk, xwrk, log);
+        mol_wrk = run_cycle(nhit, srchst, verbose, natools, seq_wrk, mol_wrk, xwrk, log, false);
 
         int pred_na_count = NautilusUtil::count_well_modelled_nas(mol_wrk, xphospred, xsugarpred, xbasepred);
         std::cout << "Cycle "<< cyc+1 << " built " << pred_na_count << " residues with positive predicted density" << std::endl;
@@ -565,9 +570,11 @@ void run_find(NautilusInput &input, NautilusOutput &output, int cycles) {
     log.log("FIND ML", mol_wrk, verbose >= 5);
 
 //    NautilusUtil::save_minimol(mol_wrk, "find.pdb");
-    NucleicAcidJoin na_join;
-    mol_wrk = na_join.join(mol_wrk);
-    log.log("FIND ML JOIN", mol_wrk, verbose >= 5);
+    // NucleicAcidJoin na_join;
+    // mol_wrk = na_join.join(mol_wrk);
+    // log.log("FIND ML JOIN", mol_wrk, verbose >= 5);
+    // NautilusUtil::save_minimol(mol_wrk, "find-join.pdb");
+    // exit(-1);
 
     mol_wrk = natools.link(xwrk, mol_wrk);
     log.log("FIND ML LINK", mol_wrk, verbose >= 5);
@@ -834,7 +841,7 @@ void run_complete(NautilusInput &input, NautilusOutput &output, int cycles) {
 
         for (int cyc = 0; cyc < cycles; cyc++) {
             std::cout << "ML Based cycle " << clipper::String(cyc + 1, 3) << std::endl << std::endl;
-            mol_wrk = run_cycle(nhit, srchst, verbose, natools, seq_wrk, mol_wrk, xwrk, log);
+            mol_wrk = run_cycle(nhit, srchst, verbose, natools, seq_wrk, mol_wrk, xwrk, log, true);
             NucleicAcidTools::chain_label(mol_wrk, clipper::MMDBManager::CIF);
             mol_wrk = NucleicAcidTools::chain_sort(mol_wrk);
             NucleicAcidTools::residue_label(mol_wrk);
@@ -855,7 +862,7 @@ void run_complete(NautilusInput &input, NautilusOutput &output, int cycles) {
         mol_wrk = natools.find(xwrk, mol_wrk, nhit / 2, nhit / 2, srchst);
         log.log("FIND", mol_wrk, verbose >= 5);
 
-        mol_wrk = run_cycle(nhit, srchst, verbose, natools, seq_wrk, mol_wrk, xwrk, log);
+        mol_wrk = run_cycle(nhit, srchst, verbose, natools, seq_wrk, mol_wrk, xwrk, log, false);
 
         int pred_na_count = NautilusUtil::count_well_modelled_nas(mol_wrk, xphospred, xsugarpred, xbasepred);
         std::cout << "Cycle "<< cyc+1 << " built " << pred_na_count << " residues with positive predicted density" << std::endl;

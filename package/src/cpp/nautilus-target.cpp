@@ -740,6 +740,68 @@ const clipper::MiniMol NucleicAcidTargets::prune( clipper::MiniMol& mol ) const
   return NucleicAcidTools::chain_sort( mol_new );
 }
 
+const clipper::MiniMol NucleicAcidTargets::strong_prune(clipper::MiniMol &mol) const {
+    mol = NucleicAcidTools::chain_sort(mol);
+    NucleicAcidTools::residue_label(mol);
+    clipper::MiniMol mol_nb = mol;
+
+  for ( int c = 0; c < mol_nb.size(); c++ ) {
+      for (int r = 0; r < mol_nb[c].size(); r++) {
+          NucleicAcidDB::NucleicAcid na(mol_nb[c][r]);
+          if (na.flag() != NucleicAcidDB::NucleicAcid::NONE)
+              mol_nb[c][r] = na.mmonomer();
+      }
+  }
+  // find clashes
+  clipper::MAtomNonBond nb( mol_nb, 4.0 );
+  for ( int c1 = 0; c1 < mol_nb.size(); c1++ ) {
+    if ( !mol_nb[c1].exists_property( "NON-NA" ) ) {
+      for ( int r1 = 0; r1 < mol_nb[c1].size(); r1++ ) {
+        for ( int a1 = 0; a1 < mol_nb[c1][r1].size(); a1++ ) {
+          const clipper::Coord_orth co = mol_nb[c1][r1][a1].coord_orth();
+          std::vector<clipper::MAtomIndexSymmetry> atoms = nb( co, 2.0 );
+          for ( int i = 0; i < atoms.size(); i++ ) {
+            int c2 = atoms[i].polymer();
+            int r2 = atoms[i].monomer();
+            if ( !mol_nb[c2].exists_property( "NON-NA" ) ) {  // clash with NA
+              if ( mol_nb[c1][r1].type() != "~~~" &&
+                   mol_nb[c2][r2].type() != "~~~" ) {
+                if ( c1 != c2 || r1 < r2-1 || r1 > r2+1 ) {
+                  if ( mol_nb[c1].size() < mol_nb[c2].size() )
+                    mol_nb[c1][r1].set_type( "~~~" );
+                  else
+                    mol_nb[c2][r2].set_type( "~~~" );
+                }
+              }
+            } else {  // clash with non-NA - delete the NA
+              mol_nb[c2][r2].set_type( "~~~" );
+            }
+          }
+        }
+      }
+    }
+  }
+  clipper::MiniMol mol_new( mol.spacegroup(), mol.cell() );
+  for ( int c = 0; c < mol.size(); c++ ) {
+    // if ( !mol[c].exists_property( "NON-NA" ) ) {
+      clipper::MPolymer mp;
+      for ( int r = 0; r < mol[c].size(); r++ ) {
+        if ( mol_nb[c][r].type() != "~~~" ) {
+          mp.insert( mol[c][r] );
+        } else {
+          if ( mp.size() >= 1 ) mol_new.insert( mp );
+          mp = clipper::MPolymer();
+        }
+      }
+      if ( mp.size() >= 1 ) mol_new.insert( mp );
+    // } else {
+    //   mol_new.insert( mol[c] );
+    // }
+  }
+  mol_new = NucleicAcidTools::flag_chains(mol_new);
+  return NucleicAcidTools::chain_sort( mol_new );
+}
+
 
 const clipper::MiniMol NucleicAcidTargets::rebuild_chain( const clipper::Xmap<float>& xmap, const clipper::MiniMol& mol ) const
 {
