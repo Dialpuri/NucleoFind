@@ -420,7 +420,8 @@ clipper::MiniMol NucleoFind::BackboneTracer::build_chains() {
 
         // check that it is exactly half
         if (chains_without_duplicates.size() != chains.size() / 2) {
-            throw std::runtime_error("Mismatch in chains, something has gone wrong.");
+            std::cout << "WARNING: Mismatch in chains, something isn't right << std::endl;" << std::endl;
+            std::cout << "Found " << chains_without_duplicates.size() << " chains, which was filtered to" << chains.size() << std::endl;
         }
 
         chains = chains_without_duplicates;
