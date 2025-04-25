@@ -177,7 +177,7 @@ namespace NucleoFind {
 
         std::vector<double> score_monomers_individually(std::vector<clipper::MMonomer>& monomers);
 
-        double score_monomer(clipper::MMonomer& monomer, bool use_predicted_maps);
+        double score_monomer(clipper::MMonomer& monomer, bool use_predicted_maps, bool use_experimental_map);
 
         static double score_to_grid(const clipper::Coord_orth& coord, const clipper::Xmap<float>* grid);
 

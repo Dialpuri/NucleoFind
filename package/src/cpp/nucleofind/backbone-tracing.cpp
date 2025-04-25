@@ -78,7 +78,7 @@ clipper::Coord_orth NucleoFind::BackboneTracer::get_symmetry_copy(clipper::Coord
     return target_f.coord_orth(xgrid.cell());
 }
 
-double NucleoFind::BackboneTracer::score_monomer(clipper::MMonomer &monomer, bool use_predicted_maps) {
+double NucleoFind::BackboneTracer::score_monomer(clipper::MMonomer &monomer, bool use_predicted_maps, bool use_experimental_map) {
     double score = 0.0;
 
     int ip = monomer.lookup(" P  ", clipper::MM::ANY);
@@ -105,7 +105,7 @@ double NucleoFind::BackboneTracer::score_monomer(clipper::MMonomer &monomer, boo
         if (ic1 != -1) score += score_to_grid(monomer[ic1].coord_orth(), predicted_maps.get_sugar_map());
         if (in != -1) score += score_to_grid(monomer[in].coord_orth(), predicted_maps.get_base_map());
     }
-    // else {
+    if (use_experimental_map) {
         if (ip != -1) score += score_to_grid(monomer[ip].coord_orth(), &xgrid);
         if (io5 != -1) score += score_to_grid(monomer[io5].coord_orth(), &xgrid);
         if (ic5 != -1) score += score_to_grid(monomer[ic5].coord_orth(), &xgrid);
@@ -116,7 +116,7 @@ double NucleoFind::BackboneTracer::score_monomer(clipper::MMonomer &monomer, boo
         if (ic2 != -1) score += score_to_grid(monomer[ic2].coord_orth(), &xgrid);
         if (ic1 != -1) score += score_to_grid(monomer[ic1].coord_orth(), &xgrid);
         if (in != -1) score += score_to_grid(monomer[in].coord_orth(), &xgrid);
-    // }
+    }
 
     return score;
 }
@@ -125,7 +125,7 @@ double NucleoFind::BackboneTracer::score_monomer(clipper::MMonomer &monomer, boo
 double NucleoFind::BackboneTracer::score_monomers(std::vector<clipper::MMonomer> &monomers) {
     double score = 0;
     for (auto &monomer: monomers) {
-        score += score_monomer(monomer, true);
+        score += score_monomer(monomer, true, false);
     }
     return score;
 }
@@ -134,7 +134,7 @@ std::vector<double> NucleoFind::BackboneTracer::score_monomers_individually(std:
     std::vector<double> scores;
     scores.reserve(monomers.size());
     for (auto &monomer: monomers) {
-        scores.emplace_back(score_monomer(monomer, true));
+        scores.emplace_back(score_monomer(monomer, true, false));
     }
     return scores;
 }
@@ -184,9 +184,12 @@ NucleoFind::FragmentResult NucleoFind::BackboneTracer::fit_best_fragment(int n1,
 
 double NucleoFind::BackboneTracer::fit_and_score_fragment(int n1, int n2, int n3) {
     double score = INT_MIN;
-    const clipper::Coord_orth p1 = input[n1].coord_orth();
-    const clipper::Coord_orth p2 = input[n2].coord_orth();
-    const clipper::Coord_orth p3 = input[n3].coord_orth();
+    clipper::Coord_orth p1 = input[n1].coord_orth();
+    clipper::Coord_orth p2 = input[n2].coord_orth();
+    clipper::Coord_orth p3 = input[n3].coord_orth();
+
+    p2 = get_symmetry_copy(p2, p1);
+    p3 = get_symmetry_copy(p3, p1);
 
     std::vector<clipper::Coord_orth> trial_fragment_positions_forward = {p1, p2, p3};
     std::vector<clipper::Coord_orth> trial_fragment_positions_backward = {p3, p2, p1};
@@ -205,9 +208,12 @@ std::vector<double> NucleoFind::BackboneTracer::fit_and_score_fragment_individua
     int best_l = -1;
     bool fwd = false;
 
-    const clipper::Coord_orth p1 = input[n1].coord_orth();
-    const clipper::Coord_orth p2 = input[n2].coord_orth();
-    const clipper::Coord_orth p3 = input[n3].coord_orth();
+    clipper::Coord_orth p1 = input[n1].coord_orth();
+    clipper::Coord_orth p2 = input[n2].coord_orth();
+    clipper::Coord_orth p3 = input[n3].coord_orth();
+
+    p2 = get_symmetry_copy(p2, p1);
+    p3 = get_symmetry_copy(p3, p1);
 
     std::vector<clipper::Coord_orth> trial_fragment_positions_forward = {p1, p2, p3};
     std::vector<clipper::Coord_orth> trial_fragment_positions_backward = {p3, p2, p1};
@@ -225,6 +231,7 @@ std::vector<double> NucleoFind::BackboneTracer::fit_and_score_fragment_individua
             best_l = l;
         }
     }
+    std::cout << best_l << " " << score << std::endl;
 
     TriNucleotide library_fragment = library[best_l];
     std::vector<clipper::Coord_orth> library_fragment_positions = library_fragment.get_phosphates();
@@ -269,6 +276,7 @@ void NucleoFind::BackboneTracer::identify_and_resolve_branches() {
     for (auto &branch_node: branch_nodes) {
         auto node = find_node_by_point_index(branch_node);
 
+        std::cout << "Looking at branch node " << branch_node << std::endl;
         // which nodes are nearby
         std::unordered_set<int> nearby_nodes_s = {};
         for (auto& edge: node->edges) {
@@ -304,6 +312,9 @@ void NucleoFind::BackboneTracer::identify_and_resolve_branches() {
         auto new_end = std::remove_if(edges.begin(), edges.end(), [&](const std::shared_ptr<Edge>& edge) {
             bool contains_wrong_node = differences.find(edge->target) != differences.end() || differences.find(edge->source) != differences.end();
             bool contains_midpoint = edge->target == branch_node || edge->source == branch_node;
+            // if (contains_wrong_node && contains_midpoint) {
+            //     std::cout << edge->target << " " << edge->source << std::endl;
+            // }
             return contains_wrong_node && contains_midpoint;
        });
        edges.erase(new_end, edges.end());
@@ -424,7 +435,9 @@ clipper::MiniMol NucleoFind::BackboneTracer::build_chains() {
             clipper::Coord_orth new_orth = get_symmetry_copy(current_orth, ref_orth);
             input[index].set_coord_orth(new_orth);
             ref_orth = new_orth;
+            std::cout << index << "->";
         }
+        std::cout << std::endl;
     }
 
 

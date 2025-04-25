@@ -16,14 +16,18 @@ namespace NucleoFind {
         }
 
         std::vector<clipper::Coord_orth> get_phosphates() {
+            setup(m1, m2, m3);
             return {P1, P2, P3};
         }
 
         std::vector<clipper::MMonomer> transform(clipper::RTop_orth& rtop) {
-            m1.transform(rtop);
-            m2.transform(rtop);
-            m3.transform(rtop);
-            return {m1, m2, m3};
+            clipper::MMonomer m1_ = m1;
+            clipper::MMonomer m2_ = m2;
+            clipper::MMonomer m3_ = m3;
+            m1_.transform(rtop);
+            m2_.transform(rtop);
+            m3_.transform(rtop);
+            return {m1_, m2_, m3_};
         }
 
     private:
