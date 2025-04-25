@@ -75,33 +75,45 @@ namespace NucleoFind {
 
     struct FragmentResult {
         FragmentResult(FragmentResult& other) {
-            score = other.score;
+            scores = other.scores;
             monomers = other.monomers;
         };
         FragmentResult() = default;
-        FragmentResult(double score, std::vector<clipper::MMonomer>& monomers): score(score), monomers(monomers) {};
+        FragmentResult(std::vector<double>& scores, std::vector<clipper::MMonomer>& monomers): scores(scores), monomers(monomers) {};
 
         void append(FragmentResult& other) {
-            score += other.score;
-            monomers.insert(monomers.end(), other.monomers.begin(), other.monomers.end());
+            scores.insert(scores.end(), other.scores.begin(), other.scores.end()-1);
+            monomers.insert(monomers.end(), other.monomers.begin(), other.monomers.end()-1);
         }
 
-        double score;
+        double get_total_score() const {
+            return std::accumulate(scores.begin(), scores.end(), 0.0);
+        }
+
+        FragmentResult sort_result();
+
         std::vector<clipper::MMonomer> monomers;
+        std::vector<double> scores;
+    };
+
+    struct ScoredMonomer {
+        ScoredMonomer(double score, clipper::MMonomer& monomer): score(score), monomer(monomer) {}
+        double score;
+        clipper::MMonomer monomer;
     };
 
     struct BackboneTracer {
         BackboneTracer(clipper::MiniMol& mol,
                         clipper::Xmap<float>& xgrid,
                         PredictedMaps& predicted_maps): mol(mol), xgrid(xgrid), predicted_maps(predicted_maps) {
-            library = TriNucleotideLibrary("/Users/dialpuri/Downloads/collated.cif");
+            library = TriNucleotideLibrary("/Users/dialpuri/Downloads/collated-removed.cif");
             initialise_tracer();
         };
 
-        void build() {
+        clipper::MiniMol build() {
             identify_and_resolve_branches();
             // print_stats();
-            build_chains();
+            return build_chains();
         }
 
     private:
@@ -145,7 +157,7 @@ namespace NucleoFind {
         // Model building main functions
         void identify_and_resolve_branches();
 
-        void build_chains();
+        clipper::MiniMol build_chains();
 
         FragmentResult build_chain(std::vector<int> &chain);
 
@@ -165,7 +177,7 @@ namespace NucleoFind {
 
         std::vector<double> score_monomers_individually(std::vector<clipper::MMonomer>& monomers);
 
-        double score_monomer(clipper::MMonomer& monomer);
+        double score_monomer(clipper::MMonomer& monomer, bool use_predicted_maps);
 
         static double score_to_grid(const clipper::Coord_orth& coord, const clipper::Xmap<float>* grid);
 

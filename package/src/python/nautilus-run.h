@@ -252,15 +252,13 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
         mapfile.close_read();
     }
 
-    PredictedMaps predictions = {xphospred, xsugarpred, xbasepred};
-
     mol_wrk = NucleicAcidTools::flag_chains(mol_wrk);
     clipper::MiniMol mol_wrk_original = mol_wrk;
 
-    FindML find_ml = FindML(mol_wrk, xwrk, predictions);
-    find_ml.load_library_from_file(ippdb_ref);
-    find_ml.set_resolution(hkls.resolution().limit()); // Needed for the RSRZ calculation, but if not set defaults to 2
-    mol_wrk = find_ml.find();
+    NucleoFind::PredictedMaps predicted_maps = {xphospred, xsugarpred, xbasepred};
+    NucleoFind::Find find = {xwrk, predicted_maps};
+    mol_wrk = find.find();
+    // NautilusUtil::save_minimol(mol_wrk, "find.pdb");
     log.log("FIND ML", mol_wrk, verbose >= 5);
 //    NautilusUtil::save_minimol(mol_wrk, "find.pdb");
 
@@ -530,17 +528,12 @@ void run_find(NautilusInput &input, NautilusOutput &output, int cycles) {
     clipper::Xmap<float> xphospred;
     clipper::Xmap<float> xsugarpred;
     clipper::Xmap<float> xbasepred;
-    gemmi::Ccp4<> phosphate_map;
-    gemmi::Ccp4<> sugar_map;
-    gemmi::Ccp4<> base_map;
 
     if (input.get_phosphate_prediction_path().has_value()) {
         clipper::CCP4MAPfile mapfile;
         mapfile.open_read(input.get_phosphate_prediction_path().value());
         mapfile.import_xmap(xphospred);
         mapfile.close_read();
-
-        phosphate_map = gemmi::read_ccp4_map(input.get_phosphate_prediction_path().value(), true);
     }
 
     if (input.get_sugar_prediction_path().has_value()) {
@@ -548,9 +541,6 @@ void run_find(NautilusInput &input, NautilusOutput &output, int cycles) {
         mapfile.open_read(input.get_sugar_prediction_path().value());
         mapfile.import_xmap(xsugarpred);
         mapfile.close_read();
-
-        sugar_map = gemmi::read_ccp4_map(input.get_sugar_prediction_path().value(), true);
-
     }
 
     if (input.get_base_prediction_path().has_value()) {
@@ -558,38 +548,20 @@ void run_find(NautilusInput &input, NautilusOutput &output, int cycles) {
         mapfile.open_read(input.get_base_prediction_path().value());
         mapfile.import_xmap(xbasepred);
         mapfile.close_read();
-
-        base_map = gemmi::read_ccp4_map(input.get_base_prediction_path().value(), true);
     }
-
-    gemmi::Mtz mtz = gemmi::read_mtz_file(input.get_mtz_path());
-
-
-    const gemmi::Mtz::Column& f = mtz.get_column_with_label("FWT");
-    const gemmi::Mtz::Column& phi = mtz.get_column_with_label("PHWT");
-    gemmi::FPhiProxy<gemmi::MtzDataProxy> gemmi_fphi(gemmi::MtzDataProxy{mtz}, f.idx, phi.idx);
-    gemmi::Grid<> xgrid = transform_f_phi_to_map2<float>(gemmi_fphi, {}, 1.5, {});
-
-    gemmi::Ccp4<> m;
-    m.grid = xgrid;
-    m.update_ccp4_header();
-    m.write_ccp4_map("xgrid.map");
-
-    PredictedMaps predictions = {xphospred, xsugarpred, xbasepred};
 
     mol_wrk = NucleicAcidTools::flag_chains(mol_wrk);
     clipper::MiniMol mol_wrk_original = mol_wrk;
 
     NucleoFind::PredictedMaps predicted_maps = {xphospred, xsugarpred, xbasepred};
     NucleoFind::Find find = {xwrk, predicted_maps};
-    find.find();
+    mol_wrk = find.find();
+    NautilusUtil::save_minimol(mol_wrk, "find.pdb");
 
-    exit(-1);
-
-    FindML find_ml = FindML(mol_wrk, xwrk, predictions);
-    find_ml.load_library_from_file(ippdb_ref);
-    find_ml.set_resolution(hkls.resolution().limit()); // Needed for the RSRZ calculation, but if not set defaults to 2
-    mol_wrk = find_ml.find();
+    // FindML find_ml = FindML(mol_wrk, xwrk, predictions);
+    // find_ml.load_library_from_file(ippdb_ref);
+    // find_ml.set_resolution(hkls.resolution().limit()); // Needed for the RSRZ calculation, but if not set defaults to 2
+    // mol_wrk = find_ml.find();
     log.log("FIND ML", mol_wrk, verbose >= 5);
 
 //    NautilusUtil::save_minimol(mol_wrk, "find.pdb");

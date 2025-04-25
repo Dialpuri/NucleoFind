@@ -40,6 +40,18 @@ void NucleoFind::BackboneTracer::find_nearby_nodes(const clipper::MAtomNonBond &
     }
 }
 
+NucleoFind::FragmentResult NucleoFind::FragmentResult::sort_result() {
+
+    std::vector<clipper::MMonomer> sorted_monomers;
+
+    for (int i = 0; i < monomers.size(); i++) {
+        if (i == 0 || i == monomers.size() - 1) {
+            sorted_monomers.push_back(monomers[i]);
+        }
+        else {}
+    }
+}
+
 void NucleoFind::BackboneTracer::generate_graph() {
     nodes.reserve(input.size());
     const auto nb = clipper::MAtomNonBond(mol, max_distance);
@@ -49,7 +61,6 @@ void NucleoFind::BackboneTracer::generate_graph() {
     }
 
     for (int a = 0; a < input.size(); a++) {
-
         find_nearby_nodes(nb, a);
     }
 }
@@ -67,7 +78,7 @@ clipper::Coord_orth NucleoFind::BackboneTracer::get_symmetry_copy(clipper::Coord
     return target_f.coord_orth(xgrid.cell());
 }
 
-double NucleoFind::BackboneTracer::score_monomer(clipper::MMonomer &monomer) {
+double NucleoFind::BackboneTracer::score_monomer(clipper::MMonomer &monomer, bool use_predicted_maps) {
     double score = 0.0;
 
     int ip = monomer.lookup(" P  ", clipper::MM::ANY);
@@ -82,16 +93,30 @@ double NucleoFind::BackboneTracer::score_monomer(clipper::MMonomer &monomer) {
     int in = monomer.lookup(" N9 ", clipper::MM::ANY);
     if (in < 0) in = monomer.lookup(" N1 ", clipper::MM::ANY);
 
-    if (ip != -1) score += score_to_grid(monomer[ip].coord_orth(), predicted_maps.get_phosphate_map());
-    if (io5 != -1) score += score_to_grid(monomer[io5].coord_orth(), predicted_maps.get_sugar_map());
-    if (ic5 != -1) score += score_to_grid(monomer[ic5].coord_orth(), predicted_maps.get_sugar_map());
-    if (ic4 != -1) score += score_to_grid(monomer[ic4].coord_orth(), predicted_maps.get_sugar_map());
-    if (io4 != -1) score += score_to_grid(monomer[io4].coord_orth(), predicted_maps.get_sugar_map());
-    if (ic3 != -1) score += score_to_grid(monomer[ic3].coord_orth(), predicted_maps.get_sugar_map());
-    if (io3 != -1) score += score_to_grid(monomer[io3].coord_orth(), predicted_maps.get_sugar_map());
-    if (ic2 != -1) score += score_to_grid(monomer[ic2].coord_orth(), predicted_maps.get_sugar_map());
-    if (ic1 != -1) score += score_to_grid(monomer[ic1].coord_orth(), predicted_maps.get_sugar_map());
-    if (in != -1) score += score_to_grid(monomer[in].coord_orth(), predicted_maps.get_sugar_map());
+    if (use_predicted_maps) {
+        if (ip != -1) score += score_to_grid(monomer[ip].coord_orth(), predicted_maps.get_phosphate_map());
+        if (io5 != -1) score += score_to_grid(monomer[io5].coord_orth(), predicted_maps.get_sugar_map());
+        if (ic5 != -1) score += score_to_grid(monomer[ic5].coord_orth(), predicted_maps.get_sugar_map());
+        if (ic4 != -1) score += score_to_grid(monomer[ic4].coord_orth(), predicted_maps.get_sugar_map());
+        if (io4 != -1) score += score_to_grid(monomer[io4].coord_orth(), predicted_maps.get_sugar_map());
+        if (ic3 != -1) score += score_to_grid(monomer[ic3].coord_orth(), predicted_maps.get_sugar_map());
+        if (io3 != -1) score += score_to_grid(monomer[io3].coord_orth(), predicted_maps.get_sugar_map());
+        if (ic2 != -1) score += score_to_grid(monomer[ic2].coord_orth(), predicted_maps.get_sugar_map());
+        if (ic1 != -1) score += score_to_grid(monomer[ic1].coord_orth(), predicted_maps.get_sugar_map());
+        if (in != -1) score += score_to_grid(monomer[in].coord_orth(), predicted_maps.get_base_map());
+    }
+    // else {
+        if (ip != -1) score += score_to_grid(monomer[ip].coord_orth(), &xgrid);
+        if (io5 != -1) score += score_to_grid(monomer[io5].coord_orth(), &xgrid);
+        if (ic5 != -1) score += score_to_grid(monomer[ic5].coord_orth(), &xgrid);
+        if (ic4 != -1) score += score_to_grid(monomer[ic4].coord_orth(), &xgrid);
+        if (io4 != -1) score += score_to_grid(monomer[io4].coord_orth(), &xgrid);
+        if (ic3 != -1) score += score_to_grid(monomer[ic3].coord_orth(), &xgrid);
+        if (io3 != -1) score += score_to_grid(monomer[io3].coord_orth(), &xgrid);
+        if (ic2 != -1) score += score_to_grid(monomer[ic2].coord_orth(), &xgrid);
+        if (ic1 != -1) score += score_to_grid(monomer[ic1].coord_orth(), &xgrid);
+        if (in != -1) score += score_to_grid(monomer[in].coord_orth(), &xgrid);
+    // }
 
     return score;
 }
@@ -100,18 +125,20 @@ double NucleoFind::BackboneTracer::score_monomer(clipper::MMonomer &monomer) {
 double NucleoFind::BackboneTracer::score_monomers(std::vector<clipper::MMonomer> &monomers) {
     double score = 0;
     for (auto &monomer: monomers) {
-        score += score_monomer(monomer);
+        score += score_monomer(monomer, true);
     }
     return score;
 }
 
 std::vector<double> NucleoFind::BackboneTracer::score_monomers_individually(std::vector<clipper::MMonomer> &monomers) {
     std::vector<double> scores;
+    scores.reserve(monomers.size());
     for (auto &monomer: monomers) {
-        scores.push_back(score_monomer(monomer));
+        scores.emplace_back(score_monomer(monomer, true));
     }
     return scores;
 }
+
 
 double NucleoFind::BackboneTracer::extract_library_fragment_and_score(
     int l, std::vector<clipper::Coord_orth> &reference_coords) {
@@ -128,7 +155,8 @@ NucleoFind::FragmentResult NucleoFind::BackboneTracer::extract_library_fragment_
     std::vector<clipper::Coord_orth> library_fragment_positions = library_fragment.get_phosphates();
     clipper::RTop_orth rtop = {library_fragment_positions, reference_coords};
     std::vector<clipper::MMonomer> library_fragment_monomers = library_fragment.transform(rtop);
-    return {score_monomers(library_fragment_monomers), library_fragment_monomers};
+    std::vector<double> scores = score_monomers_individually(library_fragment_monomers);
+    return {scores, library_fragment_monomers};
 }
 
 NucleoFind::FragmentResult NucleoFind::BackboneTracer::fit_best_fragment(int n1, int n2, int n3) {
@@ -145,12 +173,11 @@ NucleoFind::FragmentResult NucleoFind::BackboneTracer::fit_best_fragment(int n1,
 
     for (int l = 0; l < library.size(); l++) {
         FragmentResult result = extract_library_fragment_score_and_return(l, trial_fragment_positions_forward);
-        if (result.score > score) {
-            score = result.score;
+        if (result.get_total_score() > score) {
+            score = result.get_total_score();
             best_result = result;
         }
     }
-    std::cout << "Best fragment for " << n1 << " " << n2 << " " << n3 << " = " << best_result.score << std::endl;
     return best_result;
 }
 
@@ -297,11 +324,25 @@ void NucleoFind::BackboneTracer::identify_and_resolve_branches() {
 }
 
 NucleoFind::FragmentResult NucleoFind::BackboneTracer::build_chain(std::vector<int> &chain) {
-    FragmentResult result;
-    for (int i = 0; i < chain.size()-2; i+=2) {
+    std::map<std::pair<int, int>, std::vector<ScoredMonomer>> overlapping_positions;
+    for (int i = 0; i < chain.size()-2; i++) {
         FragmentResult fragment = fit_best_fragment(chain[i], chain[i+1], chain[i+2]);
-        result.append(fragment);
+        overlapping_positions[{chain[i], chain[i+1]}].emplace_back(fragment.scores[0], fragment.monomers[0]);
+        overlapping_positions[{chain[i+1], chain[i+2]}].emplace_back(fragment.scores[1], fragment.monomers[1]);
     }
+
+    FragmentResult result;
+    for (int i = 0; i < chain.size()-1; i++) {
+        std::vector<ScoredMonomer> possible_fragments = overlapping_positions[{chain[i], chain[i+1]}];
+        std::sort( possible_fragments.begin( ), possible_fragments.end( ), [ ]( const ScoredMonomer& lhs, const ScoredMonomer& rhs ) {
+           return lhs.score > rhs.score;
+        });
+        if (possible_fragments.empty()) {continue;}
+
+        result.scores.push_back(possible_fragments[0].score);
+        result.monomers.push_back(possible_fragments[0].monomer);
+    }
+
     return result;
 }
 
@@ -338,33 +379,66 @@ std::vector<std::vector<int>> NucleoFind::BackboneTracer::find_unique_chains(con
     return result;
 }
 
-void NucleoFind::BackboneTracer::build_chains() {
+clipper::MiniMol NucleoFind::BackboneTracer::build_chains() {
 
     // nodes with 2 edges are end points, nodes with 4 edges are mid points
     auto start_nodes = find_nodes_by_degree(2);
-
-    // go through and find chains
     std::vector<std::vector<int>> chains;
-    for (auto& node: start_nodes) {
-        std::vector<int> chain = {};
-        traverse_chain(node, chain);
-        chains.push_back(chain);
+
+    // if there are no start nodes, the chain is cyclic so pick any point
+    if (start_nodes.empty()) {
+        std::set<int> visited;
+        for (auto& node: nodes) {
+            if (visited.count(node->point_index)) continue;
+            std::vector<int> chain = {};
+            traverse_chain(node, chain);
+            visited.insert(chain.begin(), chain.end());
+            chains.push_back(chain);
+        }
+    }
+    else {
+        // go through and find chains from all start nodes
+        for (auto& node: start_nodes) {
+            std::vector<int> chain = {};
+            traverse_chain(node, chain);
+            chains.push_back(chain);
+        }
+
+        // remove backward representations
+        std::vector<std::vector<int>> chains_without_duplicates = find_unique_chains(chains);
+
+        // check that it is exactly half
+        if (chains_without_duplicates.size() != chains.size() / 2) {
+            throw std::runtime_error("Mismatch in chains, something has gone wrong.");
+        }
+
+        chains = chains_without_duplicates;
     }
 
-    // remove backward representations
-    std::vector<std::vector<int>> chains_without_duplicates = find_unique_chains(chains);
 
-    // check that it is exactly half
-    if (chains_without_duplicates.size() != chains.size() / 2) {
-        throw std::runtime_error("Mismatch in chains, something has gone wrong.");
+    // make all chains exist in the same symmetry copy
+    for (auto& chain: chains) {
+        clipper::Coord_orth ref_orth = input[chain[0]].coord_orth();
+        for (auto& index: chain) {
+            clipper::Coord_orth current_orth = input[index].coord_orth();
+            clipper::Coord_orth new_orth = get_symmetry_copy(current_orth, ref_orth);
+            input[index].set_coord_orth(new_orth);
+            ref_orth = new_orth;
+        }
     }
+
 
     clipper::MiniMol mol = {xgrid.spacegroup(), xgrid.cell()};
 
-    for (int c = 0; c < chains_without_duplicates.size(); c++) {
-        std::cout << c << "/" << chains_without_duplicates.size() << std::endl;
-        auto [fwd_score, fwd_polymer] = build_chain(chains_without_duplicates[c]);
-        auto [bck_score, bck_polymer] = build_chain(chains_without_duplicates[c]);
+    for (int c = 0; c < chains.size(); c++) {
+        std::cout << c << "/" << chains.size() << std::endl;
+        auto [fwd_polymer, fwd_score] = build_chain(chains[c]);
+
+        std::reverse(chains[c].begin(), chains[c].end());
+        auto [bck_polymer, bck_score] = build_chain(chains[c]);
+
+        // std::cout << "Built forward chain with score: " << std::accumulate(fwd_score.begin(), fwd_score.end(), 0.0) << std::endl;
+        // std::cout << "Build backward chain with score: " << std::accumulate(bck_score.begin(), bck_score.end(), 0.0) << std::endl;
 
         std::string chain_index = nth_letter(c);
         if (fwd_score > bck_score) {
@@ -375,7 +449,8 @@ void NucleoFind::BackboneTracer::build_chains() {
         }
     }
 
-    NautilusUtil::save_minimol(mol, "build.pdb");
+    // NautilusUtil::save_minimol(mol, "build.pdb");
+    return mol;
 }
 
 
