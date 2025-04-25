@@ -257,8 +257,7 @@ void run(NautilusInput &input, NautilusOutput &output, int cycles) {
 
     NucleoFind::PredictedMaps predicted_maps = {xphospred, xsugarpred, xbasepred};
     NucleoFind::Find find = {xwrk, predicted_maps};
-    clipper::MiniMol find_result = find.find();
-    mol_wrk = NautilusUtil::combine_minimols(mol_wrk, find_result);
+    mol_wrk = find.find(mol_wrk);
     // NautilusUtil::save_minimol(mol_wrk, "find.pdb");
     log.log("FIND ML", mol_wrk, verbose >= 5);
 //    NautilusUtil::save_minimol(mol_wrk, "find.pdb");
@@ -556,7 +555,7 @@ void run_find(NautilusInput &input, NautilusOutput &output, int cycles) {
 
     NucleoFind::PredictedMaps predicted_maps = {xphospred, xsugarpred, xbasepred};
     NucleoFind::Find find = {xwrk, predicted_maps};
-    mol_wrk = find.find();
+    mol_wrk = find.find(mol_wrk);
     NautilusUtil::save_minimol(mol_wrk, "find.pdb");
 
     // FindML find_ml = FindML(mol_wrk, xwrk, predictions);
