@@ -106,7 +106,7 @@ namespace NucleoFind {
         BackboneTracer(clipper::MiniMol& mol,
                         clipper::Xmap<float>& xgrid,
                         PredictedMaps& predicted_maps): mol(mol), xgrid(xgrid), predicted_maps(predicted_maps) {
-            library = TriNucleotideLibrary("/Users/dialpuri/Downloads/collated-removed.cif");
+            library = TriNucleotideLibrary("");
             initialise_tracer();
         };
 
