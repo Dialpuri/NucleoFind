@@ -860,7 +860,6 @@ void run_complete(NautilusInput &input, NautilusOutput &output, int cycles) {
 
         mol_wrk = NucleicAcidTools::flag_chains(mol_wrk);
 
-        // TODO - STOP THE INTERNAL FIND FROM MESSING THINGS UP !
         clipper::MiniMol nautilus_find = natools.find(xwrk, mol_wrk, nhit / 2, nhit / 2, srchst);
         mol_wrk = NucleoFind::Find::aggregate(ml_model, nautilus_find);
 
