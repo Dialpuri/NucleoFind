@@ -276,7 +276,7 @@ void NucleoFind::BackboneTracer::identify_and_resolve_branches() {
     for (auto &branch_node: branch_nodes) {
         auto node = find_node_by_point_index(branch_node);
 
-        std::cout << "Looking at branch node " << branch_node << std::endl;
+        // std::cout << "Looking at branch node " << branch_node << std::endl;
         // which nodes are nearby
         std::unordered_set<int> nearby_nodes_s = {};
         for (auto& edge: node->edges) {
@@ -435,7 +435,7 @@ clipper::MiniMol NucleoFind::BackboneTracer::build_chains() {
             clipper::Coord_orth new_orth = get_symmetry_copy(current_orth, ref_orth);
             input[index].set_coord_orth(new_orth);
             ref_orth = new_orth;
-            std::cout << index << "->";
+            // std::cout << index << "->";
         }
         std::cout << std::endl;
     }
