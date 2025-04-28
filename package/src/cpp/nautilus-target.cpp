@@ -631,11 +631,12 @@ const clipper::MiniMol NucleicAcidTargets::link( const clipper::Xmap<float>& xma
            !mol[c2].exists_property( "NON-NA" ) &&
            c1 != c2 ) {
         int l1 = mol[c1].size()-1;
-        //int l2 = mol[c2].size()-1;
+        int l2 = mol[c2].size()-1;
         NucleicAcidDB::Chain chn;
         for ( int r1 = 0; r1 < 2; r1++ ) {
           for ( int r2 = 0; r2 < 2; r2++ ) {
             if (l1-r1 < 0) {continue;}; // skip if the chain is too short i.e when chain has only 2 NAs or fewer
+            if (l2-r2 < 0) {continue;}; // skip if the chain is too short i.e when chain has only 2 NAs or fewer
             NucleicAcidDB::NucleicAcid na1 = mol[c1][l1-r1];
             NucleicAcidDB::NucleicAcid na2 = mol[c2][r2];
             clipper::Coord_orth   cref = na1.coord_o3();
