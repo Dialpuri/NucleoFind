@@ -438,7 +438,7 @@ clipper::MiniMol NucleoFind::BackboneTracer::build_chains() {
             ref_orth = new_orth;
             // std::cout << index << "->";
         }
-        std::cout << std::endl;
+        // std::cout << std::endl;
     }
 
 
@@ -451,13 +451,15 @@ clipper::MiniMol NucleoFind::BackboneTracer::build_chains() {
         std::reverse(chains[c].begin(), chains[c].end());
         auto [bck_polymer, bck_score] = build_chain(chains[c]);
 
-        // std::cout << "Built forward chain with score: " << std::accumulate(fwd_score.begin(), fwd_score.end(), 0.0) << std::endl;
-        // std::cout << "Build backward chain with score: " << std::accumulate(bck_score.begin(), bck_score.end(), 0.0) << std::endl;
 
         if (fwd_polymer.empty() || bck_polymer.empty()) continue;
+        double forward_score = std::accumulate(fwd_score.begin(), fwd_score.end(), 0.0);
+        double backward_score = std::accumulate(bck_score.begin(), bck_score.end(), 0.0);
+        // std::cout << "Built forward chain with score: " <<  forward_score << std::endl;
+        // std::cout << "Build backward chain with score: " << backward_score << std::endl;
 
         std::string chain_index = nth_letter(c);
-        if (fwd_score > bck_score) {
+        if (forward_score > backward_score) {
             mol.insert(create_clipper_polymer(fwd_polymer, chain_index));
         }
         else {
