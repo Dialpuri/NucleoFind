@@ -390,43 +390,44 @@ std::vector<std::vector<int>> NucleoFind::BackboneTracer::find_unique_chains(con
     return result;
 }
 
+void NucleoFind::BackboneTracer::find_cyclic_chains(std::vector<std::vector<int>> &chains, std::set<int> &visited) {
+    for (auto& node: nodes) {
+        if (visited.count(node->point_index)) continue;
+        std::vector<int> chain = {};
+        traverse_chain(node, chain);
+        visited.insert(chain.begin(), chain.end());
+        chains.push_back(chain);
+    }
+}
+
 clipper::MiniMol NucleoFind::BackboneTracer::build_chains() {
 
     // nodes with 2 edges are end points, nodes with 4 edges are mid points
     auto start_nodes = find_nodes_by_degree(2);
     std::vector<std::vector<int>> chains;
+    std::set<int> visited;
 
-    // if there are no start nodes, the chain is cyclic so pick any point
-    if (start_nodes.empty()) {
-        std::set<int> visited;
-        for (auto& node: nodes) {
-            if (visited.count(node->point_index)) continue;
-            std::vector<int> chain = {};
-            traverse_chain(node, chain);
-            visited.insert(chain.begin(), chain.end());
-            chains.push_back(chain);
-        }
-    }
-    else {
-        // go through and find chains from all start nodes
-        for (auto& node: start_nodes) {
-            std::vector<int> chain = {};
-            traverse_chain(node, chain);
-            chains.push_back(chain);
-        }
-
-        // remove backward representations
-        std::vector<std::vector<int>> chains_without_duplicates = find_unique_chains(chains);
-
-        // check that it is exactly half
-        if (chains_without_duplicates.size() != chains.size() / 2) {
-            std::cout << "WARNING: Mismatch in chains, something isn't right << std::endl;" << std::endl;
-            std::cout << "Found " << chains_without_duplicates.size() << " chains, which was filtered to" << chains.size() << std::endl;
-        }
-
-        chains = chains_without_duplicates;
+    // go through and find chains from all start nodes
+    for (auto& node: start_nodes) {
+        std::vector<int> chain = {};
+        traverse_chain(node, chain);
+        visited.insert(chain.begin(), chain.end());
+        chains.push_back(chain);
     }
 
+    // now, if some nodes are not in visited, they are part of a separate cyclic chain
+    find_cyclic_chains(chains, visited);
+
+    // remove backward representations
+    std::vector<std::vector<int>> chains_without_duplicates = find_unique_chains(chains);
+
+    // check that it is exactly half
+    if (chains_without_duplicates.size() != chains.size() / 2) {
+        std::cout << "WARNING: Mismatch in chains, something isn't right" << std::endl;
+        std::cout << "Found " << chains.size() << " chains, which was filtered to " << chains.size() << std::endl;
+    }
+
+    chains = chains_without_duplicates;
 
     // make all chains exist in the same symmetry copy
     for (auto& chain: chains) {
@@ -436,9 +437,9 @@ clipper::MiniMol NucleoFind::BackboneTracer::build_chains() {
             clipper::Coord_orth new_orth = get_symmetry_copy(current_orth, ref_orth);
             input[index].set_coord_orth(new_orth);
             ref_orth = new_orth;
-            // std::cout << index << "->";
+            std::cout << index << "->";
         }
-        // std::cout << std::endl;
+        std::cout << std::endl;
     }
 
 
