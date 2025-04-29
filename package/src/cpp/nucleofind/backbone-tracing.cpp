@@ -134,7 +134,7 @@ std::vector<double> NucleoFind::BackboneTracer::score_monomers_individually(std:
     std::vector<double> scores;
     scores.reserve(monomers.size());
     for (auto &monomer: monomers) {
-        scores.emplace_back(score_monomer(monomer, true, true));
+        scores.emplace_back(score_monomer(monomer, false, true));
     }
     return scores;
 }
@@ -437,9 +437,9 @@ clipper::MiniMol NucleoFind::BackboneTracer::build_chains() {
             clipper::Coord_orth new_orth = get_symmetry_copy(current_orth, ref_orth);
             input[index].set_coord_orth(new_orth);
             ref_orth = new_orth;
-            std::cout << index << "->";
+            // std::cout << index << "->";
         }
-        std::cout << std::endl;
+        // std::cout << std::endl;
     }
 
 
@@ -456,15 +456,23 @@ clipper::MiniMol NucleoFind::BackboneTracer::build_chains() {
         if (fwd_polymer.empty() || bck_polymer.empty()) continue;
         double forward_score = std::accumulate(fwd_score.begin(), fwd_score.end(), 0.0);
         double backward_score = std::accumulate(bck_score.begin(), bck_score.end(), 0.0);
-        // std::cout << "Built forward chain with score: " <<  forward_score << std::endl;
-        // std::cout << "Build backward chain with score: " << backward_score << std::endl;
+
+        for (auto& fwd: chains[c]) {
+            std::cout << fwd << "->";
+        }
+        std::cout << std::endl;
+        std::cout << "Built forward chain with score: " <<  forward_score << std::endl;
+        std::cout << "Build backward chain with score: " << backward_score << std::endl;
 
         std::string chain_index = nth_letter(c);
         if (forward_score > backward_score) {
             // remove_overlaps(fwd_polymer);
+            std::cout << "Chosing forward" << std::endl;
             mol.insert(create_clipper_polymer(fwd_polymer, chain_index));
         }
         else {
+            std::cout << "Chosing backward" << std::endl;
+
             mol.insert(create_clipper_polymer(bck_polymer, chain_index));
         }
     }
