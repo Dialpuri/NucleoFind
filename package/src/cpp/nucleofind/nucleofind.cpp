@@ -13,10 +13,10 @@ clipper::MiniMol NucleoFind::Find::find(clipper::MiniMol &mol_wrk) {
     NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
     BackboneTracer b = {phosphate_peaks, m_xwrk, m_predicted_maps};
     clipper::MiniMol find_result = b.build();
-    return std::move(aggregate(find_result, mol_wrk));
+    return std::move(aggregate_nucleic_protein(find_result, mol_wrk));
 }
 
-clipper::MiniMol NucleoFind::Find::aggregate(clipper::MiniMol &find_result, clipper::MiniMol &mol) {
+clipper::MiniMol NucleoFind::Find::aggregate_nucleic_protein(clipper::MiniMol &find_result, clipper::MiniMol &mol) {
 
     if (mol.size() == 0) {
         NucleicAcidTools::chain_label(find_result, clipper::MMDBManager::Default);
@@ -59,6 +59,33 @@ clipper::MiniMol NucleoFind::Find::aggregate(clipper::MiniMol &find_result, clip
         }
         if (mp.size() == 0) continue;
         find_result.insert(mp);
+    }
+
+    NucleicAcidTools::chain_label(find_result, clipper::MMDBManager::Default);
+    NucleicAcidTools::residue_label(find_result);
+    find_result = NucleicAcidTools::flag_chains(find_result);
+
+    return find_result;
+}
+
+clipper::MiniMol NucleoFind::Find::aggregate_nucleic_nucleic(clipper::MiniMol &find_result, clipper::MiniMol &mol) {
+    if (mol.size() == 0) {
+        NucleicAcidTools::chain_label(find_result, clipper::MMDBManager::Default);
+        NucleicAcidTools::residue_label(find_result);
+        return NucleicAcidTools::flag_chains(find_result);
+    }
+    clipper::MAtomNonBond nb = {mol, 4};
+
+    std::set<std::tuple<int,int>> to_remove = {};
+    for (int c = 0; c < find_result.size(); c++) {
+        for (int r = 0; r < find_result[c].size(); r++) {
+            for (int a = 0; a < find_result[c][r].size(); a++) {
+                auto atoms_near = nb(find_result[c][r][a].coord_orth(), 3);
+                for (auto& atom: atoms_near) {
+                    to_remove.insert({atom.polymer(), atom.monomer()});
+                }
+            }
+        }
     }
 
     NucleicAcidTools::chain_label(find_result, clipper::MMDBManager::Default);

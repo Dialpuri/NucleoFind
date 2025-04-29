@@ -134,7 +134,7 @@ std::vector<double> NucleoFind::BackboneTracer::score_monomers_individually(std:
     std::vector<double> scores;
     scores.reserve(monomers.size());
     for (auto &monomer: monomers) {
-        scores.emplace_back(score_monomer(monomer, true, false));
+        scores.emplace_back(score_monomer(monomer, true, true));
     }
     return scores;
 }
@@ -460,6 +460,7 @@ clipper::MiniMol NucleoFind::BackboneTracer::build_chains() {
 
         std::string chain_index = nth_letter(c);
         if (forward_score > backward_score) {
+            // remove_overlaps(fwd_polymer);
             mol.insert(create_clipper_polymer(fwd_polymer, chain_index));
         }
         else {

@@ -396,7 +396,7 @@ void run_find(NautilusInput &input, NautilusOutput &output, int cycles) {
     prog.summary_end();
 
     bool doanis = false;
-    int nhit = 100;
+    int nhit = 10;
     double res_in = 2.0;         // Resolution limit
     double srchst = 18.0;        // Search angle step
     int verbose = 0;
@@ -660,7 +660,7 @@ void run_complete(NautilusInput &input, NautilusOutput &output, int cycles) {
     prog.summary_end();
 
     bool doanis = false;
-    int nhit = 100;
+    int nhit = 10;
     double res_in = 2.0;         // Resolution limit
     double srchst = 18.0;        // Search angle step
     int verbose = 0;
@@ -861,7 +861,7 @@ void run_complete(NautilusInput &input, NautilusOutput &output, int cycles) {
         mol_wrk = NucleicAcidTools::flag_chains(mol_wrk);
 
         clipper::MiniMol nautilus_find = natools.find(xwrk, mol_wrk, nhit / 2, nhit / 2, srchst);
-        mol_wrk = NucleoFind::Find::aggregate(ml_model, nautilus_find);
+        mol_wrk = NucleoFind::Find::aggregate_nucleic_nucleic(ml_model, nautilus_find);
 
         log.log("FIND", mol_wrk, verbose >= 5);
 

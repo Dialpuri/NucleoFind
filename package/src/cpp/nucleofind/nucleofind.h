@@ -23,7 +23,9 @@ namespace NucleoFind {
 
         clipper::MiniMol find(clipper::MiniMol &mol_wrk);
 
-        static clipper::MiniMol aggregate(clipper::MiniMol &find_result, clipper::MiniMol &mol);
+        static clipper::MiniMol aggregate_nucleic_protein(clipper::MiniMol &find_result, clipper::MiniMol &mol);
+        
+        static clipper::MiniMol aggregate_nucleic_nucleic(clipper::MiniMol &find_result, clipper::MiniMol &mol);
 
     private:
         clipper::Xmap<float> m_xwrk;
