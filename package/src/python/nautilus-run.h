@@ -660,7 +660,7 @@ void run_complete(NautilusInput &input, NautilusOutput &output, int cycles) {
     prog.summary_end();
 
     bool doanis = false;
-    int nhit = 10;
+    int nhit = 100;
     double res_in = 2.0;         // Resolution limit
     double srchst = 18.0;        // Search angle step
     int verbose = 0;
