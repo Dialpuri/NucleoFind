@@ -122,6 +122,7 @@ namespace NucleoFind {
         void initialise_tracer() {
             input = mol[0][0];
             generate_sugar_nonbond();
+            generate_input_nonbond();
             generate_graph();
             generate_adjacency_list();
             // create_linked_structure();
@@ -132,6 +133,10 @@ namespace NucleoFind {
             clipper::Xmap<float> sugar = *predicted_maps.get_sugar_map();
             clipper::MiniMol sugar_mol = MapToPoints::create_mol_at_gridpoints(sugar, 0.1);
             predicted_sugar_positions = clipper::MAtomNonBond(sugar_mol, 1);
+        }
+
+        void generate_input_nonbond() {
+            initial_nb = clipper::MAtomNonBond(mol, 2);
         }
 
         void generate_adjacency_list() {
@@ -152,6 +157,8 @@ namespace NucleoFind {
         void traverse_chain(std::shared_ptr<Node>& node, std::vector<int> &chain);
 
         static std::vector<std::vector<int>>  find_unique_chains(const std::vector<std::vector<int>>& chains);
+
+        void find_cyclic_chains(std::vector<std::vector<int>> &chains, std::set<int> &visited);
 
 
         // Model building main functions
@@ -222,6 +229,7 @@ namespace NucleoFind {
         clipper::Xmap<float> xgrid;
         PredictedMaps& predicted_maps;
         clipper::MAtomNonBond predicted_sugar_positions; // Used to determine if an edge is valid
+        clipper::MAtomNonBond initial_nb; // Used to determine overlaps with input
 
         // Library members
         TriNucleotideLibrary library;
