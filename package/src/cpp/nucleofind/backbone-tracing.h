@@ -73,11 +73,19 @@ namespace NucleoFind {
         std::vector<std::shared_ptr<Edge>> edges;
     };
 
+    struct ScoredMonomer {
+        ScoredMonomer() = default;
+        ScoredMonomer(double score, clipper::MMonomer& monomer): score(score), monomer(monomer) {}
+        double score;
+        clipper::MMonomer monomer;
+    };
+
     struct FragmentResult {
-        FragmentResult(FragmentResult& other) {
+        FragmentResult(const FragmentResult& other) {
             scores = other.scores;
             monomers = other.monomers;
-        };
+            terminus = other.terminus;
+        }
         FragmentResult() = default;
         FragmentResult(std::vector<double>& scores, std::vector<clipper::MMonomer>& monomers): scores(scores), monomers(monomers) {};
 
@@ -90,17 +98,22 @@ namespace NucleoFind {
             return std::accumulate(scores.begin(), scores.end(), 0.0);
         }
 
+        [[nodiscard]] bool empty() const {
+            return monomers.empty();
+        }
+
         FragmentResult sort_result();
 
+        void add_terminus() {
+            monomers.emplace_back(terminus.monomer);
+            scores.emplace_back(terminus.score);
+        };
+
+        ScoredMonomer terminus = {};
         std::vector<clipper::MMonomer> monomers;
         std::vector<double> scores;
     };
 
-    struct ScoredMonomer {
-        ScoredMonomer(double score, clipper::MMonomer& monomer): score(score), monomer(monomer) {}
-        double score;
-        clipper::MMonomer monomer;
-    };
 
     struct BackboneTracer {
         BackboneTracer(clipper::MiniMol& mol,
@@ -159,6 +172,8 @@ namespace NucleoFind {
         static std::vector<std::vector<int>>  find_unique_chains(const std::vector<std::vector<int>>& chains);
 
         void find_cyclic_chains(std::vector<std::vector<int>> &chains, std::set<int> &visited);
+
+        void symmetrise_chains(std::vector<std::vector<int>> &chains);
 
 
         // Model building main functions
