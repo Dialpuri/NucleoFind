@@ -51,6 +51,28 @@ NucleoFind::FragmentResult NucleoFind::FragmentResult::sort_result() {
         else {}
     }
 }
+//
+// void NucleoFind::FragmentResult::filter() {
+//     double sum = std::accumulate(scores.begin(), scores.end(), 0.0);
+//     double mean = sum / scores.size();
+//
+//     double sq_sum = 0.0;
+//     for (const double s : scores) sq_sum += (s - mean) * (s - mean);
+//     double stddev = std::sqrt(sq_sum / scores.size());
+//
+//     int stddev_cutoff = 2;
+//     size_t j = 0;
+//     for (size_t i = 0; i < scores.size(); ++i) {
+//         double deviation = std::abs(scores[i] - mean);
+//         if (deviation <= stddev_cutoff * stddev) {
+//             scores[j] = scores[i];
+//             monomers[j] = monomers[i];
+//             ++j;
+//         }
+//     }
+//     scores.resize(j);
+//     monomers.resize(j);
+// }
 
 void NucleoFind::BackboneTracer::generate_graph() {
     nodes.reserve(input.size());
@@ -76,6 +98,41 @@ clipper::Coord_orth NucleoFind::BackboneTracer::get_symmetry_copy(clipper::Coord
     clipper::Coord_frac reference_f = reference.coord_frac(xgrid.cell());
     target_f = target_f.symmetry_copy_near(xgrid.spacegroup(), xgrid.cell(), reference_f);
     return target_f.coord_orth(xgrid.cell());
+}
+
+std::vector<std::vector<int>> NucleoFind::BackboneTracer::find_local_chains(std::vector<int> &chain) {
+    std::vector<double> angles = {};
+    std::vector<int> angle_centers = {};
+
+    for (int i = 1; i < chain.size()-1; i++) {
+        clipper::Vec3<> a = input[chain[i]].coord_orth() - input[chain[i - 1]].coord_orth();
+        clipper::Vec3<> b = input[chain[i+1]].coord_orth() - input[chain[i]].coord_orth();
+        double angle = std::acos(std::clamp(clipper::Vec3<>::dot(a.unit(), b.unit()), -1.0, 1.0));
+        angles.emplace_back(angle);
+        angle_centers.emplace_back(i);
+    }
+
+    const double mean = std::accumulate(angles.begin(), angles.end(), 0.0) / angles.size();
+    const double sq_sum = std::inner_product(angles.begin(), angles.end(), angles.begin(), 0.0);
+    const double stddev = std::sqrt(sq_sum / angles.size() - mean * mean);
+
+    constexpr double z_threshold = 2;
+
+    std::vector<int> split_points = {};
+    for (size_t i = 0; i < angles.size(); ++i) {
+        if (const double z = (angles[i] - mean) / stddev; std::abs(z) > z_threshold) {
+            split_points.emplace_back(angle_centers[i]);
+        }
+    }
+
+    std::vector<std::vector<int>> result;
+    int last_split_point = 0;
+    for (const int split_point : split_points) {
+        result.emplace_back(chain.begin() + last_split_point , chain.begin() + split_point + 1);
+        last_split_point = split_point;
+    }
+    result.emplace_back(chain.begin() + last_split_point, chain.end());
+    return result;
 }
 
 double NucleoFind::BackboneTracer::score_monomer(clipper::MMonomer &monomer, bool use_predicted_maps, bool use_experimental_map) {
@@ -334,6 +391,31 @@ void NucleoFind::BackboneTracer::identify_and_resolve_branches() {
     nodes.erase(node_removal, nodes.end());
 }
 
+void NucleoFind::BackboneTracer::identify_and_resolve_clashes(
+    std::vector<clipper::MMonomer> &monomers, std::vector<int> &chain, std::vector<double> &scores) {
+
+    int j = 0;
+    for (int c = 0; c < chain.size()-2; c++) {
+        clipper::MMonomer first_monomer = monomers[c];
+        clipper::MMonomer second_monomer = monomers[c+1];
+
+        int clash = 0;
+        for (int a1 = 0; a1 < first_monomer.size(); a1++) {
+            for (int a2 = 0; a2 < second_monomer.size(); a2++) {
+                float distance =(first_monomer[a1].coord_orth()-second_monomer[a2].coord_orth()).lengthsq();
+                if (distance < 4) {
+                    clash += 1;
+                }
+            }
+        }
+        if (clash < 0.5 * floor(first_monomer.size())) {
+            monomers[j] = monomers[c];
+            j++;
+        }
+    }
+    monomers.resize(j);
+}
+
 NucleoFind::FragmentResult NucleoFind::BackboneTracer::build_chain(std::vector<int> &chain) {
     std::map<std::pair<int, int>, std::vector<ScoredMonomer>> overlapping_positions;
     for (int i = 0; i < chain.size()-2; i++) {
@@ -353,6 +435,8 @@ NucleoFind::FragmentResult NucleoFind::BackboneTracer::build_chain(std::vector<i
         result.scores.push_back(possible_fragments[0].score);
         result.monomers.push_back(possible_fragments[0].monomer);
     }
+
+    // result.filter();
 
     return result;
 }
@@ -444,40 +528,79 @@ clipper::MiniMol NucleoFind::BackboneTracer::build_chains() {
 
 
     clipper::MiniMol mol = {xgrid.spacegroup(), xgrid.cell()};
-
+    int current_letter_index = 0;
     for (int c = 0; c < chains.size(); c++) {
         std::cout << c << "/" << chains.size() << std::endl;
-        auto [fwd_polymer, fwd_score] = build_chain(chains[c]);
 
-        std::reverse(chains[c].begin(), chains[c].end());
-        auto [bck_polymer, bck_score] = build_chain(chains[c]);
+        // split up chain based on curvature estimates
+        std::vector<std::vector<int>> local_chains = find_local_chains(chains[c]);
+        std::vector<bool> direction = {}; // true - forward, false - backward
+        // std::vector<std::vector<clipper::MMonomer>> local_chain_monomers = {};
+        std::unordered_map<int, std::vector<clipper::MMonomer>> local_chain_monomers = {};
 
+        // go through each local chain
+        for (int lc = 0; lc < local_chains.size(); lc++) {
+            // build local chain in both directions
+            auto [fwd_polymer, fwd_score] = build_chain(local_chains[lc]);
+            std::reverse(local_chains[lc].begin(), local_chains[lc].end());
+            auto [bck_polymer, bck_score] = build_chain(local_chains[lc]);
 
-        if (fwd_polymer.empty() || bck_polymer.empty()) continue;
-        double forward_score = std::accumulate(fwd_score.begin(), fwd_score.end(), 0.0);
-        double backward_score = std::accumulate(bck_score.begin(), bck_score.end(), 0.0);
+            if (fwd_polymer.empty() || bck_polymer.empty()) {
+                continue;
+            }
 
-        for (auto& fwd: chains[c]) {
-            std::cout << fwd << "->";
+            double forward_score = std::accumulate(fwd_score.begin(), fwd_score.end(), 0.0);
+            double backward_score = std::accumulate(bck_score.begin(), bck_score.end(), 0.0);
+
+            // take the best direction
+            bool forward = false;
+            std::vector<clipper::MMonomer> best_polymer;
+            if (forward_score > backward_score) {
+                best_polymer = fwd_polymer;
+                forward = true;
+            }
+            else {
+                best_polymer = bck_polymer;
+            }
+
+            // add direction and best_polymer to parent
+            direction.emplace_back(forward);
+            local_chain_monomers.insert({lc, best_polymer});
         }
-        std::cout << std::endl;
-        std::cout << "Built forward chain with score: " <<  forward_score << std::endl;
-        std::cout << "Build backward chain with score: " << backward_score << std::endl;
 
-        std::string chain_index = nth_letter(c);
-        if (forward_score > backward_score) {
-            // remove_overlaps(fwd_polymer);
-            std::cout << "Chosing forward" << std::endl;
-            mol.insert(create_clipper_polymer(fwd_polymer, chain_index));
-        }
-        else {
-            std::cout << "Chosing backward" << std::endl;
 
-            mol.insert(create_clipper_polymer(bck_polymer, chain_index));
+        if (local_chain_monomers.empty()) continue;
+
+        // no split points, continue
+        if (local_chains.size() == 1) {
+            std::string chain_index = nth_letter(++current_letter_index);
+            mol.insert(create_clipper_polymer(local_chain_monomers[0], chain_index));
+            continue;
         }
+
+        // if all are in the same direction, put them back together since it is likely one chain
+        std::vector<clipper::MMonomer> built_chain = {};
+        std::vector<int> built_chain_indices = {};
+
+        for (int i = 0; i < local_chains.size(); i++) {
+
+            // no monomers were built for this local chain (too small)
+            if (local_chain_monomers.count(i) == 0) continue;
+
+            int start = 0;
+            if (!built_chain_indices.empty()) {
+                start = (built_chain_indices.back() == local_chains[i].front()) ? 1 : 0;
+            }
+
+            built_chain_indices.insert(built_chain_indices.end(), local_chains[i].begin() + start, local_chains[i].end());
+            built_chain.insert(built_chain.end(), local_chain_monomers[i].begin() + start, local_chain_monomers[i].end());
+
+        }
+
+        std::string chain_index = nth_letter(++current_letter_index);
+        mol.insert(create_clipper_polymer(built_chain, chain_index));
     }
 
-    // NautilusUtil::save_minimol(mol, "build.pdb");
     return mol;
 }
 

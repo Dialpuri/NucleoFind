@@ -164,6 +164,9 @@ namespace NucleoFind {
         // Model building main functions
         void identify_and_resolve_branches();
 
+        void identify_and_resolve_clashes(std::vector<clipper::MMonomer> &monomers,
+                                          std::vector<int> &chain, std::vector<double> &scores);
+
         clipper::MiniMol build_chains();
 
         FragmentResult build_chain(std::vector<int> &chain);
@@ -189,6 +192,8 @@ namespace NucleoFind {
         static double score_to_grid(const clipper::Coord_orth& coord, const clipper::Xmap<float>* grid);
 
         clipper::Coord_orth get_symmetry_copy(clipper::Coord_orth& target, clipper::Coord_orth& reference);
+
+        std::vector<std::vector<int>> find_local_chains(std::vector<int> &chain);
 
         // Graph Structure Utility Functions
         std::shared_ptr<Node> find_node_by_point_index(int point_index) const {
