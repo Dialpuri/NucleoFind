@@ -536,11 +536,11 @@ clipper::MiniMol NucleoFind::BackboneTracer::build_chains() {
     // make all chains exist in the same symmetry copy
     symmetrise_chains(chains);
 
-
     clipper::MiniMol mol = {xgrid.spacegroup(), xgrid.cell()};
     int current_letter_index = 0;
     for (int c = 0; c < chains.size(); c++) {
-        std::cout << c << "/" << chains.size() << std::endl;
+        std::cout << "\rBuilding chain " << c+1 << " of " << chains.size();
+        std::cout << std::flush;
 
         // split up chain based on curvature estimates
         std::vector<std::vector<int>> local_chains = find_local_chains(chains[c]);
@@ -560,18 +560,6 @@ clipper::MiniMol NucleoFind::BackboneTracer::build_chains() {
 
             double forward_score = std::accumulate(forward_result.scores.begin(), forward_result.scores.end(), 0.0);
             double backward_score = std::accumulate(backward_result.scores.begin(), backward_result.scores.end(), 0.0);
-
-            std::reverse(local_chains[lc].begin(), local_chains[lc].end());
-            for (auto& x: local_chains[lc]) {
-                std::cout << x << "->";
-            }
-            std::cout << forward_score << std::endl;
-
-            std::reverse(local_chains[lc].begin(), local_chains[lc].end());
-            for (auto& x: local_chains[lc]) {
-                std::cout << x << "->";
-            }
-            std::cout << backward_score << std::endl;
 
             // take the best direction
             bool forward = false;
@@ -622,7 +610,7 @@ clipper::MiniMol NucleoFind::BackboneTracer::build_chains() {
         std::string chain_index = nth_letter(++current_letter_index);
         mol.insert(create_clipper_polymer(built_chain, chain_index));
     }
-
+    std::cout << std::endl;
     return mol;
 }
 
