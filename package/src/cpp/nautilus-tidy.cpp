@@ -7,6 +7,8 @@
 //#include <algorithm>
 #include <string>
 
+#include "nautilus-tools.h"
+
 
 std::vector<int> ModelTidy::chain_renumber( clipper::MiniMol& mol, const clipper::MMoleculeSequence& seq )
 {
@@ -126,4 +128,39 @@ clipper::String ModelTidy::chain_sequence( const clipper::MPolymer& mp )
     seq += c;
   }
   return seq;
+}
+
+clipper::MiniMol ModelTidy::setup_residue_types(clipper::Xmap<float> xwrk, clipper::MiniMol mol_wrk) {
+  const clipper::String basetypes = "ACGTU";
+  clipper::MiniMol mol_new(xwrk.spacegroup(), xwrk.cell());
+  for (int c = 0; c < mol_wrk.size(); c++) {
+    clipper::MPolymer mpx = mol_wrk[c];
+    if (!mpx.exists_property("NON-NA")) {
+      bool dna = false;
+      for (int r = 0; r < mpx.size(); r++) {
+        const clipper::String type = mpx[r].type().trim() + " ";
+        const char ctype = type[0];
+        int t = NucleicAcidTools::base_index(ctype);
+        if (t >= 0) mpx[r].set_type("  " + basetypes.substr(t, 1));
+        else mpx[r].set_type("  U");
+        if (mpx[r].type().trim() == "T") dna = true;
+      }
+      // for DNA, prefix type with D and remove O2'
+      if (dna) {
+        for (int r = 0; r < mpx.size(); r++) {
+          const clipper::String type = " D" + mpx[r].type().trim();
+          mpx[r].set_type(type);
+          const int io2 = mpx[r].lookup(" O2'", clipper::MM::ANY);
+          clipper::MMonomer mm;
+          mm.copy(mpx[r], clipper::MM::COPY_MP);
+          for (int a = 0; a < mpx[r].size(); a++) {
+            if (a != io2) mm.insert(mpx[r][a]);
+          }
+          mpx[r] = mm;
+        }
+      }
+    }
+    mol_new.insert(mpx);
+  }
+  return mol_new;
 }

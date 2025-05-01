@@ -4,7 +4,7 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>
 
-#include "../cpp/nucleofind/io.h"
+#include "../cpp/nucleofind/input.h"
 #include "nautilus-run.h"
 
 namespace nb = nanobind;

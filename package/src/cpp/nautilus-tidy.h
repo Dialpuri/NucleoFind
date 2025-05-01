@@ -12,10 +12,11 @@
 class ModelTidy {
  public:
   static std::vector<int> chain_renumber( clipper::MiniMol& mol, const clipper::MMoleculeSequence& seq );
+  static clipper::MiniMol setup_residue_types(clipper::Xmap<float> xwrk, clipper::MiniMol mol_wrk);
+
  private:
   static int chain_renumber( clipper::MPolymer& mp, const clipper::MMoleculeSequence& seq );
   static clipper::String chain_sequence( const clipper::MPolymer& mp );
 };
-
 
 #endif

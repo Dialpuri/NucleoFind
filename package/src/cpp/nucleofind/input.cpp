@@ -2,7 +2,7 @@
 // Created by Jordan Dialpuri on 01/05/2025.
 //
 
-#include "io.h"
+#include "input.h"
 
 
 CCP4Program NucleoFind::IO::initialise_ccp4_program(const std::string &version) {
