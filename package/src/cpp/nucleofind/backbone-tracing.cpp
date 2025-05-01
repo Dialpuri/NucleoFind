@@ -105,9 +105,9 @@ std::vector<std::vector<int>> NucleoFind::BackboneTracer::find_local_chains(std:
     std::vector<int> angle_centers = {};
 
     for (int i = 1; i < chain.size()-1; i++) {
-        clipper::Vec3<> a = input[chain[i]].coord_orth() - input[chain[i - 1]].coord_orth();
+        clipper::Vec3<> a = input[chain[i-1]].coord_orth() - input[chain[i]].coord_orth();
         clipper::Vec3<> b = input[chain[i+1]].coord_orth() - input[chain[i]].coord_orth();
-        double angle = std::acos(std::clamp(clipper::Vec3<>::dot(a.unit(), b.unit()), -1.0, 1.0));
+        double angle = std::acos(clipper::Vec3<>::dot(a.unit(), b.unit())) * (180.0 / M_PI);
         angles.emplace_back(angle);
         angle_centers.emplace_back(i);
     }
@@ -116,11 +116,10 @@ std::vector<std::vector<int>> NucleoFind::BackboneTracer::find_local_chains(std:
     const double sq_sum = std::inner_product(angles.begin(), angles.end(), angles.begin(), 0.0);
     const double stddev = std::sqrt(sq_sum / angles.size() - mean * mean);
 
-    constexpr double z_threshold = 2;
-
+    constexpr double z_threshold = -2;
     std::vector<int> split_points = {};
     for (int i = 0; i < angles.size(); ++i) {
-        if (const double z = (angles[i] - mean) / stddev; std::abs(z) > z_threshold) {
+        if (const double z = (angles[i] - mean) / stddev; z < z_threshold) {
             split_points.emplace_back(angle_centers[i]);
         }
     }
@@ -547,10 +546,15 @@ clipper::MiniMol NucleoFind::BackboneTracer::build_chains() {
         std::vector<bool> direction = {}; // true - forward, false - backward
         std::unordered_map<int, FragmentResult> local_chain_results = {};
 
+        std::cout << std::endl;
         // go through each local chain
         for (int lc = 0; lc < local_chains.size(); lc++) {
             // build local chain in both directions
             FragmentResult forward_result = build_chain(local_chains[lc]);
+            for (auto& x: local_chains[lc]) {
+                std::cout << x << "->";
+            }
+            std::cout << std::endl;
             std::reverse(local_chains[lc].begin(), local_chains[lc].end());
             FragmentResult backward_result = build_chain(local_chains[lc]);
 
@@ -560,6 +564,10 @@ clipper::MiniMol NucleoFind::BackboneTracer::build_chains() {
 
             double forward_score = std::accumulate(forward_result.scores.begin(), forward_result.scores.end(), 0.0);
             double backward_score = std::accumulate(backward_result.scores.begin(), backward_result.scores.end(), 0.0);
+
+
+            std::cout << "Forward score = " << forward_score << std::endl;
+            std::cout << "Backward score = " << backward_score << std::endl;
 
             // take the best direction
             bool forward = false;
