@@ -11,6 +11,8 @@
 #include <map>
 #include <algorithm>
 
+#include "nucleofind/predicted-maps.h"
+
 enum AtomType {
     phosphate, sugar, base, unknown
 };
@@ -202,6 +204,9 @@ class NautilusUtil {
 
     static int count_well_modelled_nas(clipper::MiniMol& mol, clipper::Xmap<float> xphospred, clipper::Xmap<float> xsugarpred,
                                        clipper::Xmap<float> xbasepred);
+
+    static int count_well_modelled_nas(clipper::MiniMol& mol, NucleoFind::PredictedMaps& predicted_maps);
+
 
     static AtomType get_atom_type(std::string& atom_name);
 };

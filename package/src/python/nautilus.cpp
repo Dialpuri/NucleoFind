@@ -4,7 +4,7 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>
 
-#include "nautilus-include.h"
+#include "../cpp/nucleofind/io.h"
 #include "nautilus-run.h"
 
 namespace nb = nanobind;
@@ -12,7 +12,7 @@ namespace nb = nanobind;
 using namespace nb::literals;
 
 NB_MODULE(nautilus_module, m) {
-nb::class_<NautilusInput>(m, "Input")
+nb::class_<NucleoFind::IO::Input>(m, "Input")
             .def(nb::init< const std::string&, // mtzin
              const std::string&, // seqin
              const std::string&, // pdbin
@@ -25,13 +25,11 @@ nb::class_<NautilusInput>(m, "Input")
              const std::string&,  // colin_fc
              const std::string&  >(), // colin_free
              "mtzin"_a, "seqin"_a, "pdbin"_a, "phospredin"_a, "sugarpredin"_a, "basepredin"_a, "colin_fo"_a,
-             "colin_hl"_a, "colin_phifom"_a, "colin_fc"_a, "colinfree"_a, ""
+             "colin_hl"_a, "colin_phifom"_a, "colin_fc"_a, "colinfree"_a, "Input to NucleoFind"
              );
 
-nb::class_<NautilusOutput>(m, "Output")
+nb::class_<NucleoFind::IO::Output>(m, "Output")
             .def(nb::init< const std::string&, const std::string&  >()); // pdbout, xmlout
 
 m.def("run", &run, "input"_a, "output"_a, "cycles"_a, "Run nucleofind-build");
-m.def("run_find", &run_find, "input"_a, "output"_a, "cycles"_a, "Run nucleofind-build find algorithm");
-m.def("run_complete", &run_complete, "input"_a, "output"_a, "cycles"_a, "Run nucleofind-build completion algorithm");
 }

@@ -466,6 +466,10 @@ int NautilusUtil::count_well_modelled_nas(clipper::MiniMol &mol, clipper::Xmap<f
     return well_modelled;
 }
 
+int NautilusUtil::count_well_modelled_nas(clipper::MiniMol &mol, NucleoFind::PredictedMaps &predicted_maps) {
+    return count_well_modelled_nas(mol, *predicted_maps.get_phosphate_map(), *predicted_maps.get_sugar_map(), *predicted_maps.get_base_map());
+}
+
 AtomType NautilusUtil::get_atom_type(std::string &atom_name) {
     std::vector<std::string> phosphate_atoms = {"P", "OP1", "OP2"};
     std::vector<std::string> sugar_atoms = {"C1'", "C2'", "C3'", "C4'", "C5'", "O4'"};

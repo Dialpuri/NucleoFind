@@ -4,7 +4,7 @@ import dataclasses
 import pathlib
 import traceback
 
-from .nautilus_module import Input, Output, run, run_find, run_complete
+from .nautilus_module import Input, Output, run
 import argparse
 from .__version__ import __version__
 from .prediction.predict import predict_map
@@ -47,7 +47,6 @@ def main():
     parser.add_argument("-colin-free", required=False, default="")
     parser.add_argument("-xmlout", required=False, default="")
     parser.add_argument("-cycles", required=False, default=3)
-    parser.add_argument("-mode", required=False, choices=["all", "find", "complete"], default="all")
     parser.add_argument("-v", "--version", action="version", version=__version__)
 
     args = parser.parse_args()
@@ -108,12 +107,7 @@ def main():
     output = Output(args.pdbout, args.xmlout)
 
     try:
-        if args.mode == "all":
-            run(input, output, args.cycles)
-        if args.mode == "find":
-            run_find(input, output, args.cycles)
-        if args.mode == "complete":
-            run_complete(input, output, args.cycles)
+        run(input, output, args.cycles)
     except:
         print(traceback.format_exc())
 

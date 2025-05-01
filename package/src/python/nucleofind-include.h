@@ -1,9 +1,9 @@
 #include <string>
 #include <optional>
 
-class NautilusInput { 
+class NucleoFindInput {
 public:
-    NautilusInput(
+    NucleoFindInput(
         const std::string& mtzin,
         const std::string& seqin,
         const std::string& pdbin,
@@ -106,9 +106,9 @@ private:
     std::string colin_free;
 };
 
-class NautilusOutput { 
+class NucleoFindOutput {
 public: 
-    NautilusOutput(const std::string& pdbout, const std::string& xmlout) {
+    NucleoFindOutput(const std::string& pdbout, const std::string& xmlout) {
         this->pdbout = pdbout; 
         this->xmlout = xmlout;
         if (pdbout == "") {throw std::runtime_error("PDB Out must not be empty");}
