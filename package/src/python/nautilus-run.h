@@ -91,6 +91,7 @@ void run(NucleoFind::IO::Input &input, NucleoFind::IO::Output &output, int cycle
     NautilusUtil::set_reference(ippdb_ref);
     NucleicAcidTargets natools;
     natools.add_pdb(ippdb_ref);
+    NucleicAcidTools tools;
 
     // setup
     auto mtz_file = NucleoFind::IO::MTZ(input, res_in);
@@ -132,7 +133,7 @@ void run(NucleoFind::IO::Input &input, NucleoFind::IO::Output &output, int cycle
 
         for (int cyc = 0; cyc < cycles; cyc++) {
             std::cout << "ML Based cycle " << clipper::String(cyc + 1, 3) << std::endl << std::endl;
-            mol_wrk = run_cycle(verbose, natools, seq_wrk, mol_wrk, xwrk, log, false);
+            mol_wrk = run_cycle(verbose, natools, seq_wrk, mol_wrk, xwrk, log, true);
             NucleicAcidTools::chain_label(mol_wrk, clipper::MMDBManager::CIF);
             mol_wrk = NucleicAcidTools::chain_sort(mol_wrk);
             NucleicAcidTools::residue_label(mol_wrk);
