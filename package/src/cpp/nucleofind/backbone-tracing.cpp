@@ -190,7 +190,7 @@ std::vector<double> NucleoFind::BackboneTracer::score_monomers_individually(std:
     std::vector<double> scores;
     scores.reserve(monomers.size());
     for (auto &monomer: monomers) {
-        scores.emplace_back(score_monomer(monomer, false, true));
+        scores.emplace_back(score_monomer(monomer, true, true));
     }
     return scores;
 }
