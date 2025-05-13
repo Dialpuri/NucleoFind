@@ -21,7 +21,7 @@ namespace NucleoFind {
             m_base = const_cast<clipper::Xmap<float>* >(predicted_maps.get_base_map());
         };
 
-        clipper::MiniMol find(clipper::MiniMol &mol_wrk);
+        clipper::MiniMol find(clipper::MiniMol &mol_wrk, bool refine = true);
 
         static clipper::MiniMol aggregate_nucleic_protein(clipper::MiniMol &find_result, clipper::MiniMol &mol);
         

@@ -8,8 +8,8 @@
 #include "src/cpp/nautilus-tools.h"
 #include "src/cpp/nautilus-util.h"
 
-clipper::MiniMol NucleoFind::Find::find(clipper::MiniMol &mol_wrk) {
-    clipper::MiniMol phosphate_peaks = MapToPoints::locate_peaks(m_xwrk, *m_phosphate, 0.1, true);
+clipper::MiniMol NucleoFind::Find::find(clipper::MiniMol &mol_wrk, bool refine) {
+    clipper::MiniMol phosphate_peaks = MapToPoints::locate_peaks(m_xwrk, *m_phosphate, 0.1, refine);
     NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
     BackboneTracer b = {phosphate_peaks, m_xwrk, m_predicted_maps};
     clipper::MiniMol find_result = b.build();

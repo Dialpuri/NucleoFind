@@ -23,9 +23,10 @@ nb::class_<NucleoFind::IO::Input>(m, "Input")
              const std::string&, // colin_hl
              const std::string&, // colin_phifom
              const std::string&,  // colin_fc
-             const std::string&  >(), // colin_free
+             const std::string&, // colin_free
+             const bool&>(),
              "mtzin"_a, "seqin"_a, "pdbin"_a, "phospredin"_a, "sugarpredin"_a, "basepredin"_a, "colin_fo"_a,
-             "colin_hl"_a, "colin_phifom"_a, "colin_fc"_a, "colinfree"_a, "Input to NucleoFind"
+             "colin_hl"_a, "colin_phifom"_a, "colin_fc"_a, "colinfree"_a, "bool"_a, "Input to NucleoFind"
              );
 
 nb::class_<NucleoFind::IO::Output>(m, "Output")

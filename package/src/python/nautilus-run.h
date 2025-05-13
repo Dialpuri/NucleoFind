@@ -30,12 +30,14 @@ run_cycle(const int verbose, const NucleicAcidTargets &natools, const clipper::M
     int nas_found = NautilusUtil::count_nas(mol_wrk);
     if (nas_found == 0) { return mol_wrk;}
 
-    mol_wrk = natools.grow(xwrk, mol_wrk, 25, 0.001);
-    log.log("GROW", mol_wrk, verbose >= 5);
 
     ModelTidy::chain_renumber(mol_wrk, seq_wrk);
     NucleicAcidTools::chain_sort(mol_wrk);
+    NucleicAcidTools::chain_label(mol_wrk, clipper::MMDBManager::CIF);
     NucleicAcidTools::residue_label(mol_wrk);
+
+    mol_wrk = natools.grow(xwrk, mol_wrk, 25, 0.001);
+    log.log("GROW", mol_wrk, verbose >= 5);
 
     // join
     if (!strong_prune) {
@@ -116,7 +118,7 @@ void run(NucleoFind::IO::Input &input, NucleoFind::IO::Output &output, int cycle
     // find with NucleoFind predictions
     NucleoFind::PredictedMaps predicted_maps = prediction_files.get_predictions();
     NucleoFind::Find find = {xwrk, predicted_maps};
-    mol_wrk = find.find(mol_wrk);
+    mol_wrk = find.find(mol_wrk, !(input.is_em()));
     log.log("FIND ML", mol_wrk, verbose >= 5);
 
     int nas_found = NautilusUtil::count_nas(mol_wrk);

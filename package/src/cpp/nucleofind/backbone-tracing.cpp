@@ -551,10 +551,12 @@ clipper::MiniMol NucleoFind::BackboneTracer::build_chains() {
         for (int lc = 0; lc < local_chains.size(); lc++) {
             // build local chain in both directions
             FragmentResult forward_result = build_chain(local_chains[lc]);
-            for (auto& x: local_chains[lc]) {
-                std::cout << x << "->";
-            }
-            std::cout << std::endl;
+
+            // for (auto& x: local_chains[lc]) {
+            //     std::cout << x << "->";
+            // }
+            // std::cout << std::endl;
+
             std::reverse(local_chains[lc].begin(), local_chains[lc].end());
             FragmentResult backward_result = build_chain(local_chains[lc]);
 
@@ -566,8 +568,8 @@ clipper::MiniMol NucleoFind::BackboneTracer::build_chains() {
             double backward_score = std::accumulate(backward_result.scores.begin(), backward_result.scores.end(), 0.0);
 
 
-            std::cout << "Forward score = " << forward_score << std::endl;
-            std::cout << "Backward score = " << backward_score << std::endl;
+            // std::cout << "Forward score = " << forward_score << std::endl;
+            // std::cout << "Backward score = " << backward_score << std::endl;
 
             // take the best direction
             bool forward = false;
