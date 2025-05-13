@@ -22,6 +22,7 @@ class InputParameters:
     colinphifom: str | pathlib.Path = ""
     colinfc: str | pathlib.Path = ""
     colinfree: str | pathlib.Path = ""
+    em: bool = False
     cycles: int = 3
 
 
@@ -47,6 +48,7 @@ def main():
     parser.add_argument("-colin-free", required=False, default="")
     parser.add_argument("-xmlout", required=False, default="")
     parser.add_argument("-cycles", required=False, default=3)
+    parser.add_argument("--em", required=False, default=False, action='store_true')
     parser.add_argument("-v", "--version", action="version", version=__version__)
 
     args = parser.parse_args()
@@ -102,6 +104,7 @@ def main():
         args.colin_phifom,
         args.colin_fc,
         args.colin_free,
+        args.em
     )
 
     output = Output(args.pdbout, args.xmlout)
