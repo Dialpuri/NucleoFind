@@ -83,7 +83,7 @@ def predictions_cmdline(parameters) -> Path:
         str: The path to the output file.
     """
     output = parameters.output.parent / ("cmd_" + parameters.output.stem)
-    cmd = f'nucleofind -i "{parameters.mtzin}" -o "{output}" -m {parameters.model_name} -no-symmetry'
+    cmd = f'nucleofind -i "{parameters.mtzin}" -o "{output}" -m {parameters.model_name} --no-use-symmetry'
     os.system(cmd)
     return output
 

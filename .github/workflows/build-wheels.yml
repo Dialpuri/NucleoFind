@@ -52,7 +52,9 @@ jobs:
         run: pip install pytest
 
       - name: Install NucleoFind models
-        run:  nucleofind-install --all
+        run:  |
+          nucleofind-install -m nano
+          nucleofind-install -m core
 
       - name: Run tests
         run : pytest tests
