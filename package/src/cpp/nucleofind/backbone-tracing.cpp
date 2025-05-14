@@ -28,15 +28,15 @@ void NucleoFind::BackboneTracer::find_nearby_nodes(const clipper::MAtomNonBond &
     clipper::Coord_orth current_atom_coord_orth = input[a].coord_orth();
     clipper::Coord_frac current_atom_coord_frac = current_atom_coord_orth.coord_frac(xgrid.cell());
     std::vector<clipper::MAtomIndexSymmetry> nearby = nb(current_atom_coord_orth, max_distance);
-    for (const auto &near: nearby) {
-        if (near.atom() == a) continue;
-        clipper::Coord_orth nearby_atom_coord_orth = input[near.atom()].coord_orth();
+    for (const auto &neighbour: nearby) {
+        if (neighbour.atom() == a) continue;
+        clipper::Coord_orth nearby_atom_coord_orth = input[neighbour.atom()].coord_orth();
         clipper::Coord_frac nearby_atom_coord_frac = nearby_atom_coord_orth.coord_frac(xgrid.cell());
         clipper::Coord_frac nearby_atom_symmetry_copy = nearby_atom_coord_frac.symmetry_copy_near(
             xgrid.spacegroup(), xgrid.cell(), current_atom_coord_frac);
         clipper::Coord_orth nearby_atom_symmetry_copy_orth = nearby_atom_symmetry_copy.coord_orth(xgrid.cell());
 
-        determine_edge(a, near.atom(), current_atom_coord_orth, nearby_atom_symmetry_copy_orth);
+        determine_edge(a, neighbour.atom(), current_atom_coord_orth, nearby_atom_symmetry_copy_orth);
     }
 }
 
