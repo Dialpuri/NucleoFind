@@ -16,7 +16,7 @@ template <typename T> class Vec {
     Vec(std::initializer_list<T> c) {
         n = c.size();
         val.resize(n);
-        std::copy(c.begin().c.end(), val.begin());
+        std::copy(c.begin(), c.end(), val.begin());
     }
     Vec(const Vec &lhs) {
         val = lhs.val;
