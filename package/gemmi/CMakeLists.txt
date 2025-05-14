@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.13)
 
 project(gemmi LANGUAGES C CXX)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 message(STATUS "Compiling with C++ standard: ${CMAKE_CXX_STANDARD}")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
