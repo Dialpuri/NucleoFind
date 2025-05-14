@@ -3,6 +3,7 @@
 //
 
 #include "predicted-maps.h"
+#include "refine.h"
 
 #include <iostream>
 #include <set>
@@ -135,8 +136,7 @@ clipper::MiniMol NucleoFind::MapToPoints::refine_peaks(clipper::MiniMol &mol, cl
 }
 
 clipper::Coord_orth NucleoFind::DensityRefiner::refine_position(const clipper::Coord_orth &position, bool use_restraints) {
-
-    auto lambda = [&](std::vector<double>& x) -> double {
+    std::function<double(std::vector<double>)> lambda = [&](std::vector<double> x) {
         clipper::Coord_orth current_position = {x[0], x[1], x[2]};
         clipper::Coord_frac current_position_f = current_position.coord_frac(this->xwrk.cell());
         if (use_restraints) {
@@ -144,6 +144,7 @@ clipper::Coord_orth NucleoFind::DensityRefiner::refine_position(const clipper::C
         }
         return this->xwrk.interp<clipper::Interp_cubic>(current_position_f);
     };
+
     std::vector<double> initial_values = {position.x(), position.y(), position.z()};
     std::vector<std::vector<double>> initial_simplex = {
         {initial_values[0], initial_values[1], initial_values[2]},
@@ -151,8 +152,10 @@ clipper::Coord_orth NucleoFind::DensityRefiner::refine_position(const clipper::C
         {initial_values[0], initial_values[1]+0.1, initial_values[2]},
         {initial_values[0], initial_values[1], initial_values[2]+0.1}
     };
-    std::vector<double> final_values = nelder_mead::find_min(lambda, initial_values, false, initial_simplex, 1e-8, 1e-8, 100, 100000);
+    SimplexOptimiser simplex = SimplexOptimiser(3);
+    std::vector<double> final_values = simplex(lambda, initial_simplex);
     clipper::Coord_orth final_position = {final_values[0], final_values[1], final_values[2]};
+
     return final_position;
 }
 

@@ -93,12 +93,12 @@ add_library(
   ${WRK_DIR}/src/cpp/nautilus-tools.cpp
   ${WRK_DIR}/src/cpp/nautilus-util.cpp
   ${WRK_DIR}/src/cpp/nucleicacid_db.cpp
-#  ${WRK_DIR}/src/cpp/nautilus-findml.cpp
   ${WRK_DIR}/src/cpp/nucleofind/predicted-maps.cpp
   ${WRK_DIR}/src/cpp/nucleofind/nucleofind.cpp
   ${WRK_DIR}/src/cpp/nucleofind/backbone-tracing.cpp
   ${WRK_DIR}/src/cpp/nucleofind/fragment-library.cpp
   ${WRK_DIR}/src/cpp/nucleofind/input.cpp
+  ${WRK_DIR}/src/cpp/nucleofind/refine.cpp
 )
 
 target_link_directories(
