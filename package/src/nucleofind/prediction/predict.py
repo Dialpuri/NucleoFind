@@ -198,6 +198,7 @@ def predict_map(
     amplitude: str = "FWT",
     phase: str = "PHWT",
     overlap: int = None,
+    nthreads: int = 1
 ):
     """Run prediction from Python"""
     logging.info(
@@ -209,7 +210,7 @@ def predict_map(
         use_gpu=False,
         disable_progress_bar=False,
         compute_entire_unit_cell=False,
-        n_threads=1,
+        n_threads=nthreads,
         **vars(model_configuration),
     )
     prediction = NucleoFind(model_path, configuration=configuration)
