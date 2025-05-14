@@ -8,16 +8,10 @@
 
 #include "predicted-maps.h"
 #include "nucleofind-utils.h"
-#include <iostream>
-#include <unordered_set>
 #include <set>
+#include <vector>
 
 #include <clipper/minimol/minimol_utils.h>
-#include <gemmi/neighbor.hpp>
-#include <gemmi/to_cif.hpp>
-#include <gemmi/to_mmcif.hpp>
-#include <gemmi/to_pdb.hpp>
-
 #include "fragment-library.h"
 
 namespace NucleoFind {
