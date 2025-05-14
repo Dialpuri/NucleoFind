@@ -94,27 +94,11 @@ add_library(
   ${WRK_DIR}/src/cpp/nautilus-util.cpp
   ${WRK_DIR}/src/cpp/nucleicacid_db.cpp
   ${WRK_DIR}/src/cpp/nautilus-findml.cpp
-#  ${WRK_DIR}/src/cpp/nautilus-findml.h
-#        ${WRK_DIR}/src/cpp/nucleofind/predicted-maps.h
-        ${WRK_DIR}/src/cpp/nucleofind/predicted-maps.cpp
-#        ${WRK_DIR}/src/cpp/nucleofind/nucleofind.h
-        ${WRK_DIR}/src/cpp/nucleofind/nucleofind.cpp
-        ${WRK_DIR}/src/cpp/nucleofind/backbone-tracing.cpp
-#        ${WRK_DIR}/src/cpp/nucleofind/backbone-tracing.h
-        ${WRK_DIR}/src/cpp/nucleofind/fragment-library.cpp
-#        ${WRK_DIR}/src/cpp/nucleofind/fragment-library.h
-        ${WRK_DIR}/src/cpp/nucleofind/input.cpp
-#        ${WRK_DIR}/src/cpp/nucleofind/input.h
-
-)
-
-# add_executable(cnautilus ${WRK_DIR}/src/cpp/cnautilus.cpp)
-# set_target_properties(cnautilus PROPERTIES OUTPUT_NAME nautilus)
-# target_compile_features(cnautilus INTERFACE cxx_std_17)
-
-# target_include_directories(cnautilus PUBLIC checkout/gemmi)
-set(LINK_LIBS
-    "gemmi_cpp nautilus_lib ccp4 fftw rfftw mmdb2 clipper-mmdb clipper-cif clipper-core clipper-contrib clipper-minimol clipper-ccp4 clipper-gemmi"
+  ${WRK_DIR}/src/cpp/nucleofind/predicted-maps.cpp
+  ${WRK_DIR}/src/cpp/nucleofind/nucleofind.cpp
+  ${WRK_DIR}/src/cpp/nucleofind/backbone-tracing.cpp
+  ${WRK_DIR}/src/cpp/nucleofind/fragment-library.cpp
+  ${WRK_DIR}/src/cpp/nucleofind/input.cpp
 )
 
 target_link_directories(
@@ -130,7 +114,8 @@ target_link_directories(
   ${CMAKE_BINARY_DIR}/rfftw
   ${CMAKE_BINARY_DIR}/ccp4
   ${CMAKE_BINARY_DIR}/mmdb2
-  ${CMAKE_BINARY_DIR}/gemmi)
+#  ${CMAKE_BINARY_DIR}/gemmi
+)
 
 target_link_libraries(
   nautilus_lib
@@ -143,7 +128,7 @@ target_link_libraries(
          rfftw
          fftw
          mmdb2
-         gemmi_cpp
+#         gemmi_cpp
 )
 
 if(CCP4BUILD)
@@ -166,9 +151,6 @@ set(nautilus_HEADERS
     ${WRK_DIR}/src/cpp/nautilus-util.h
     ${WRK_DIR}/src/cpp/nucleicacid_db.h
     ${WRK_DIR}/src/python/nautilus-include.h)
-# set_target_properties(cnautilus PROPERTIES PUBLIC_HEADER
-# "${nautilus_HEADERS}") install(TARGETS cnautilus LIBRARY DESTINATION lib
-# PUBLIC_HEADER DESTINATION ${WRK_DIR}/include/nautilus)
 
 # Try to import all Python components potentially needed by nanobind
 find_package(
@@ -212,7 +194,8 @@ target_link_directories(
   ${CMAKE_BINARY_DIR}/rfftw
   ${CMAKE_BINARY_DIR}/ccp4
   ${CMAKE_BINARY_DIR}/mmdb2
-  ${CMAKE_BINARY_DIR}/gemmi)
+#  ${CMAKE_BINARY_DIR}/gemmi
+)
 
 target_link_libraries(
   nautilus_module
@@ -226,7 +209,8 @@ target_link_libraries(
           rfftw
           fftw
           mmdb2
-          gemmi_cpp)
+#          gemmi_cpp
+)
 
 if(CCP4BUILD)
   target_link_libraries(nautilus_module PUBLIC ccp4c)
