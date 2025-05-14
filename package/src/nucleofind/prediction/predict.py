@@ -168,7 +168,7 @@ def run():
     """Run prediction from command line arguments"""
     setup_logging()
     args = parse_arguments()
-    model_path = find_model(args.m)
+    model_path = find_model(args.model)
     model_configuration = get_model_config(model_path, args.overlap)
     configuration = Configuration(
         use_gpu=args.gpu,
@@ -176,15 +176,15 @@ def run():
         compute_entire_unit_cell=False,
         use_raw_values=args.raw,
         compute_variance=args.variance,
-        n_threads=args.n,
+        n_threads=args.nthreads,
         **vars(model_configuration),
     )
     nucleofind = NucleoFind(model_path, configuration)
     nucleofind.predict(
-        args.i,
+        args.input,
         [args.amplitude, args.phase],
     )
-    output_dir = Path(args.o)
+    output_dir = Path(args.output)
     nucleofind.save_grid(MapType.phosphate, output_dir)
     nucleofind.save_grid(MapType.sugar, output_dir)
     nucleofind.save_grid(MapType.base, output_dir)
