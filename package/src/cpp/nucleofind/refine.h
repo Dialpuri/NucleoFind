@@ -6,6 +6,7 @@
 #define REFINE_H
 
 #include "vector"
+#include "functional"
 #include <clipper/clipper.h>
 
 class SimplexOptimiser {
