@@ -23,14 +23,14 @@
     </chapter>
 
     <chapter title="Example Usage" id="example">
-        <p>Simple Syntax:</p>
+        <p>Simple Syntax :</p>
         <code-block lang="shell">
-            nucleofind -m nano -i reflections.mtz -o predicted.map
+            nucleofind -i reflections.mtz
         </code-block>
 
         <p>Advanced Syntax:</p>
         <code-block lang="shell">
-            nucleofind -m core -i reflections.mtz -o predicted.map -r 2.5 -amplitude F -phase phi
+            nucleofind -m core -i reflections.mtz -o output_dir -r 2.5 -amplitude F_phi.F -phase F_phi.phi
         </code-block>
     </chapter>
 
@@ -38,17 +38,17 @@
         <p>Description of each option:</p>
 
         <deflist type="medium">
-            <def title="-i, -input">
+            <def title="-i, --input">
                 Path to input file.
                 <p>Formats accepted: MTZ, CCP4, MRC and zipped equivalents</p>
                 <b>Required</b>
             </def>
-            <def title="-o, -output">
+            <def title="-o, --output">
                 <p>Path to output folder which will contain NucleoFind predicted phosphate, sugar, and base maps.</p>
                 <p>e.g. <code> -o nucleofind-predictions</code></p>
                 <b>Required</b>
             </def>
-            <def title="-m ">
+            <def title="-m, --model">
                 <p>Name of NucleoFind model</p>
                 <p>Available Models:</p>
                 <list>
@@ -57,26 +57,26 @@
                 </list>
                 <p>Optional if only one model is installed, otherwise required.</p>
             </def>
-            <def title="-r, -resolution">
+            <def title="-r, --resolution">
                 <p>Resolution cutoff off to use with reflection data</p>
                 <p>E.g. a value of <code>2.5</code> uses only the 2.5 Angstrom and greater reflctions in the map
                 calculation</p>
             </def>
-            <def title="-n, -nthreads">
+            <def title="-n, --nthreads">
                 <p>Number of threads to use</p>
                 <p>Default: Max available</p>
             </def>
-            <def title="-f, -amplitude">
+            <def title="-f, --amplitude">
                 Column name of structure factor amplitudes.
                 <p>Default: FWT</p>
             </def>
-            <def title="-phi, -phase">
+            <def title="-phi, --phase">
                 Column name of structure factor phases.
                 <p>Default: PHWT</p>
             </def>
-             <def title="-no-symmetry">
+             <def title="--use-symmetry">
                 <p>Predict over the entire unit cell instead of the asymmetric unit</p>
-                 <p>Default: True</p>
+                 <p>Default: False</p>
                 <b>Advanced</b>
             </def>
 <!--            <def title="-raw">-->
@@ -87,7 +87,7 @@
 <!--                <p>Use point-wise variance values to form the output map.</p>-->
 <!--                <b>Advanced</b>-->
 <!--            </def>-->
-            <def title="-gpu">
+            <def title="--gpu">
                 <p>Use GPU acceleration. (Linux only)</p>
                 <b>Advanced</b>
             </def>
@@ -95,10 +95,10 @@
 <!--                <p>Path to ONNX model for use with a custom model.</p>-->
 <!--                <b>Advanced</b>-->
 <!--            </def>-->
-            <def title="-debug">
+            <def title="--debug">
                 <p>Enable debug logging.</p>
             </def>
-            <def title="-silent">
+            <def title="--silent">
                 <p>Disable progress bar.</p>
             </def>
             <def title="-h, --help">

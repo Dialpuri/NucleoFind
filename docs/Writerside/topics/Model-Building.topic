@@ -51,21 +51,21 @@
         <p>Description of each option:</p>
 
         <deflist type="medium">
-            <def title="-mtzin">
+            <def title="--mtzin">
                 <p>Path to MTZ file.</p>
                 <b>Required</b>
             </def>
-            <def title="-seqin">
+            <def title="--seqin">
                 Path to sequence or FASTA file.
             </def>
-            <def title="-pdbin">
+            <def title="--pdbin">
                 Path to input model.
             </def>
-            <def title="-pdbout">
+            <def title="--pdbout">
                 <p>Path to output model</p>
                 <b>Required</b>
             </def>
-            <def title="-phosin">
+            <def title="--phosin">
                 <p>Path to the predicted phosphate map</p>
                 <b>Required</b>
                 <note>
@@ -74,30 +74,34 @@
                     <p>e.g. <code>-phosin auto</code></p>
                 </note>
             </def>
-            <def title="-sugarin">
+            <def title="--sugarin">
             Path to the predicted sugar map
             </def>
-            <def title="-basein">
+            <def title="--basein">
                 Path to the predicted base map
             </def>
-            <def title="-colin-fo">
+            <def title="--colin-fo">
                 <p>Column name for observed structure factors</p>
                 <p>Example: FP,SIGFP</p>
             </def>
-            <def title="-colin-fc">
+            <def title="--colin-fc">
                 <p>Column name for map coefficients</p>
                 <p>Example: FWT,PHWT</p>
             </def>
-            <def title="-colin-free">
+            <def title="--colin-free">
                 <p>Column name for free reflections</p>
                 <p>Example: FREE</p>
             </def>
-            <def title="-xmlout">
+            <def title="--xmlout">
                 <p>Path to XML summary</p>
             </def>
-            <def title="-cycles">
+            <def title="--cycles">
                 <p>Number of cycles to run</p>
                 <p>Default: 3</p>
+            </def>
+            <def title="--em">
+                <p>Enable EM mode</p>
+                <p>EM mode prevents phosphate position refinement </p>
             </def>
         </deflist>
     </chapter>

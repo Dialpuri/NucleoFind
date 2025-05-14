@@ -75,23 +75,13 @@ def run():
         required=False,
         default=output_list[1],
     )
-    parser.add_argument("--all", required=False, action="store_true")
     parser.add_argument("--update", required=False, action="store_true")
     parser.add_argument("-v", "--version", action="version", version=__version__)
 
     args = parser.parse_args()
 
-    if not args.all and not args.model:
+    if not args.model:
         print("Please specify a model you wish to download")
-        return
-
-    if args.all:
-        status = [
-            install_model(type=type, location=args.output, reinstall=args.update)
-            for type in model.ModelType
-        ]
-        if not any(status):
-            print("There was a problem with installation of one of the models.", status)
         return
 
     install_model(
