@@ -82,6 +82,10 @@ void run(NucleoFind::IO::Input &input, NucleoFind::IO::Output &output, int cycle
     clipper::MMDBManager::TYPE cifflag = clipper::MMDBManager::Default;
 
 
+    if (!input.get_database().has_value()) {
+        throw std::runtime_error("NucleoFind could not locate the fragment library.");
+    }
+
     // Get reference model
     NautilusUtil::set_reference(ippdb_ref);
     NucleicAcidTargets natools;
@@ -110,7 +114,7 @@ void run(NucleoFind::IO::Input &input, NucleoFind::IO::Output &output, int cycle
 
     // find with NucleoFind predictions
     NucleoFind::PredictedMaps predicted_maps = prediction_files.get_predictions();
-    NucleoFind::Find find = {xwrk, predicted_maps};
+    NucleoFind::Find find = {xwrk, predicted_maps, input.get_database().value()};
     mol_wrk = find.find(mol_wrk, !(input.is_em()));
     log.log("FIND ML", mol_wrk, verbose >= 5);
 

@@ -3,6 +3,8 @@
 import dataclasses
 import pathlib
 import traceback
+from importlib.metadata import PackageNotFoundError
+from importlib.resources import files
 
 from .nautilus_module import Input, Output, run
 import argparse
@@ -31,6 +33,13 @@ class OutputParameters:
     pdbout: str | pathlib.Path = ""
     xmlout: str | pathlib.Path = ""
 
+
+def find_database() -> str:
+    try:
+        data_path = files("nucleofind.data").joinpath("database.cif")
+        return str(data_path)
+    except (FileNotFoundError, PackageNotFoundError) as e:
+        return ""
 
 def main():
     parser = argparse.ArgumentParser(description="nucleofind build")
@@ -91,7 +100,9 @@ def main():
 
     if not args.colin_fc and not args.colin_phifom: 
         raise ValueError("Please specify columns for the phases, either FWT,PHWT or PHI,FOM")
-    
+
+    database = find_database()
+
     input = Input(
         args.mtzin,
         args.seqin,
@@ -104,7 +115,8 @@ def main():
         args.colin_phifom,
         args.colin_fc,
         args.colin_free,
-        args.em
+        args.em,
+        database
     )
 
     output = Output(args.pdbout, args.xmlout)
@@ -116,6 +128,8 @@ def main():
 
 
 def build(input_parameters: InputParameters, output_parameters: OutputParameters):
+    database = find_database()
+
     input = Input(
         str(input_parameters.mtzin),
         str(input_parameters.seqin),
@@ -128,7 +142,8 @@ def build(input_parameters: InputParameters, output_parameters: OutputParameters
         str(input_parameters.colinphifom),
         str(input_parameters.colinfc),
         str(input_parameters.colinfree),
-        input_parameters.em
+        input_parameters.em,
+        database
     )
     output = Output(str(output_parameters.pdbout), str(output_parameters.xmlout))
 

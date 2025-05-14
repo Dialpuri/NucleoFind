@@ -118,8 +118,9 @@ namespace NucleoFind {
     struct BackboneTracer {
         BackboneTracer(clipper::MiniMol& mol,
                         clipper::Xmap<float>& xgrid,
-                        PredictedMaps& predicted_maps): mol(mol), xgrid(xgrid), predicted_maps(predicted_maps) {
-            library = TriNucleotideLibrary("");
+                        PredictedMaps& predicted_maps,
+                        const std::string& database_path): mol(mol), xgrid(xgrid), predicted_maps(predicted_maps) {
+            library = TriNucleotideLibrary(database_path);
             initialise_tracer();
         };
 

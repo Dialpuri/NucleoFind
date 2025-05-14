@@ -13,20 +13,23 @@ using namespace nb::literals;
 
 NB_MODULE(nautilus_module, m) {
 nb::class_<NucleoFind::IO::Input>(m, "Input")
-            .def(nb::init< const std::string&, // mtzin
-             const std::string&, // seqin
-             const std::string&, // pdbin
-             const std::string&, // phospredin
-             const std::string&, // sugarpredin
-             const std::string&, // basepredin
-             const std::string&, // colin_fo
-             const std::string&, // colin_hl
-             const std::string&, // colin_phifom
-             const std::string&,  // colin_fc
-             const std::string&, // colin_free
-             const bool&>(),
+            .def(nb::init<
+                 const std::string&, // mtzin
+                 const std::string&, // seqin
+                 const std::string&, // pdbin
+                 const std::string&, // phospredin
+                 const std::string&, // sugarpredin
+                 const std::string&, // basepredin
+                 const std::string&, // colin_fo
+                 const std::string&, // colin_hl
+                 const std::string&, // colin_phifom
+                 const std::string&,  // colin_fc
+                 const std::string&, // colin_free
+                 const bool&, // em
+                 const std::string& // database
+             >(),
              "mtzin"_a, "seqin"_a, "pdbin"_a, "phospredin"_a, "sugarpredin"_a, "basepredin"_a, "colin_fo"_a,
-             "colin_hl"_a, "colin_phifom"_a, "colin_fc"_a, "colinfree"_a, "bool"_a, "Input to NucleoFind"
+             "colin_hl"_a, "colin_phifom"_a, "colin_fc"_a, "colinfree"_a, "bool"_a, "database"_a, "Input to NucleoFind"
              );
 
 nb::class_<NucleoFind::IO::Output>(m, "Output")

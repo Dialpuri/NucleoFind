@@ -15,7 +15,7 @@ namespace NucleoFind {
 
     class Find {
     public:
-        Find(clipper::Xmap<float>& xwrk, PredictedMaps& predicted_maps): m_xwrk(xwrk), m_predicted_maps(predicted_maps) {
+        Find(clipper::Xmap<float>& xwrk, PredictedMaps& predicted_maps, const std::string& database_path): m_xwrk(xwrk), m_predicted_maps(predicted_maps), m_database_path(database_path) {
             m_phosphate = const_cast<clipper::Xmap<float> *>(predicted_maps.get_phosphate_map());
             m_sugar = const_cast<clipper::Xmap<float> *>(predicted_maps.get_sugar_map());
             m_base = const_cast<clipper::Xmap<float>* >(predicted_maps.get_base_map());
@@ -34,6 +34,8 @@ namespace NucleoFind {
         clipper::Xmap<float>* m_base;
 
         PredictedMaps m_predicted_maps;
+
+        std::string m_database_path;
     };
 
 

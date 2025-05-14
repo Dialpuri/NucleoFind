@@ -30,7 +30,8 @@ namespace NucleoFind::IO {
             const std::string &colin_phifom,
             const std::string &colin_fc,
             const std::string &colin_free,
-            const bool& em
+            const bool& em,
+            const std::string& database
         ) {
             this->mtzin = mtzin;
             this->seqin = seqin;
@@ -45,6 +46,7 @@ namespace NucleoFind::IO {
             this->colin_fc = colin_fc;
             this->colin_free = colin_free;
             this->em = em;
+            this->database = database;
 
             if (mtzin.empty()) { throw std::runtime_error("MTZ path must not be empty"); }
             //        if (seqin.empty()) { throw std::runtime_error("SEQ Path must not be empty");}
@@ -114,6 +116,13 @@ namespace NucleoFind::IO {
             return em;
         }
 
+        [[nodiscard]] std::optional<std::string> get_database() const {
+            if (database.empty()) {
+                return std::nullopt;
+            }
+            return database;
+        }
+
     private:
         std::string mtzin;
         std::string seqin;
@@ -127,6 +136,7 @@ namespace NucleoFind::IO {
         std::string colin_fc;
         std::string colin_free;
         bool em;
+        std::string database;
     };
 
     class Output {

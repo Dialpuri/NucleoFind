@@ -10,8 +10,8 @@
 
 clipper::MiniMol NucleoFind::Find::find(clipper::MiniMol &mol_wrk, bool refine) {
     clipper::MiniMol phosphate_peaks = MapToPoints::locate_peaks(m_xwrk, *m_phosphate, 0.1, refine);
-    NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
-    BackboneTracer b = {phosphate_peaks, m_xwrk, m_predicted_maps};
+    // NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
+    BackboneTracer b = {phosphate_peaks, m_xwrk, m_predicted_maps, m_database_path};
     clipper::MiniMol find_result = b.build();
     return std::move(aggregate_nucleic_protein(find_result, mol_wrk));
 }
