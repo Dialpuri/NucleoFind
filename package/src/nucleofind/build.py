@@ -98,7 +98,7 @@ def main():
         args.sugarin = f"{args.preddirin}/nucleofind-sugar.map"
         args.basein = f"{args.preddirin}/nucleofind-base.map"
 
-    if not args.colin_fc and not args.colin_phifom: 
+    if not args.colin_fc and not args.colin_phifom:
         raise ValueError("Please specify columns for the phases, either FWT,PHWT or PHI,FOM")
 
     database = find_database()
