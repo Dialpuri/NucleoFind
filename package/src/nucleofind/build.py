@@ -128,10 +128,18 @@ def build(input_parameters: InputParameters, output_parameters: OutputParameters
         str(input_parameters.colinphifom),
         str(input_parameters.colinfc),
         str(input_parameters.colinfree),
+        input_parameters.em
     )
     output = Output(str(output_parameters.pdbout), str(output_parameters.xmlout))
 
-    run(input, output, input_parameters.cycles)
+    if not all([input_parameters.phosin, input_parameters.sugarin, input_parameters.basein]):
+        raise RuntimeError("The phosphate, sugar and base predictions are required.")
+
+    try:
+        run(input, output, input_parameters.cycles)
+    except:
+        print(traceback.format_exc())
+
 
 
 # def build(mtzin: str, seqin: str, pdbin: str, phosin: str, sugarin: str, basein: str, colin_fo: str, colin_fc: str,

@@ -1,15 +1,8 @@
 #include <clipper/clipper-ccp4.h>
-#include <clipper/clipper-contrib.h>
 #include <clipper/clipper-minimol.h>
 
 #include <gemmi/fourier.hpp>  // for get_size_for_hkl, get_f_phi_on_grid, ...
-
-#include <algorithm>
-#include <gemmi/refln.hpp>
-
-#include "../cpp/nucleicacid_db.h"
 #include "../cpp/nautilus-tools.h"
-#include "../cpp/nautilus-ss-find.h"
 #include "../cpp/nautilus-target.h"
 #include "../cpp/nautilus-join.h"
 #include "../cpp/nautilus-sequence.h"

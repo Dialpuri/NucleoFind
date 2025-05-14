@@ -94,17 +94,17 @@ add_library(
   ${WRK_DIR}/src/cpp/nautilus-util.cpp
   ${WRK_DIR}/src/cpp/nucleicacid_db.cpp
   ${WRK_DIR}/src/cpp/nautilus-findml.cpp
-  ${WRK_DIR}/src/cpp/nautilus-findml.h
-        ${WRK_DIR}/src/cpp/nucleofind/predicted-maps.h
+#  ${WRK_DIR}/src/cpp/nautilus-findml.h
+#        ${WRK_DIR}/src/cpp/nucleofind/predicted-maps.h
         ${WRK_DIR}/src/cpp/nucleofind/predicted-maps.cpp
-        ${WRK_DIR}/src/cpp/nucleofind/nucleofind.h
+#        ${WRK_DIR}/src/cpp/nucleofind/nucleofind.h
         ${WRK_DIR}/src/cpp/nucleofind/nucleofind.cpp
         ${WRK_DIR}/src/cpp/nucleofind/backbone-tracing.cpp
-        ${WRK_DIR}/src/cpp/nucleofind/backbone-tracing.h
+#        ${WRK_DIR}/src/cpp/nucleofind/backbone-tracing.h
         ${WRK_DIR}/src/cpp/nucleofind/fragment-library.cpp
-        ${WRK_DIR}/src/cpp/nucleofind/fragment-library.h
+#        ${WRK_DIR}/src/cpp/nucleofind/fragment-library.h
         ${WRK_DIR}/src/cpp/nucleofind/input.cpp
-        ${WRK_DIR}/src/cpp/nucleofind/input.h
+#        ${WRK_DIR}/src/cpp/nucleofind/input.h
 
 )
 
@@ -183,7 +183,7 @@ find_package(nanobind CONFIG REQUIRED)
 nanobind_add_module(
   nautilus_module STABLE_ABI NB_STATIC
   # Python bound functions here
-  ${WRK_DIR}/src/python/nautilus.cpp)
+  ${WRK_DIR}/src/python/nucleofind.cpp)
 
 target_include_directories(
   nautilus_module

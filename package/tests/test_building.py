@@ -34,14 +34,6 @@ def data_base_path():
 
 
 @pytest.fixture(scope='session', params=[
-    {"map_combination": [1, 0, 0]},
-    {"map_combination": [1, 1, 1]},
-])
-def permutation(request):
-    return request.param['map_combination']
-
-
-@pytest.fixture(scope='session', params=[
     {"pdb": "1hr2"},
     {"pdb": "5d5w"},
 ])
@@ -50,7 +42,7 @@ def test_example(request):
 
 
 @pytest.fixture(scope='session')
-def parameters(data_base_path, permutation, test_example):
+def parameters(data_base_path, test_example):
     input = nucleofind_build.InputParameters()
     data_dir = data_base_path / test_example
     input.mtzin = data_dir / "hklout.mtz"
@@ -60,9 +52,9 @@ def parameters(data_base_path, permutation, test_example):
         input.pdbin = ""
 
     input.seqin = data_dir / f"{test_example}.fasta"
-    input.phosin = data_dir / "nucleofind-phosphate.map" if permutation[0] else ""
-    input.sugarin = data_dir / "nucleofind-sugar.map" if permutation[1] else ""
-    input.basein = data_dir / "nucleofind-base.map" if permutation[2] else ""
+    input.phosin = data_dir / "nucleofind-phosphate.map"
+    input.sugarin = data_dir / "nucleofind-sugar.map"
+    input.basein = data_dir / "nucleofind-base.map"
     input.colinfo = "FP,SIGFP"
     input.colinfc = "FWT,PHWT"
     input.colinfree = "FREE"

@@ -5,7 +5,7 @@
 #include <nanobind/stl/string.h>
 
 #include "../cpp/nucleofind/input.h"
-#include "nautilus-run.h"
+#include "nucleofind-run.h"
 
 namespace nb = nanobind;
 
