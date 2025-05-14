@@ -10,7 +10,6 @@
 #include <gemmi/ccp4.hpp>
 #include <gemmi/model.hpp>
 #include "nucleofind-utils.h"
-#include "nelder-mead.h"
 
 namespace NucleoFind {
     class PredictedMaps {

@@ -16,6 +16,18 @@ class InstallLocation(enum.Enum):
     site_packages = 0
     ccp4 = 1
 
+def download_database(folder: Path, reinstall: bool = False, dry_run: bool = False):
+    """Download database from GitHub"""
+    nucleofind_model_dir = folder / "nucleofind_models"
+    nucleofind_model_dir.mkdir(exist_ok=True)
+    model_path = nucleofind_model_dir / f"nucleofind-database.cif"
+
+    url = f"https://raw.githubusercontent.com/Dialpuri/NucleoFind/refs/heads/new-find/package/database.cif"
+    logging.debug("Downloading database from %s", url)
+    if not dry_run:
+        urllib.request.urlretrieve(url, model_path)
+
+
 
 def clibd_error_msg():
     print("""CCP4 Environment Variable - CLIBD is not found.
@@ -44,6 +56,7 @@ def install_model(type: model.ModelType, location: str, reinstall: bool) -> bool
             )
         first_sitepackages = Path(site_packages_dir[0])
         model.download_model(type=type, folder=first_sitepackages, reinstall=reinstall)
+        download_database(folder=first_sitepackages, reinstall=reinstall)
         return True
 
 

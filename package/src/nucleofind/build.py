@@ -2,9 +2,10 @@
 
 import dataclasses
 import pathlib
+import site
 import traceback
 from importlib.metadata import PackageNotFoundError
-from importlib.resources import files
+
 
 from .nautilus_module import Input, Output, run
 import argparse
@@ -35,11 +36,11 @@ class OutputParameters:
 
 
 def find_database() -> str:
-    try:
-        data_path = files("nucleofind.data").joinpath("database.cif")
-        return str(data_path)
-    except (FileNotFoundError, PackageNotFoundError) as e:
-        return ""
+    for pkg in site.getsitepackages():
+        database_path = pathlib.Path(pkg) / "nucleofind_models" / "nucleofind-database.cif"
+        if database_path.exists():
+            return str(database_path)
+    return ""
 
 def main():
     parser = argparse.ArgumentParser(description="nucleofind build")
