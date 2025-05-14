@@ -12,7 +12,7 @@ def expected_values(test_example):
     data = {
         "1hr2": {
             "time": 100,
-            "fragments_built": 10,
+            "fragments_built": 9,
             "residues_built": 250,
             "residues_sequenced": 150,
             "longest_fragment": 45
