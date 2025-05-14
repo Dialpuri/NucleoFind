@@ -36,6 +36,8 @@ namespace NucleicAcidDB {
         O6_1 = clipper::Coord_orth(clipper::Vec3<>::null());
 
         int ip = monomer_1.lookup(" P  ", clipper::MM::ANY);
+        int iop1 = monomer_1.lookup(" OP1", clipper::MM::ANY);
+        int iop2 = monomer_1.lookup(" OP2", clipper::MM::ANY);
         int io5p1 = monomer_1.lookup(" O5'", clipper::MM::ANY);
         int ic5p1 = monomer_1.lookup(" C5'", clipper::MM::ANY);
         int ic4p1 = monomer_1.lookup(" C4'", clipper::MM::ANY);
@@ -62,6 +64,8 @@ namespace NucleicAcidDB {
 //        std::cout << ic8_1 << " " << in9_1 << std::endl;
 
         if (ip >= 0) { P = monomer_1[ip].coord_orth(); }
+        if (iop1 >= 0) { OP1 = monomer_1[iop1].coord_orth(); }
+        if (iop2 >= 0) { OP2 = monomer_1[iop2].coord_orth(); }
         if (io5p1 >= 0) { O5p1 = monomer_1[io5p1].coord_orth(); }
         if (ic5p1 >= 0) { C5p1 = monomer_1[ic5p1].coord_orth(); }
         if (ic4p1 >= 0) { C4p1 = monomer_1[ic4p1].coord_orth(); }
@@ -130,6 +134,14 @@ namespace NucleicAcidDB {
         }
         if (!O5p1.is_null()) {
             clipper::MAtom atom = NautilusUtil::create_atom(O5p1, "O5'", "O");
+            monomer.insert(atom);
+        }
+        if (!OP1.is_null()) {
+            clipper::MAtom atom = NautilusUtil::create_atom(OP1, "OP1", "O");
+            monomer.insert(atom);
+        }
+        if (!OP2.is_null()) {
+            clipper::MAtom atom = NautilusUtil::create_atom(OP2, "OP2", "O");
             monomer.insert(atom);
         }
 

@@ -293,7 +293,7 @@ FindML::find_triplet_coordinates(const clipper::MiniMol &phosphate_peaks, const 
     bool use_sugar_map = false;
     clipper::MAtomNonBond sugar_non_bond;
     if (!sugar_peaks.is_null()) {
-        sugar_non_bond = clipper::MAtomNonBond(sugar_peaks, 2);
+        sugar_non_bond = clipper::MAtomNonBond(sugar_peaks, 1);
         use_sugar_map = true;
     }
 
@@ -303,8 +303,8 @@ FindML::find_triplet_coordinates(const clipper::MiniMol &phosphate_peaks, const 
 
     TripletCoordinates return_list;
 
-    float target_angle = 140;
-    float target_range = 30;
+    float target_lower_bound = 110;
+    float target_upper_bound = 170;
 
     for (int atom = 0; atom < phosphate_peaks[p][m].size(); atom++) {
 
@@ -351,13 +351,12 @@ FindML::find_triplet_coordinates(const clipper::MiniMol &phosphate_peaks, const 
                 double angle = acos(AB_x_BC);
                 double angle_d = clipper::Util::rad2d(angle);
 
-                if (target_angle - target_range < angle_d && angle_d < target_angle + target_range) {
+                if (target_lower_bound < angle_d && angle_d < target_upper_bound) {
                     if (use_sugar_map) {
                         clipper::Coord_orth AB_center = first_atom_orth + 0.5 * (m_atom_orth - first_atom_orth);
                         clipper::Coord_orth BC_center = m_atom_orth + 0.5 * (third_atom_orth - m_atom_orth);
-
-                        if (!sugar_non_bond.atoms_near(AB_center, 2).empty() &&
-                            !sugar_non_bond.atoms_near(BC_center, 2).empty()) {
+                        if (!sugar_non_bond.atoms_near(AB_center, 1).empty() &&
+                            !sugar_non_bond.atoms_near(BC_center, 1).empty()) {
                             return_list.push_back({{first_atom.atom(), first_atom_orth},
                                                    {atom,              m_atom_orth},
                                                    {third_atom.atom(), third_atom_orth}});
@@ -551,42 +550,50 @@ NucleicAcidDB::ChainFull FindML::refine_fragment_coordinates(NucleicAcidDB::Chai
 
 
 clipper::MiniMol FindML::remove_bases(clipper::MiniMol &mol) {
-
-    std::vector<std::string> safe_list_pyr = {" C1'", " C2'", " C3'", " C4'", " C5'", " O3'", " O4'", " O5'", " P  ",
-                                              " N1 ",};
-
-    std::vector<std::string> safe_list_pur = {" C1'", " C2'", " C3'", " C4'", " C5'", " O3'", " O4'", " O5'", " P  ",
-                                              " N9 ",};
-
+    mol = NucleicAcidTools::flag_chains(mol);
+    std::vector<std::string> safe_list = {" C1'", " C2'", " C3'", " C4'", " C5'", " O3'", " O4'", " O5'", " P  ", " OP1", " OP2"};
     clipper::MiniMol safe_mol = {mol.spacegroup(), mol.cell()};
 
-
     for (int poly = 0; poly < mol.model().size(); poly++) {
+        if (mol[poly].exists_property("NON-NA")) {
+            safe_mol.model().insert(mol[poly]);
+        };
         clipper::MPolymer mp;
         mp.set_id(mol[poly].id());
         for (int mon = 0; mon < mol.model()[poly].size(); mon++) {
             clipper::MMonomer return_monomer;
             return_monomer.set_type(mol.model()[poly][mon].type());
             return_monomer.set_id(mol.model()[poly][mon].id());
-
-            for (int atom = 0; atom < mol.model()[poly][mon].size(); atom++) {
-                clipper::MAtom m_atom = mol.model()[poly][mon][atom];
-                if (mol.model()[poly][mon].lookup(" N9 ", clipper::MM::ANY) >= 0) {
-                    if (std::find(safe_list_pur.begin(), safe_list_pur.end(), m_atom.name()) != safe_list_pur.end()) {
-                        return_monomer.insert(m_atom);
-                    }
-                } else if (mol.model()[poly][mon].lookup(" N1 ", clipper::MM::ANY) >= 0) {
-                    if (std::find(safe_list_pyr.begin(), safe_list_pyr.end(), m_atom.name()) != safe_list_pyr.end()) {
-                        return_monomer.insert(m_atom);
-                    }
-                }
-
+            int c1 = mol[poly][mon].lookup(" C1'", clipper::MM::ANY);
+            if (c1 == -1) continue;
+            int n9 = mol.model()[poly][mon].lookup(" N9 ", clipper::MM::ANY);
+            int n1 = mol.model()[poly][mon].lookup(" N1 ", clipper::MM::ANY);
+            if (n1 == -1 && n9 == -1) {
+                continue;
             }
-
+            clipper::Coord_orth c1_coord = mol[poly][mon][c1].coord_orth();
+            double n9_dist = 101;
+            double n1_dist = 100;
+            if (n9 >= 0) {
+                n9_dist =  (c1_coord - mol[poly][mon][n9].coord_orth()).lengthsq();
+            }
+            if (n1 >= 0) {
+                n1_dist = (c1_coord - mol[poly][mon][n1].coord_orth()).lengthsq();
+            }
+            int closest_n = n9_dist < n1_dist ? n9 : n1;
+            for (int atom = 0; atom < mol.model()[poly][mon].size(); atom++) {
+                if (closest_n == atom) {
+                    return_monomer.insert(mol.model()[poly][mon][atom]);
+                    continue;
+                }
+               clipper::MAtom m_atom = mol.model()[poly][mon][atom];
+                if (std::find(safe_list.begin(), safe_list.end(), m_atom.name()) != safe_list.end()) {
+                    return_monomer.insert(m_atom);
+                }
+            }
             mp.insert(return_monomer);
         }
         safe_mol.model().insert(mp);
-
     }
 
     return safe_mol;
@@ -622,6 +629,7 @@ clipper::MiniMol FindML::filter_and_form_bidirectional_chain(PossibleFragments &
 clipper::MiniMol
 FindML::form_organised_chains(PossibleFragments &fragments, std::vector<std::vector<int>> &fragment_indices) const {
     clipper::MiniMol mol_ = clipper::MiniMol(xwrk.spacegroup(), xwrk.cell());
+    clipper::MAtomNonBond nb = clipper::MAtomNonBond(mol, 1.5);
 
     for (const auto &chain: fragment_indices) {
         clipper::MPolymer mp;
@@ -630,19 +638,36 @@ FindML::form_organised_chains(PossibleFragments &fragments, std::vector<std::vec
             std::pair<int, int> pair = std::make_pair(chain[i], chain[i + 1]);
 
             if (fragments.find(pair) == fragments.end()) {
-                std::cout << "not found a pair for " << pair.first << " " << pair.second << std::endl;
                 continue;
             }
 
             std::vector<NucleicAcidDB::NucleicAcidFull> fragment_list = fragments[pair];
             std::sort(fragment_list.begin(), fragment_list.end());
             auto f1 = fragment_list[fragment_list.size() - 1].get_mmonomer();
+
+            clipper::Atom p = f1.find(" P  ", clipper::MM::ANY);
+            auto nearby_atoms = nb.atoms_near(p.coord_orth(), 1.5);
+            bool nearby_p = false;
+            for (auto& near: nearby_atoms) {
+                // std::cout << "Nearby element is" <<  mol[near.polymer()][near.monomer()][near.atom()].element() << std::endl;
+                if ( mol[near.polymer()][near.monomer()][near.atom()].name().trim() == "P") {
+                    nearby_p = true;
+                    break;
+                }
+            }
+            if (nearby_p) {
+                // std::cout << "Found fragmnet nearby to another P, skipping" << std::endl;
+                continue;
+            }
+
             f1.set_type(fragment_list[fragment_list.size() - 1].get_type());
             f1.set_id(i);
             mp.insert(f1);
         }
 
-        mol_.insert(mp);
+        if (mp.size() != 0) {
+            mol_.insert(mp);
+        }
     }
 
     NucleicAcidTools::chain_label(mol_, clipper::MMDBManager::PDB);
@@ -745,6 +770,7 @@ FindML::PairedChainIndices FindML::organise_triplets_to_chains(TripletCoordinate
     std::vector<std::vector<int>> chains;
     std::set<std::vector<int>> completed_triplets;
 
+
     /**Go through each triplet and look to see whether there is a chain where it can be added to the front or back, if there is
      * do so. If not, create a new chain for that triplet.
      * Should create a large chain of triplets, but the output can be split depending on the start points.
@@ -773,20 +799,22 @@ FindML::PairedChainIndices FindML::organise_triplets_to_chains(TripletCoordinate
         completed_triplets.insert(triplet_ids);
     }
 
+
+
     /*chains could have become split depending on starting point, bring them together*/
     bool merging = true;
     while (merging) {
         merging = false;
         for (auto it1 = chains.begin(); it1 != chains.end(); ++it1) {
             for (auto it2 = it1 + 1; it2 != chains.end(); ++it2) {
-                if (std::equal((*it1).end() - 3, (*it1).end(), (*it2).begin())) {
-                    (*it1).insert((*it1).end(), (*it2).begin() + 3, (*it2).end());
+                if (std::equal(it1->end() - 3, it1->end(), it2->begin())) {
+                    it1->insert(it1->end(), it2->begin() + 3, it2->end());
                     it2 = chains.erase(it2);
                     merging = true;
                     break;
                 }
-                if (std::equal((*it1).begin(), (*it1).begin() + 3, (*it2).end() - 3)) {
-                    (*it2).insert((*it2).end(), (*it1).begin() + 3, (*it1).end());
+                if (std::equal(it1->begin(), it1->begin() + 3, it2->end() - 3)) {
+                    it2->insert(it2->end(), it1->begin() + 3, it1->end());
                     it1 = chains.erase(it1);
                     merging = true;
                     break;
@@ -797,6 +825,109 @@ FindML::PairedChainIndices FindML::organise_triplets_to_chains(TripletCoordinate
             }
         }
     }
+
+    // for (const auto& element : chains) {
+    //     for (auto& x: element) {
+    //         std::cout << x << ",";
+    //     }
+    //     std::cout << std::endl;
+    // }
+    //
+    // std::unordered_map<int,  std::vector<std::vector<std::vector<int>>::iterator>> start_indices;
+    // std::unordered_map<int,  std::vector<std::vector<std::vector<int>>::iterator>> end_indices;
+    // std::vector<std::vector<int>> joined_chains;
+    //
+    // for (auto it = chains.begin(); it != chains.end(); ++it) {
+    //     start_indices[it->front()].emplace_back(it);
+    //     end_indices[it->back()].emplace_back(it);
+    // }
+    //
+    // std::set<std::vector<std::vector<int>>::iterator> merged;
+    // std::set<std::vector<std::vector<int>>::iterator> to_remove;
+    // for (auto it = chains.begin(); it != chains.end(); ++it) {
+    //     if (merged.find(it) != merged.end()) continue;
+    //     merged.insert(it);
+    //
+    //     std::set<int> current_chain = {it->begin(), it->end()};
+    //     int end = it->back();
+    //
+    //     if (start_indices.find(end) != start_indices.end()) {
+    //         auto alternate_indices = start_indices[end];
+    //         for (auto& alternate_index: alternate_indices) {
+    //             std::set<int> alternate_chain = {alternate_index->begin(), alternate_index->end()};
+    //             if (merged.find(alternate_index) == merged.end() && current_chain != alternate_chain) {
+    //                 it->insert(it->end(), alternate_index->begin() + 1, alternate_index->end());
+    //                 merged.insert(it);
+    //                 to_remove.insert(alternate_index);
+    //                 // std::cout << "adding for removal: " << &alternate_index << std::endl;
+    //                 // for (auto& x: *alternate_index) {
+    //                 //     std::cout << x << ",";
+    //                 // }
+    //                 // std::cout << std::endl;
+    //                 break;
+    //             }
+    //         }
+    //     }
+    //
+    //     int start = it->front();
+    //     if (end_indices.find(start) != end_indices.end()) {
+    //         auto alternate_indices = start_indices[start];
+    //         for (auto& alternate_index: alternate_indices) {
+    //             std::set<int> alternate_chain = {alternate_index->begin(), alternate_index->end()};
+    //             if (merged.find(alternate_index) == merged.end() && current_chain != alternate_chain) {
+    //                 it->insert(it->begin(), alternate_index->rbegin(), alternate_index->rend() - 1);
+    //                 merged.insert(it);
+    //                 to_remove.insert(alternate_index);
+    //
+    //                 // std::cout << "adding for removal: " << &alternate_index << std::endl;
+    //                 // for (auto& x: *alternate_index) {
+    //                 //     std::cout << x << ",";
+    //                 // }
+    //                 // std::cout << std::endl;
+    //                 break;
+    //             }
+    //         }
+    //     }
+    //
+    //     if (to_remove.find(it) != to_remove.end()) {
+    //         continue;
+    //     }
+    //     // std::cout << "===Adding: " << &it << std::endl;
+    //     // for (auto& x: *it) {
+    //     //     std::cout << x << ",";
+    //     // }
+    //     // std::cout << std::endl;
+    //     joined_chains.push_back(*it);
+    // }
+    //
+    //
+    // std::cout << "After join" <<  std::endl;
+    // for (const auto& element : joined_chains) {
+    //     for (auto& x: element) {
+    //         std::cout << x << ",";
+    //     }
+    //     std::cout << std::endl;
+    // }
+    //
+    // for (auto& chain: joined_chains) {
+    //     std::set<std::vector<int>> seen_triplets;
+    //     int l_ptr = 0;
+    //     for (l_ptr = 0; l_ptr < chain.size()-2; ++l_ptr) {
+    //         auto new_triplet = {chain[l_ptr], chain[l_ptr+1], chain[l_ptr+2]};
+    //         if (seen_triplets.find(new_triplet) != seen_triplets.end()) {
+    //             chain.erase(chain.begin() + l_ptr, chain.end());
+    //             break;
+    //         }
+    //         seen_triplets.insert(new_triplet);
+    //     }
+    // }
+    // std::cout << "After clean" <<  std::endl;
+    // for (const auto& element : joined_chains) {
+    //     for (auto& x: element) {
+    //         std::cout << x << ",";
+    //     }
+    //     std::cout << std::endl;
+    // }
 
     std::map<std::set<int>, int> paired_map = {};
     PairedChainIndices pairs;
@@ -892,6 +1023,10 @@ clipper::MiniMol FindML::organise_to_chains(clipper::MiniMol &mol) {
 
 clipper::MiniMol FindML::remove_clashing_protein(clipper::MiniMol &na_chain) {
     clipper::MiniMol molwrk = mol;
+    // remove bases in case the input model has nucleic acids with bases on it
+    molwrk = remove_bases(molwrk);
+    na_chain = remove_bases(na_chain);
+
     clipper::MAtomNonBond nb = clipper::MAtomNonBond(molwrk, 4);
 
     std::set<std::vector<std::string>> to_remove;
@@ -911,10 +1046,11 @@ clipper::MiniMol FindML::remove_clashing_protein(clipper::MiniMol &na_chain) {
                     clipper::MAtom atom = residue[nearby_atom.atom()];
 
                     clipper::Coord_frac cf = atom.coord_orth().coord_frac(na_chain.cell());
-                    cf.symmetry_copy_near(na_chain.spacegroup(), na_chain.cell(), na_chain[p][m][a].coord_orth().coord_frac(na_chain.cell()
+                    cf = cf.symmetry_copy_near(na_chain.spacegroup(), na_chain.cell(), na_chain[p][m][a].coord_orth().coord_frac(na_chain.cell()
                     ));
                     clipper::Coord_orth co = cf.coord_orth(na_chain.cell());
                     if ((na_chain[p][m][a].coord_orth()-co).lengthsq() > 2.25) {
+                        // std::cout << chain.id() << " " << residue.id() << " " << atom.name() << " found near " << na_chain[p][m].id() << " " << na_chain[p][m][a].name() << std::endl;
                         continue;
                     }
 
@@ -932,34 +1068,34 @@ clipper::MiniMol FindML::remove_clashing_protein(clipper::MiniMol &na_chain) {
 
     std::set<std::string> allowed_atoms = {"CA", "C", "N", "O"};
 
-    for (int p = 0; p < mol.size(); p++) {
+    for (int p = 0; p < molwrk.size(); p++) {
         clipper::MPolymer mp;
-        mp.set_id(mol[p].id());
+        mp.set_id(molwrk[p].id());
         int count = 0;
-        for (int m = 0; m < mol[p].size(); m++) {
-            clipper::MPolymer chain = mol[p];
-            clipper::MMonomer residue = mol[p][m];
+        for (int m = 0; m < molwrk[p].size(); m++) {
+            clipper::MPolymer chain = molwrk[p];
+            clipper::MMonomer residue = molwrk[p][m];
             std::vector<std::string> key = {chain.id(), residue.type(), std::to_string(residue.seqnum())};
             if (to_remove.find(key) != to_remove.end()) {
-//                clipper::MMonomer backbone_only;
-//                backbone_only.set_type(mol[p][m].type());
-//                backbone_only.set_id(mol[p][m].id());
-//
-//                for (int a = 0; a < mol[p][m].size(); a++) {
-//                    if (allowed_atoms.find(mol[p][m][a].id().trim()) != allowed_atoms.end()) {
-//                        backbone_only.insert(mol[p][m][a]);
-//                    }
-//                }
-//
-//                if (backbone_only.size() != 0) {
-//                    mp.insert(backbone_only);
-//                    count += 1;
-//                }
+                // clipper::MMonomer backbone_only;
+                // backbone_only.set_type(molwrk[p][m].type());
+                // backbone_only.set_id(molwrk[p][m].id());
+                //
+                // for (int a = 0; a < molwrk[p][m].size(); a++) {
+                //     if (allowed_atoms.find(molwrk[p][m][a].id().trim()) != allowed_atoms.end()) {
+                //         backbone_only.insert(molwrk[p][m][a]);
+                //     }
+                // }
+                //
+                // if (backbone_only.size() != 0) {
+                //     mp.insert(backbone_only);
+                //     count += 1;
+                // }
 
                 continue;
             }
             count += 1;
-            mp.insert(mol[p][m]);
+            mp.insert(molwrk[p][m]);
         }
         if (count > 0) {
             mol_final.insert(mp);
@@ -1085,35 +1221,36 @@ clipper::MiniMol FindML::find() {
 //    NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
     //NautilusUtil::save_minimol(sugar_peaks, "sugar_peaks.pdb");
     //NautilusUtil::save_minimol(base_peaks, "base_peaks.pdb");
+    clipper::MiniMol sugar_mol = generate_molecule_from_gridpoints(xsugarpred, 0.3);
 
-    TripletCoordinates phosphate_triplets = find_triplet_coordinates(phosphate_peaks, sugar_peaks);
-//    draw_triplets(phosphate_triplets, phosphate_peaks, "triplets-ext.pdb");
-//     NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
+    TripletCoordinates phosphate_triplets = find_triplet_coordinates(phosphate_peaks, sugar_mol);
+    draw_triplets(phosphate_triplets, phosphate_peaks, "triplets-ext.pdb");
+    NautilusUtil::save_minimol(phosphate_peaks, "phosphate_peaks.pdb");
     std::cout << phosphate_triplets.size() << " phosphate triplets found\n";
 
     PairedChainIndices pairs = organise_triplets_to_chains(phosphate_triplets);
 
-//    for (const auto& pair : pairs) {
-//        std::cout << "Pair:" << std::endl;
-//        std::cout << "First vector: ";
-//        for (const auto& element : pair.first) {
-//            std::cout << element << " ";
-//        }
-//        std::cout << std::endl;
-//
-//        std::cout << "Second vector: ";
-//        for (const auto& element : pair.second) {
-//            std::cout << element << " ";
-//        }
-//        std::cout << std::endl << std::endl;
-//    }
+    for (const auto& pair : pairs) {
+        std::cout << "Pair:" << std::endl;
+        std::cout << "First vector: ";
+        for (const auto& element : pair.first) {
+            std::cout << element << " ";
+        }
+        std::cout << std::endl;
+
+        std::cout << "Second vector: ";
+        for (const auto& element : pair.second) {
+            std::cout << element << " ";
+        }
+        std::cout << std::endl << std::endl;
+    }
 
     std::map<std::pair<int, int>, std::vector<NucleicAcidDB::NucleicAcidFull>> placed_fragments;
     std::vector<std::vector<int>> placed_fragment_indices;
     int count = 0;
     std::cout << "Beginning to place fragments" << std::endl;
     for (const auto &[fwd, bck]: pairs) {
-        std::cout << "\r" << count++ << " of " << pairs.size()-1 << " potential fragments placed" << std::flush;
+        std::cout << "\r" << count++ << " of " << pairs.size() << " potential fragments placed" << std::flush;
         PlacedFragmentResult forward_result = place_fragments(phosphate_peaks, fwd);
         PlacedFragmentResult backward_result = place_fragments(phosphate_peaks, bck);
 
@@ -1128,12 +1265,12 @@ clipper::MiniMol FindML::find() {
     std::cout << std::endl;
 
     clipper::MiniMol filtered_chain = form_organised_chains(placed_fragments, placed_fragment_indices);
-//     NautilusUtil::save_minimol(filtered_chain, "filtered_chain.pdb");
-    clipper::MiniMol base_removed_mol = remove_bases(filtered_chain);
+     // NautilusUtil::save_minimol(filtered_chain, "filtered_chain.pdb");
+    // clipper::MiniMol base_removed_mol = remove_bases(filtered_chain);
 //    NautilusUtil::save_minimol(base_removed_mol, "base_removed_mol.pdb");
-    clipper::MiniMol low_confidence_removed_model = remove_low_confidence(base_removed_mol);
+    // clipper::MiniMol low_confidence_removed_model = remove_low_confidence(base_removed_mol);
 //             NautilusUtil::save_minimol(low_confidence_removed_model, "low_confidence_removed_model.pdb");
-    clipper::MiniMol clash_removed_mol = remove_clashing_protein(low_confidence_removed_model);
+    clipper::MiniMol clash_removed_mol = remove_clashing_protein(filtered_chain);
     // NautilusUtil::save_minimol(clash_removed_mol, "clash_removed_mol.pdb");
 
     return clash_removed_mol;

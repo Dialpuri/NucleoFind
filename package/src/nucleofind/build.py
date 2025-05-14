@@ -2,7 +2,10 @@
 
 import dataclasses
 import pathlib
+import site
 import traceback
+from importlib.metadata import PackageNotFoundError
+
 
 from .nautilus_module import Input, Output, run
 import argparse
@@ -22,6 +25,7 @@ class InputParameters:
     colinphifom: str | pathlib.Path = ""
     colinfc: str | pathlib.Path = ""
     colinfree: str | pathlib.Path = ""
+    em: bool = False
     cycles: int = 3
 
 
@@ -30,6 +34,13 @@ class OutputParameters:
     pdbout: str | pathlib.Path = ""
     xmlout: str | pathlib.Path = ""
 
+
+def find_database() -> str:
+    for pkg in site.getsitepackages():
+        database_path = pathlib.Path(pkg) / "nucleofind_models" / "nucleofind-database.cif"
+        if database_path.exists():
+            return str(database_path)
+    return ""
 
 def main():
     parser = argparse.ArgumentParser(description="nucleofind build")
@@ -47,6 +58,7 @@ def main():
     parser.add_argument("-colin-free", required=False, default="")
     parser.add_argument("-xmlout", required=False, default="")
     parser.add_argument("-cycles", required=False, default=3)
+    parser.add_argument("--em", required=False, default=False, action='store_true')
     parser.add_argument("-v", "--version", action="version", version=__version__)
 
     args = parser.parse_args()
@@ -87,9 +99,11 @@ def main():
         args.sugarin = f"{args.preddirin}/nucleofind-sugar.map"
         args.basein = f"{args.preddirin}/nucleofind-base.map"
 
-    if not args.colin_fc and not args.colin_phifom: 
-        raise ValueError("Please specify columns for the phases, either FC or PHI,FOM")
-    
+    if not args.colin_fc and not args.colin_phifom:
+        raise ValueError("Please specify columns for the phases, either FWT,PHWT or PHI,FOM")
+
+    database = find_database()
+
     input = Input(
         args.mtzin,
         args.seqin,
@@ -102,6 +116,8 @@ def main():
         args.colin_phifom,
         args.colin_fc,
         args.colin_free,
+        args.em,
+        database
     )
 
     output = Output(args.pdbout, args.xmlout)
@@ -113,6 +129,8 @@ def main():
 
 
 def build(input_parameters: InputParameters, output_parameters: OutputParameters):
+    database = find_database()
+
     input = Input(
         str(input_parameters.mtzin),
         str(input_parameters.seqin),
@@ -125,10 +143,19 @@ def build(input_parameters: InputParameters, output_parameters: OutputParameters
         str(input_parameters.colinphifom),
         str(input_parameters.colinfc),
         str(input_parameters.colinfree),
+        input_parameters.em,
+        database
     )
     output = Output(str(output_parameters.pdbout), str(output_parameters.xmlout))
 
-    run(input, output, input_parameters.cycles)
+    if not all([input_parameters.phosin, input_parameters.sugarin, input_parameters.basein]):
+        raise RuntimeError("The phosphate, sugar and base predictions are required.")
+
+    try:
+        run(input, output, input_parameters.cycles)
+    except:
+        print(traceback.format_exc())
+
 
 
 # def build(mtzin: str, seqin: str, pdbin: str, phosin: str, sugarin: str, basein: str, colin_fo: str, colin_fc: str,
