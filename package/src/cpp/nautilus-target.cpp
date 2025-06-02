@@ -619,7 +619,7 @@ const clipper::MiniMol NucleicAcidTargets::grow( const clipper::Xmap<float>& xma
 }
 
 
-const clipper::MiniMol NucleicAcidTargets::link( const clipper::Xmap<float>& xmap, const clipper::MiniMol& mol) const
+const clipper::MiniMol NucleicAcidTargets::link(const clipper::Xmap<float>& xmap, const clipper::MiniMol& mol, bool do_join) const
 {
   const clipper::Spacegroup& spgr = xmap.spacegroup();
   const clipper::Cell&       cell = xmap.cell();
@@ -663,14 +663,14 @@ const clipper::MiniMol NucleicAcidTargets::link( const clipper::Xmap<float>& xma
         if ( chn.size() != 0 ) {
           clipper::MPolymer mp;
           for ( int r = 0; r < chn.size(); r++ ) {
-          //  std::cout << "Adding chn[" << r << "] to monomer" << std::endl;
+          // std::cout << "Adding chn[" << r << "] to monomer" << std::endl;
             mp.insert( chn[r].mmonomer() );
 
           }
           mol_new.insert( mp );
         }
       }
-  if ( mol_new.size() > mol.size() )
+  if ( mol_new.size() > mol.size() && do_join )
     mol_new = NucleicAcidJoin::join( mol_new );
 
   return mol_new;

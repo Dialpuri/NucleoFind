@@ -39,7 +39,7 @@ run_cycle(const int verbose, const NucleicAcidTargets &natools, const clipper::M
     }
 
     // link
-    mol_wrk = natools.link(xwrk, mol_wrk);
+    mol_wrk = natools.link(xwrk, mol_wrk, false);
     log.log("LINK", mol_wrk, verbose >= 5);
 
     // prune
@@ -119,7 +119,7 @@ void run(NucleoFind::IO::Input &input, NucleoFind::IO::Output &output, int cycle
 
     int nas_found = NautilusUtil::count_nas(mol_wrk);
     if (nas_found > 0) {
-        mol_wrk = natools.link(xwrk, mol_wrk);
+        mol_wrk = natools.link(xwrk, mol_wrk, true);
         log.log("FIND ML LINK", mol_wrk, verbose >= 5);
 
         ModelTidy::chain_renumber(mol_wrk, seq_wrk);
