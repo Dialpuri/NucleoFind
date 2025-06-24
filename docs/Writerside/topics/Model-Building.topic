@@ -34,15 +34,15 @@
 
         <p>Run NucleoFind-build with predicted map:</p>
         <code-block lang="shell">
-            nucleofind-build -mtzin hkl.mtz
-                             -seqin sequence.fasta
-                             -pdbin xyz.pdb
-                             -pdbout output.pdb
-                             -phosin phosphate.map
-                             -colin-fo FP,SIGFP
-                             -colin-fc FWT,PWHT
-                             -colin-free FREE
-                             -cycles 3
+            nucleofind-build --mtzin hkl.mtz
+                             --seqin sequence.fasta
+                             --pdbin xyz.pdb
+                             --pdbout output.pdb
+                             --phosin phosphate.map
+                             --colin-fo FP,SIGFP
+                             --colin-fc FWT,PWHT
+                             --colin-free FREE
+                             --cycles 3
         </code-block>
 
     </chapter>
