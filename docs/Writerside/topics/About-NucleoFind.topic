@@ -11,7 +11,8 @@
     </p>
 
 <!--    <chapter title="Get started">-->
-    Get started by installing nucleofind and the required models!
+Get started by installing NucleoFind (see <a href="Installation.topic">here</a>) and get the model (see <a href="ModelInstallation.topic">here</a>).
+
 <!--    </chapter>-->
     <!-- <chapter title="Architecture">
         NucleoFind uses a UNet-3D architecture.
