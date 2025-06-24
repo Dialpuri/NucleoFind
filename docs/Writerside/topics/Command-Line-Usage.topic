@@ -30,7 +30,7 @@
 
         <p>Advanced Syntax:</p>
         <code-block lang="shell">
-            nucleofind -m core -i reflections.mtz -o output_dir -r 2.5 -amplitude F_phi.F -phase F_phi.phi
+            nucleofind -m core -i reflections.mtz -o output_dir -r 2.5 --amplitude F_phi.F --phase F_phi.phi
         </code-block>
     </chapter>
 
