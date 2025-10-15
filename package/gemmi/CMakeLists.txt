@@ -169,140 +169,166 @@ set(gemmi_third_party_tao-headers_HEADERS
 )
 
 set(gemmi_third_party_tao_pegtl-headers_HEADERS
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/analyze.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/apply_mode.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/argv_input.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/ascii.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/buffer_input.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/config.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/cstream_input.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/eol.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/eol_pair.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/file_input.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/input_error.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/istream_input.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/memory_input.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/mmap_input.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/normal.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/nothing.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/parse.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/parse_error.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/position.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/read_input.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/rewind_mode.hpp
         ${gemmi_src}/include/gemmi/third_party/tao/pegtl/rules.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/string_input.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/tracking_mode.hpp
         ${gemmi_src}/include/gemmi/third_party/tao/pegtl/utf16.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/utf32.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/apply_mode.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/disable_action.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/discard_input_on_success.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/file_input.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/parse_error.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/uint16.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/read_input.hpp
         ${gemmi_src}/include/gemmi/third_party/tao/pegtl/utf8.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/analyze.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/position.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/require_apply.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/eol_pair.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/tracking_mode.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/string_input.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/change_state.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/change_states.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/change_action.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/config.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/change_action_and_state.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/uint64.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/istream_input.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/argv_input.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/change_action_and_states.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/nothing.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/discard_input_on_failure.hpp
         ${gemmi_src}/include/gemmi/third_party/tao/pegtl/version.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/input_error.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/change_control.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/eol.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/cstream_input.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/uint8.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/match.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/ascii.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/normal.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/enable_action.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/discard_input.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/mmap_input.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/require_apply0.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/memory_input.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/rewind_mode.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/uint32.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/buffer_input.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/utf32.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/parse.hpp
+
 )
 
 set(gemmi_third_party_tao_pegtl_analysis-headers_HEADERS
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/analysis/analyze_cycles.hpp
         ${gemmi_src}/include/gemmi/third_party/tao/pegtl/analysis/counted.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/analysis/generic.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/analysis/grammar_info.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/analysis/insert_guard.hpp
-        #        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/analysis/insert_rules.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/analysis/rule_info.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/analysis/analyze_cycles.hpp
         ${gemmi_src}/include/gemmi/third_party/tao/pegtl/analysis/rule_type.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/analysis/rule_info.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/analysis/generic.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/analysis/insert_guard.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/analysis/grammar_info.hpp
 )
 
 set(gemmi_third_party_tao_pegtl_internal-headers_HEADERS
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/action.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/action_input.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/alnum.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/alpha.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/any.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/apply.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/apply0.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/apply0_single.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/apply_single.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/at.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/bof.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/bol.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/rules.hpp
         ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/bump_help.hpp
-        #        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/bump_impl.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/bytes.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/if_must.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/if_missing.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/cr_eol.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/skip_control.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/endian_win.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/crlf_eol.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/identifier.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/peek_utf16.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/plus.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/peek_mask_uint.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/has_apply.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/enable.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/action.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/peek_char.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/rematch.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/read_uint.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/trivial.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/at.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/input_pair.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/bof.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/endian_gcc.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/if_then_else.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/ranges.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/apply0_single.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/file_mapper_posix.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/eof.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/always_false.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/alnum.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/list_must.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/demangle_sanitise.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/apply.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/alpha.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/rep_min.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/file_opener.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/discard.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/disable.hpp
         ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/control.hpp
         ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/cr_crlf_eol.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/cr_eol.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/crlf_eol.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/cstream_reader.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/cstring_reader.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/demangle.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/demangle_cxxabi.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/demangle_nop.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/demangle_sanitise.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/disable.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/discard.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/dusel_mode.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/duseltronik.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/enable.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/endian.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/endian_gcc.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/endian_win.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/eof.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/eol.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/eolf.hpp
-        #        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/file_mapper.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/file_opener.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/file_reader.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/has_apply.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/has_apply0.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/identifier.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/if_apply.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/if_must.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/if_must_else.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/if_then_else.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/input_pair.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/integer_sequence.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/istream_reader.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/istring.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/iterator.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/lf_crlf_eol.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/lf_eol.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/list.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/list_must.hpp
         ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/list_tail.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/list_tail_pad.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/marker.hpp
-        #        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/minus.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/must.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/not_at.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/one.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/opt.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/list.hpp
         ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/pad.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/pad_opt.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/peek_char.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/peek_utf16.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/peek_utf32.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/peek_utf8.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/pegtl_string.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/plus.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/raise.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/range.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/ranges.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/rep.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/rep_min.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/rep_min_max.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/rep_opt.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/bump.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/file_reader.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/if_apply.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/demangle_cxxabi.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/action_input.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/has_apply0.hpp
         ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/require.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/lf_crlf_eol.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/peek_mask_uint8.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/duseltronik.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/peek_uint.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/istream_reader.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/must.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/any.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/eol.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/raise.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/endian.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/demangle_nop.hpp
         ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/result_on_found.hpp
-        #        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/rule_conjunction.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/rules.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/seq.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/skip_control.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/sor.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/star.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/star_must.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/state.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/string.hpp
-        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/trivial.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/not_at.hpp
         ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/try_catch_type.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/state.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/dusel_mode.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/star_must.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/istring.hpp
         ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/until.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/string.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/rep_min_max.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/pegtl_string.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/seq.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/rep_opt.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/one.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/peek_uint8.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/bytes.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/cstring_reader.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/if_must_else.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/integer_sequence.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/apply0.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/pad_opt.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/demangle.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/eolf.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/star.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/cstream_reader.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/range.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/peek_utf8.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/peek_utf32.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/opt.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/bol.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/apply_single.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/marker.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/iterator.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/rep.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/lf_eol.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/list_tail_pad.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/has_match.hpp
+        ${gemmi_src}/include/gemmi/third_party/tao/pegtl/internal/sor.hpp
+
 )
 
 set_target_properties(gemmi_cpp PROPERTIES PUBLIC_HEADER "${gemmi_HEADERS}")
