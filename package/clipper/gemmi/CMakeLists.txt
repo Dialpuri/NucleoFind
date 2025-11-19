@@ -9,7 +9,8 @@ target_include_directories(clipper-gemmi PRIVATE
   ${WRK_DIR}/checkout/gemmi/include)
 
 set(clipper-gemmi_HEADERS
-${WRK_DIR}/checkout/clipper/clipper/gemmi/clipper_gemmi.h
+        ${WRK_DIR}/checkout/clipper/clipper/gemmi/clipper_gemmi.h
+        ${WRK_DIR}/checkout/clipper/clipper/gemmi/clipper_gemmi_model.h
 )
 
 target_compile_options(clipper-gemmi PUBLIC "-DFFTW_ENABLE_FLOAT")
