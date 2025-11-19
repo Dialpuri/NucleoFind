@@ -9,7 +9,7 @@ else
     cd clipper-gemmi
     git checkout gemmi
     find . -maxdepth 1 ! -name 'clipper' -delete
-    git apply ../../clipper.patch
+    git apply ../../patches/*.patch
     cd ..
     mv clipper-gemmi clipper
     echo

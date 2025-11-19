@@ -1,0 +1,38 @@
+Subject: [PATCH] Added clipper patch
+---
+Index: clipper/gemmi/clipper_gemmi.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/clipper/gemmi/clipper_gemmi.cpp b/clipper/gemmi/clipper_gemmi.cpp
+--- a/clipper/gemmi/clipper_gemmi.cpp	(revision 65354633d7c88ae8b2d748f201a6f891072f8347)
++++ b/clipper/gemmi/clipper_gemmi.cpp	(date 1763560932380)
+@@ -161,7 +161,8 @@
+   String colpath = mtzpath;
+   // add exported data columns to local list
+   int ncols = cdata.data_size();
+-  size_t cols[ncols];
++  // size_t cols[ncols];
++  std::vector<size_t> cols(ncols, 0);
+   std::vector<String> col_names = extract_column_names( colpath, ncols );
+   std::vector<String> dat_names = cdata.data_names().split( " " );
+   std::vector<ftype> scls( ncols, 1.0 );
+@@ -181,7 +182,7 @@
+     if ( dat_names[c] == "phi" ) scls[c] = Util::rad2d( 1.0 );
+   }
+   // loop through nreflections,data
+-  xtype values[ncols];
++  std::vector<xtype> values(ncols, 0);
+   for ( size_t i = 0; i < mtzobj.data.size(); i += mtzobj.columns.size() ) {
+     // import data
+     for ( int c = 0; c < ncols; c++ ) {
+@@ -190,7 +191,7 @@
+       if ( !Util::is_nan( xtype( mtzobj.data[i + cols[c]] ) ) )
+         values[c] = xtype( mtzobj.data[i + cols[c]] / scls[c] );
+     }
+-    cdata.data_import( Hkl( mtzobj.get_hkl( i ) ), values );
++    cdata.data_import( Hkl( mtzobj.get_hkl( i ) ), values.data() );
+   }
+ }
+ 
