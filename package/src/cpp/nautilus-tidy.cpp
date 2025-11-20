@@ -6,6 +6,7 @@
 
 //#include <algorithm>
 #include <string>
+#include <unordered_set>
 
 #include "nautilus-tools.h"
 
@@ -145,10 +146,48 @@ clipper::MiniMol ModelTidy::setup_residue_types(clipper::Xmap<float> xwrk, clipp
         else mpx[r].set_type("  U");
         if (mpx[r].type().trim() == "T") dna = true;
       }
+
+      // if no base built, get the correct N atom
+      for (int r = 0 ; r < mpx.size(); r++) {
+        int n_count = 0;
+        for (int a = 0; a < mpx[r].size(); a++) {
+          if (mpx[r][a].element().trim() == "N") {
+            n_count++;
+          }
+        }
+
+        // pyrimidines - N1
+        // purine - N9
+        std::unordered_set<std::string> pyr = {"DT",  "T", "C", "DC", "U", "DU"};
+        std::unordered_set<std::string> pur = {"DA",  "A", "G", "DG"};
+
+        // if no base, should only be 1 N atom
+        if (n_count == 1) {
+          int n1 = mpx[r].lookup("N1 ", clipper::MM::ANY);
+          int n9 = mpx[r].lookup("N9 ", clipper::MM::ANY);
+
+          if (pyr.count(mpx[r].type().trim()) > 0) {
+            if (n1 == -1) {
+              mpx[r][n9].set_name("N1 ");
+            }
+          }
+
+          if (pur.count(mpx[r].type().trim()) > 0) {
+            if (n9 == -1) {
+              mpx[r][n1].set_name("N9 ");
+            }
+          }
+        }
+      }
+
+
       // for DNA, prefix type with D and remove O2'
       if (dna) {
         for (int r = 0; r < mpx.size(); r++) {
-          const clipper::String type = " D" + mpx[r].type().trim();
+          clipper::String type = " D" + mpx[r].type().trim();
+          if ( mpx[r].type().trim() == "U") {
+            type = " DT";
+          }
           mpx[r].set_type(type);
           const int io2 = mpx[r].lookup(" O2'", clipper::MM::ANY);
           clipper::MMonomer mm;
