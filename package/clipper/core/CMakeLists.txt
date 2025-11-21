@@ -42,7 +42,8 @@ ${WRK_DIR}/checkout/clipper/clipper/core/test_data.cpp
 ${WRK_DIR}/checkout/clipper/clipper/core/xmap.cpp
 )
 
-target_include_directories(clipper-core PRIVATE ${WRK_DIR}/checkout/fftw-2.1.5/fftw ${WRK_DIR}/checkout/fftw-2.1.5/rfftw)
+target_include_directories(clipper-core PRIVATE ${WRK_DIR}/checkout/fftw-2.1.5/fftw ${WRK_DIR}/checkout/fftw-2.1.5/rfftw
+        ${WRK_DIR}/checkout/fftw3/api)
 target_compile_options(clipper-core PUBLIC "-DFFTW_ENABLE_FLOAT")
 
 set(clipper-core_HEADERS

@@ -5,9 +5,13 @@ if [ -d "clipper" ]; then
     echo "Found clipper"
 else
     echo "Checking out clipper"
-    curl -L http://www.ysbl.york.ac.uk/jsd523/clipper-gemmi-wrapper-20240603.tar.gz -o clipper.tar.gz
-    tar xf clipper.tar.gz
-    mv clipper-gemmi-wrapper clipper
+    git clone https://ccp4forge.rc-harwell.ac.uk/ccp4/clipper.git clipper-gemmi
+    cd clipper-gemmi
+    git checkout gemmi
+    find . -maxdepth 1 ! -name 'clipper' -delete
+    git apply ../../patches/*.patch
+    cd ..
+    mv clipper-gemmi clipper
     echo
 fi
 
@@ -17,7 +21,8 @@ else
     echo "Checking out gemmi"
     git clone https://github.com/project-gemmi/gemmi.git gemmi
     cd gemmi
-    git checkout v0.6.5
+    git checkout v0.7.3
+    rm CMakeLists.txt
     cd ..
     echo
 fi
@@ -53,5 +58,19 @@ else
     tar xf fftw-2.1.5.tar.gz
     echo
 fi
+
+fftw3_release="3.3.10"
+if [ -r fftw3 ]; then
+    echo "Using existing fftw3"
+else
+    echo "Downloading out fftw-$fftw3_release"
+    curl -L http://www.fftw.org/fftw-$fftw3_release.tar.gz -o fftw-$fftw3_release.tar.gz
+    echo
+    echo "Unpacking fftw-$fftw3_release"
+    tar xf fftw-$fftw3_release.tar.gz
+    mv fftw-$fftw3_release fftw3
+fi
+echo
+
 
 cd ..

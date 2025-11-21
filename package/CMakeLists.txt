@@ -63,19 +63,23 @@ else()
   add_subdirectory(${WRK_DIR}/clipper/mmdb)
   add_subdirectory(${WRK_DIR}/clipper/cif)
   add_subdirectory(${WRK_DIR}/clipper/ccp4)
+  add_subdirectory(${WRK_DIR}/clipper/gemmi)
   add_subdirectory(${WRK_DIR}/fftw)
+  add_subdirectory(${WRK_DIR}/fftw3)
   add_subdirectory(${WRK_DIR}/rfftw)
   add_subdirectory(${WRK_DIR}/ccp4)
   add_subdirectory(${WRK_DIR}/mmdb2)
   add_subdirectory(${WRK_DIR}/gemmi)
 endif()
+
+
 # message(CMAKE_BINARY_DIR="${CMAKE_BINARY_DIR}")
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR} ${WRK_DIR}/checkout/mmdb2
   ${WRK_DIR}/checkout/clipper ${WRK_DIR}/clipper
   ${WRK_DIR}/checkout/libccp4/ccp4 ${WRK_DIR}/checkout/gemmi/include
-        ${WRK_DIR}/src/third-party
+  ${WRK_DIR}/src/third-party ${WRK_DIR}/checkout/fftw3/include
 )
 
 link_directories(${WRK_DIR}/mmdb2 ${WRK_DIR}/clipper ${WRK_DIR}/ccp4
@@ -114,8 +118,13 @@ target_link_directories(
   ${CMAKE_BINARY_DIR}/rfftw
   ${CMAKE_BINARY_DIR}/ccp4
   ${CMAKE_BINARY_DIR}/mmdb2
+  ${CMAKE_BINARY_DIR}/fftw3/fftw_build
+
 #  ${CMAKE_BINARY_DIR}/gemmi
 )
+
+message(CMAKE_INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR})
+
 
 target_link_libraries(
   nautilus_lib
@@ -128,6 +137,7 @@ target_link_libraries(
          rfftw
          fftw
          mmdb2
+         fftw3f
 #         gemmi_cpp
 )
 
@@ -193,7 +203,8 @@ target_link_directories(
   ${CMAKE_BINARY_DIR}/fftw
   ${CMAKE_BINARY_DIR}/rfftw
   ${CMAKE_BINARY_DIR}/ccp4
-  ${CMAKE_BINARY_DIR}/mmdb2
+        ${CMAKE_BINARY_DIR}/mmdb2
+        ${CMAKE_BINARY_DIR}/fftw3/fftw_build
 #  ${CMAKE_BINARY_DIR}/gemmi
 )
 
@@ -209,6 +220,7 @@ target_link_libraries(
           rfftw
           fftw
           mmdb2
+        fftw3f
 #          gemmi_cpp
 )
 
