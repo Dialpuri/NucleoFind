@@ -13,6 +13,7 @@
 
 #include <clipper/minimol/minimol_utils.h>
 #include "fragment-library.h"
+#include "src/cpp/nucleicacid_db.h"
 
 namespace NucleoFind {
 
@@ -224,6 +225,14 @@ namespace NucleoFind {
             }
             return results;
         }
+
+        int find_next_residue(clipper::MAtomNonBond &nb,
+                              NucleicAcidDB::NucleicAcid &na,
+                              clipper::MiniMol &mol);
+
+        int find_prev_residue(clipper::MAtomNonBond &nb, NucleicAcidDB::NucleicAcid &na, clipper::MiniMol &mol);
+
+        std::vector<clipper::MPolymer> reorder_chain(std::vector<clipper::MMonomer> &monomers);
 
 
         // Debugging functions
