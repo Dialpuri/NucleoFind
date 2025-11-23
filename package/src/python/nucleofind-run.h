@@ -27,6 +27,8 @@ run_cycle(const int verbose, const NucleicAcidTargets &natools, const clipper::M
     NucleicAcidTools::chain_sort(mol_wrk);
     NucleicAcidTools::chain_label(mol_wrk, clipper::MMDBManager::CIF);
     NucleicAcidTools::residue_label(mol_wrk);
+    if (strong_prune)
+        mol_wrk = natools.strong_prune(mol_wrk);
 
     mol_wrk = natools.grow(xwrk, mol_wrk, 25, 0.001);
     log.log("GROW", mol_wrk, verbose >= 5);
@@ -43,11 +45,11 @@ run_cycle(const int verbose, const NucleicAcidTargets &natools, const clipper::M
     log.log("LINK", mol_wrk, verbose >= 5);
 
     // prune
-    if (strong_prune) {
-        mol_wrk = natools.strong_prune(mol_wrk);
-    } else {
-        mol_wrk = natools.prune(mol_wrk);
-    }
+    // if (strong_prune) {
+    //     mol_wrk = natools.strong_prune(mol_wrk);
+    // } else {
+    mol_wrk = natools.prune(mol_wrk);
+    // }
     log.log("PRUNE", mol_wrk, verbose >= 5);
 
     // rebuild
@@ -122,6 +124,8 @@ void run(NucleoFind::IO::Input &input, NucleoFind::IO::Output &output, int cycle
         mol_wrk = natools.link(xwrk, mol_wrk);
         log.log("FIND ML LINK", mol_wrk, verbose >= 5);
 
+        NautilusUtil::save_minimol(mol_wrk, "find.pdb");
+
         ModelTidy::chain_renumber(mol_wrk, seq_wrk);
         NucleicAcidTools::chain_sort(mol_wrk);
         if (mol_wrk_in.size() > 0) {
@@ -129,7 +133,7 @@ void run(NucleoFind::IO::Input &input, NucleoFind::IO::Output &output, int cycle
         }
         NucleicAcidTools::residue_label(mol_wrk);
 
-        for (int cyc = 0; cyc < cycles; cyc++) {
+        for (int cyc = 0; cyc < 3; cyc++) {
             std::cout << "ML Based cycle " << clipper::String(cyc + 1, 3) << std::endl << std::endl;
             mol_wrk = run_cycle(verbose, natools, seq_wrk, mol_wrk, xwrk, log, true);
             NucleicAcidTools::chain_label(mol_wrk, clipper::MMDBManager::CIF);
@@ -144,26 +148,26 @@ void run(NucleoFind::IO::Input &input, NucleoFind::IO::Output &output, int cycle
     int best_na_count = NautilusUtil::count_well_modelled_nas(mol_wrk, predicted_maps);
     std::cout << "Built " << best_na_count << " residues with positive predicted density" << std::endl;
 
-    for (int cyc = 0; cyc < cycles; cyc++) {
-        std::cout << "Internal cycle " << clipper::String(cyc + 1, 3) << std::endl << std::endl; // edited
-
-        mol_wrk = NucleicAcidTools::flag_chains(mol_wrk);
-
-        clipper::MiniMol nautilus_find = natools.find(xwrk, mol_wrk, nhit / 2, nhit / 2, srchst);
-        mol_wrk = NucleoFind::Find::aggregate_nucleic_nucleic(ml_model, nautilus_find);
-        log.log("FIND", mol_wrk, verbose >= 5);
-
-        mol_wrk = run_cycle(verbose, natools, seq_wrk, mol_wrk, xwrk, log, false);
-
-        int pred_na_count = NautilusUtil::count_well_modelled_nas(mol_wrk, predicted_maps);
-        std::cout << "Cycle "<< cyc+1 << " built " << pred_na_count << " residues with positive predicted density" << std::endl;
-
-        if (pred_na_count > best_na_count) {
-            std::cout << "Taking model from old cycle " << cyc + 1 << "\n";
-            best_model = mol_wrk;
-            best_na_count = pred_na_count;
-        }
-    }
+    // for (int cyc = 0; cyc < cycles; cyc++) {
+    //     std::cout << "Internal cycle " << clipper::String(cyc + 1, 3) << std::endl << std::endl; // edited
+    //
+    //     mol_wrk = NucleicAcidTools::flag_chains(mol_wrk);
+    //
+    //     clipper::MiniMol nautilus_find = natools.find(xwrk, mol_wrk, nhit / 2, nhit / 2, srchst);
+    //     mol_wrk = NucleoFind::Find::aggregate_nucleic_nucleic(ml_model, nautilus_find);
+    //     log.log("FIND", mol_wrk, verbose >= 5);
+    //
+    //     mol_wrk = run_cycle(verbose, natools, seq_wrk, mol_wrk, xwrk, log, false);
+    //
+    //     int pred_na_count = NautilusUtil::count_well_modelled_nas(mol_wrk, predicted_maps);
+    //     std::cout << "Cycle "<< cyc+1 << " built " << pred_na_count << " residues with positive predicted density" << std::endl;
+    //
+    //     if (pred_na_count > best_na_count) {
+    //         std::cout << "Taking model from old cycle " << cyc + 1 << "\n";
+    //         best_model = mol_wrk;
+    //         best_na_count = pred_na_count;
+    //     }
+    // }
 
     std::cout << "Taking best model from all cycles with " << best_na_count << " nucleic acids residues with positive built." << std::endl;
     mol_wrk = best_model;
