@@ -4,6 +4,7 @@
 
 #include "backbone-tracing.h"
 
+#include "src/cpp/nautilus-tools.h"
 #include "src/cpp/nautilus-util.h"
 
 void NucleoFind::BackboneTracer::determine_edge(int source_atom, int target_atom,
@@ -593,35 +594,168 @@ clipper::MiniMol NucleoFind::BackboneTracer::build_chains() {
         // no split points, continue
         if (local_chains.size() == 1) {
             std::string chain_index = nth_letter(++current_letter_index);
+            // std::cout << "Chain " << chain_index << " has no split points " << std::endl;
             local_chain_results[0].add_terminus();
+            for (int i = 0; i < local_chain_results[0].monomers.size(); i++) {
+                local_chain_results[0].monomers[i].set_id(std::to_string(i));
+            }
             mol.insert(create_clipper_polymer(local_chain_results[0].monomers, chain_index));
             continue;
         }
 
+        // std::cout << "Found a kink in a nucleic acid chain, continuing assuming this is correct. It is wise to check this." << std::endl;
+
         // if all are in the same direction, put them back together since it is likely one chain
-        std::vector<clipper::MMonomer> built_chain = {};
-        std::vector<int> built_chain_indices = {};
+        if ( std::adjacent_find( direction.begin(), direction.end(), std::not_equal_to<>() ) == direction.end() )
+        {
+            // std::cout << "chain was found in the same direction" << std::endl;
 
-        for (int i = 0; i < local_chains.size(); i++) {
+            std::vector<clipper::MMonomer> built_chain = {};
+            std::vector<int> built_chain_indices = {};
 
-            // no monomers were built for this local chain (too small)
-            if (local_chain_results.count(i) == 0) continue;
+            for (int i = 0; i < local_chains.size(); i++) {
 
-            int start = 0;
-            if (!built_chain_indices.empty()) {
-                start = (built_chain_indices.back() == local_chains[i].front()) ? 1 : 0;
+                // no monomers were built for this local chain (too small)
+                if (local_chain_results.count(i) == 0) continue;
+
+                // skip over the repeated monomer
+                int start = 0;
+                if (!built_chain_indices.empty()) {
+                    start = (built_chain_indices.back() == local_chains[i].front()) ? 1 : 0;
+                }
+
+                built_chain_indices.insert(built_chain_indices.end(), local_chains[i].begin() + start, local_chains[i].end());
+                built_chain.insert(built_chain.end(), local_chain_results[i].monomers.begin() + start, local_chain_results[i].monomers.end());
+
             }
 
-            built_chain_indices.insert(built_chain_indices.end(), local_chains[i].begin() + start, local_chains[i].end());
-            built_chain.insert(built_chain.end(), local_chain_results[i].monomers.begin() + start, local_chain_results[i].monomers.end());
+            std::string chain_index = nth_letter(++current_letter_index);
+            // std::cout << "Chain " << chain_index << " has a same direction split points " << std::endl;
 
+            for (int i = 0; i < built_chain.size(); i++) {
+                built_chain[i].set_id(std::to_string(i));
+            }
+            std::vector<clipper::MPolymer> reordered_chains = reorder_chain(built_chain);
+            // std::cout << "On chain " << chain_index << std::endl;
+            for (auto& p: reordered_chains) {
+                mol.insert(p);
+            }
+            // mol.insert(create_clipper_polymer(built_chain, chain_index));
+            continue;
         }
 
-        std::string chain_index = nth_letter(++current_letter_index);
-        mol.insert(create_clipper_polymer(built_chain, chain_index));
+        // else separate the chains, this is probably means the chain has been built incorrectly, but we will continue and let later steps decide
+        for (int lc = 0; lc < local_chains.size(); lc++) {
+            std::string chain_index = nth_letter(++current_letter_index);
+            // std::cout << "Chain " << chain_index << " has an opposite direction split points " << std::endl;
+
+            for (int i = 0; i < local_chain_results[lc].monomers.size(); i++) {
+                local_chain_results[lc].monomers[i].set_id(std::to_string(i+1));
+            }
+            if (local_chain_results[lc].monomers.empty()) continue;
+            mol.insert(create_clipper_polymer(local_chain_results[lc].monomers, chain_index));
+        }
+
     }
     std::cout << std::endl;
+    // NautilusUtil::save_minimol(mol, "build.pdb");
     return mol;
+}
+
+
+int NucleoFind::BackboneTracer::find_next_residue(
+    clipper::MAtomNonBond &nb, NucleicAcidDB::NucleicAcid &na, clipper::MiniMol &mol) {
+
+    clipper::Coord_orth o3 = na.coord_o3();
+    auto nearby_atoms = nb.atoms_near(o3, 3);
+
+    for (auto& nearby_atom: nearby_atoms) {
+        clipper::MMonomer nearby_monomer = mol[nearby_atom.polymer()][nearby_atom.monomer()];
+        NucleicAcidDB::NucleicAcid nearby_na = nearby_monomer;
+        clipper::Coord_orth delta = o3 - nearby_na.coord_p();
+        if (delta.lengthsq() < pow(3, 2)) {
+            return nearby_atom.monomer();
+        }
+    }
+    return -1;
+}
+
+int NucleoFind::BackboneTracer::find_prev_residue(clipper::MAtomNonBond &nb,
+                                                  NucleicAcidDB::NucleicAcid &na, clipper::MiniMol &mol) {
+    clipper::Coord_orth p = na.coord_p();
+    auto nearby_atoms = nb.atoms_near(p, 3);
+
+    for (auto& nearby_atom: nearby_atoms) {
+        clipper::MMonomer nearby_monomer = mol[nearby_atom.polymer()][nearby_atom.monomer()];
+        NucleicAcidDB::NucleicAcid nearby_na = nearby_monomer;
+        clipper::Coord_orth delta = p - nearby_na.coord_o3();
+        if (delta.lengthsq() < pow(3, 2)) {
+            return nearby_atom.monomer();
+        }
+    }
+    return -1;
+}
+
+std::vector<clipper::MPolymer> NucleoFind::BackboneTracer::reorder_chain(std::vector<clipper::MMonomer> &monomers) {
+
+    if (monomers.empty()) return {};
+
+    clipper::MPolymer mp;
+    mp.set_id(1);
+    for (auto& m: monomers) {
+        mp.insert(m);
+    }
+    clipper::MModel model;
+    model.insert(mp);
+
+    clipper::MiniMol mol = {xgrid.spacegroup(), xgrid.cell()};
+    mol.model() = model;
+
+    clipper::MAtomNonBond nb = {mol, 3};
+    int start = 0;
+
+    int head = start;
+    while (true) {
+        NucleicAcidDB::NucleicAcid na = monomers[head];
+        int prev = find_prev_residue(nb, na, mol);
+        if (prev == -1) {
+            break;
+        }
+        head = prev;
+    }
+    // std::cout << "new head was found at " << head << std::endl;
+
+    std::vector<int> out;
+    out.reserve(monomers.size());
+
+    while (head != -1) {
+        NucleicAcidDB::NucleicAcid na = monomers[head];
+        out.push_back(head);
+        head = find_next_residue(nb, na, mol);
+        // std::cout << monomers[head].id() << " -> " ;
+    }
+    std::cout << std::endl;
+
+    std::vector<clipper::MMonomer> output = {};
+    for (int i = 0; i < out.size(); i++) {
+        monomers[out[i]].set_id(i);
+        output.emplace_back(monomers[out[i]]);
+    }
+    clipper::MPolymer polymer = create_clipper_polymer(monomers);
+
+    if (out.size() == monomers.size()) {
+        return {polymer};
+    }
+
+    std::unordered_set<int> out_set(out.begin(), out.end());
+    std::vector<clipper::MMonomer> missing_monomers = {};
+    for (int i = 0; i < monomers.size(); ++i) {
+        if (out_set.find(i) == out_set.end()) {
+            missing_monomers.push_back(monomers[i]);
+        }
+    }
+    clipper::MPolymer missing_polymer = create_clipper_polymer(missing_monomers);
+    return {polymer, missing_polymer};
 }
 
 

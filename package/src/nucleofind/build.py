@@ -27,6 +27,7 @@ class InputParameters:
     colinfree: str | pathlib.Path = ""
     em: bool = False
     cycles: int = 3
+    remove_clashing_protein: bool = True
 
 
 @dataclasses.dataclass
@@ -59,6 +60,7 @@ def main():
     parser.add_argument("--xmlout", required=False, default="")
     parser.add_argument("--cycles", required=False, default=3)
     parser.add_argument("--em", required=False, default=False, action='store_true')
+    parser.add_argument("--remove_clashing_protein", required=False, default=False, action=argparse.BooleanOptionalAction)
     parser.add_argument("-v", "--version", action="version", version=__version__)
 
     args = parser.parse_args()
@@ -117,7 +119,8 @@ def main():
         args.colin_fc,
         args.colin_free,
         args.em,
-        database
+        database,
+        args.remove_clashing_protein
     )
 
     output = Output(args.pdbout, args.xmlout)
@@ -144,7 +147,8 @@ def build(input_parameters: InputParameters, output_parameters: OutputParameters
         str(input_parameters.colinfc),
         str(input_parameters.colinfree),
         input_parameters.em,
-        database
+        database,
+        input_parameters.remove_clashing_protein
     )
     output = Output(str(output_parameters.pdbout), str(output_parameters.xmlout))
 
