@@ -27,9 +27,10 @@ run_cycle(const int verbose, const NucleicAcidTargets &natools, const clipper::M
     NucleicAcidTools::chain_sort(mol_wrk);
     NucleicAcidTools::chain_label(mol_wrk, clipper::MMDBManager::CIF);
     NucleicAcidTools::residue_label(mol_wrk);
-    if (strong_prune)
+    if (strong_prune) {
         mol_wrk = natools.strong_prune(mol_wrk);
-
+        std::cout << "Removing clashing protein..." << std::endl;
+    }
     mol_wrk = natools.grow(xwrk, mol_wrk, 25, 0.001);
     log.log("GROW", mol_wrk, verbose >= 5);
 
@@ -124,8 +125,6 @@ void run(NucleoFind::IO::Input &input, NucleoFind::IO::Output &output, int cycle
         mol_wrk = natools.link(xwrk, mol_wrk);
         log.log("FIND ML LINK", mol_wrk, verbose >= 5);
 
-        NautilusUtil::save_minimol(mol_wrk, "find.pdb");
-
         ModelTidy::chain_renumber(mol_wrk, seq_wrk);
         NucleicAcidTools::chain_sort(mol_wrk);
         if (mol_wrk_in.size() > 0) {
@@ -133,9 +132,9 @@ void run(NucleoFind::IO::Input &input, NucleoFind::IO::Output &output, int cycle
         }
         NucleicAcidTools::residue_label(mol_wrk);
 
-        for (int cyc = 0; cyc < 3; cyc++) {
+        for (int cyc = 0; cyc < cycles; cyc++) {
             std::cout << "ML Based cycle " << clipper::String(cyc + 1, 3) << std::endl << std::endl;
-            mol_wrk = run_cycle(verbose, natools, seq_wrk, mol_wrk, xwrk, log, true);
+            mol_wrk = run_cycle(verbose, natools, seq_wrk, mol_wrk, xwrk, log, input.do_remove_clashing_protein());
             NucleicAcidTools::chain_label(mol_wrk, clipper::MMDBManager::CIF);
             mol_wrk = NucleicAcidTools::chain_sort(mol_wrk);
             NucleicAcidTools::residue_label(mol_wrk);

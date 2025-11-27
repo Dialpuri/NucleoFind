@@ -26,10 +26,11 @@ nb::class_<NucleoFind::IO::Input>(m, "Input")
                  const std::string&,  // colin_fc
                  const std::string&, // colin_free
                  const bool&, // em
-                 const std::string& // database
+                 const std::string&, // database
+                 const bool& // remove_clashing_protein
              >(),
              "mtzin"_a, "seqin"_a, "pdbin"_a, "phospredin"_a, "sugarpredin"_a, "basepredin"_a, "colin_fo"_a,
-             "colin_hl"_a, "colin_phifom"_a, "colin_fc"_a, "colinfree"_a, "bool"_a, "database"_a, "Input to NucleoFind"
+             "colin_hl"_a, "colin_phifom"_a, "colin_fc"_a, "colinfree"_a, "bool"_a, "database"_a, "remove_clashing_protein"_a, "Input to NucleoFind"
              );
 
 nb::class_<NucleoFind::IO::Output>(m, "Output")
