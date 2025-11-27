@@ -103,6 +103,11 @@
                 <p>Enable EM mode</p>
                 <p>EM mode prevents phosphate position refinement </p>
             </def>
+            <def title="--remove_clashing_protein">
+                <p>Enable clashing protein removal</p>
+                <p>If protein is built into nucleic acid density, NucleoFind will remove it.
+                    It is unlikely NucleoFind will remove correct amino acids, but it is possible.</p>
+            </def>
         </deflist>
     </chapter>
     <seealso>
