@@ -603,7 +603,7 @@ clipper::MiniMol NucleoFind::BackboneTracer::build_chains() {
             continue;
         }
 
-        std::cout << "Found a kink in a nucleic acid chain, continuing assuming this is correct. It is wise to check this." << std::endl;
+        // std::cout << "Found a kink in a nucleic acid chain, continuing assuming this is correct. It is wise to check this." << std::endl;
 
         // if all are in the same direction, put them back together since it is likely one chain
         if ( std::adjacent_find( direction.begin(), direction.end(), std::not_equal_to<>() ) == direction.end() )

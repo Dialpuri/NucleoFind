@@ -147,7 +147,8 @@ def build(input_parameters: InputParameters, output_parameters: OutputParameters
         str(input_parameters.colinfc),
         str(input_parameters.colinfree),
         input_parameters.em,
-        database
+        database,
+        input_parameters.remove_clashing_protein
     )
     output = Output(str(output_parameters.pdbout), str(output_parameters.xmlout))
 
