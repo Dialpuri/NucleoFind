@@ -9,7 +9,7 @@ else
     cd clipper-gemmi
     git checkout gemmi
     find . -maxdepth 1 ! -name 'clipper' -delete
-    git apply ../../patches/*.patch
+    git apply ../../patches/clipper-*.patch
     cd ..
     mv clipper-gemmi clipper
     echo
@@ -64,11 +64,11 @@ if [ -r fftw3 ]; then
     echo "Using existing fftw3"
 else
     echo "Downloading out fftw-$fftw3_release"
-    curl -L http://www.fftw.org/fftw-$fftw3_release.tar.gz -o fftw-$fftw3_release.tar.gz
     echo
     echo "Unpacking fftw-$fftw3_release"
     tar xf fftw-$fftw3_release.tar.gz
     mv fftw-$fftw3_release fftw3
+    git apply ../patches/fftw3-*.patch
 fi
 echo
 
