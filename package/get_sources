@@ -64,6 +64,7 @@ if [ -r fftw3 ]; then
     echo "Using existing fftw3"
 else
     echo "Downloading out fftw-$fftw3_release"
+    curl -L http://www.fftw.org/fftw-$fftw3_release.tar.gz -o fftw-$fftw3_release.tar.gz
     echo
     echo "Unpacking fftw-$fftw3_release"
     tar xf fftw-$fftw3_release.tar.gz
