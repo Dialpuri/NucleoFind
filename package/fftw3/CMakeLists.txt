@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.13)
 project(fftw3-wrapper LANGUAGES C CXX)
 
 set(ENABLE_FLOAT ON CACHE BOOL "Build single precision FFTW" FORCE)
