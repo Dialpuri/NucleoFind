@@ -7,7 +7,7 @@ name = "nucleofind"
 dynamic = ["version"]
 description = "NucleoFind: A Deep-Learning Network for Interpreting Nucleic Acid Electron Density"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 authors = [
     { name = "Jordan Dialpuri", email = "jordan.dialpuri@york.ac.uk" },
 ]
