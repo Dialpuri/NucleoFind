@@ -1,11 +1,11 @@
 #  Copyright (c) 2024 Jordan Dialpuri, Jon Agirre, Kathryn Cowtan, Paul Bond and University of York. All rights reserved
 
 import dataclasses
-import pathlib
+from pathlib import Path
 import site
 import traceback
 from importlib.metadata import PackageNotFoundError
-
+from typing import Union
 
 from .nautilus_module import Input, Output, run
 import argparse
@@ -15,16 +15,16 @@ from .prediction.predict import predict_map
 
 @dataclasses.dataclass
 class InputParameters:
-    mtzin: str | pathlib.Path = ""
-    pdbin: str | pathlib.Path = ""
-    seqin: str | pathlib.Path = ""
-    phosin: str | pathlib.Path = ""
-    sugarin: str | pathlib.Path = ""
-    basein: str | pathlib.Path = ""
-    colinfo: str | pathlib.Path = ""
-    colinphifom: str | pathlib.Path = ""
-    colinfc: str | pathlib.Path = ""
-    colinfree: str | pathlib.Path = ""
+    mtzin: Union[Path, str] = ""
+    pdbin: Union[Path, str] = ""
+    seqin: Union[Path, str] = ""
+    phosin: Union[Path, str] = ""
+    sugarin: Union[Path, str] = ""
+    basein: Union[Path, str] = ""
+    colinfo: Union[Path, str] = ""
+    colinphifom: Union[Path, str] = ""
+    colinfc: Union[Path, str] = ""
+    colinfree: Union[Path, str] = ""
     em: bool = False
     cycles: int = 3
     remove_clashing_protein: bool = True
@@ -32,13 +32,13 @@ class InputParameters:
 
 @dataclasses.dataclass
 class OutputParameters:
-    pdbout: str | pathlib.Path = ""
-    xmlout: str | pathlib.Path = ""
+    pdbout: Union[Path, str] = ""
+    xmlout: Union[Path, str] = ""
 
 
 def find_database() -> str:
     for pkg in site.getsitepackages():
-        database_path = pathlib.Path(pkg) / "nucleofind_models" / "nucleofind-database.cif"
+        database_path = Path(pkg) / "nucleofind_models" / "nucleofind-database.cif"
         if database_path.exists():
             return str(database_path)
     return ""
