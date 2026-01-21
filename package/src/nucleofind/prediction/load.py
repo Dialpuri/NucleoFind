@@ -6,12 +6,13 @@ from .util import find_map_coefficients, check_density_path
 import onnxruntime as rt
 import sys
 import logging
+from typing import Optional, Union
 
 
 def load_mtz(
-    path: Path | str,
-    column_names: List[str] | None,
-    resolution_cutoff: float | None,
+    path: Union[Path, str],
+    column_names: Optional[List[str]],
+    resolution_cutoff: Optional[float],
 ) -> gemmi.FloatGrid:
     """Load MTZ file and transform to map with 0.7A grid spacing and with resolution cutoff if specified."""
     mtz = gemmi.read_mtz_file(str(path))
@@ -32,7 +33,7 @@ def load_mtz(
     return grid
 
 
-def load_map(path: Path | str) -> gemmi.FloatGrid:
+def load_map(path: Union[Path, str]) -> gemmi.FloatGrid:
     """Load map file and normalize"""
     map = gemmi.read_ccp4_map(str(path))
     grid = map.grid
@@ -41,9 +42,9 @@ def load_map(path: Path | str) -> gemmi.FloatGrid:
 
 
 def load_density(
-    density_path: Path | str,
-    column_names: List[str] | None,
-    resolution_cutoff: float | None,
+    density_path: Union[Path, str],
+    column_names: Optional[List[str]],
+    resolution_cutoff: Optional[float],
 ) -> gemmi.FloatGrid:
     """Load density from MTZ file, or map file"""
     density_path = check_density_path(density_path)
@@ -55,7 +56,7 @@ def load_density(
 
 
 def load_onnx_model(
-    model_path: Path | str, use_gpu: bool = True
+    model_path: Union[Path, str], use_gpu: bool = True
 ) -> rt.InferenceSession:
     """Load ONNX model from model_path"""
     providers = ["CPUExecutionProvider"]
