@@ -36,11 +36,14 @@ class NucleoFind:
         """
         i, j, k = translation
         input_sub = array[i : i + box_size, j : j + box_size, k : k + box_size]
-        input_sub = input_sub[np.newaxis, ..., np.newaxis].astype(np.float16)
 
-        return np.array(self.model.run(None, {input_name: input_sub})).reshape(
-            output_shape
-        ), translation
+        if input_sub.dtype != np.float16:
+            input_sub = input_sub.astype(np.float16, copy=False)
+
+        input_sub = input_sub[None, ..., None]
+        output = self.model.run(None, {input_name: input_sub})[0]
+        output = output.reshape(output_shape)
+        return output, translation
 
     def _run_prediction(self, work_grid: np.ndarray) -> np.ndarray:
         """Run prediction on work_grid and calculate the average predicted grid"""
@@ -52,8 +55,12 @@ class NucleoFind:
         count_array = np.zeros_like(total_array, dtype=np.float32)
 
         # Variance arrays for Welch's one pass variance method
-        variance_mean = np.zeros_like(total_array, dtype=np.float32)
-        variance_m2 = np.zeros_like(total_array, dtype=np.float32)
+        if self.configuration.compute_variance:
+            variance_mean = np.zeros_like(total_array, dtype=np.float32)
+            variance_m2 = np.zeros_like(total_array, dtype=np.float32)
+        else:
+            variance_mean = None
+            variance_m2 = None
 
         channels = self.configuration.channels
         input_name = self.model.get_inputs()[0].name
@@ -68,22 +75,21 @@ class NucleoFind:
 
         miniters = 1_000 if len(slices) > 10_000 else 1
         max_workers = self.configuration.n_threads
+
         if max_workers == 1:
-            results = list(tqdm(map(process_sample_worker, slices), total=len(slices), desc="Predicting", miniters=miniters, disable=self.configuration.disable_progress_bar))
+            iterator = map(process_sample_worker, slices)
         else:
-            with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                results = list(
-                    tqdm(
-                        executor.map(process_sample_worker, slices),
-                        total=len(slices),
-                        desc="Predicting",
-                        miniters=miniters,
-                        disable=self.configuration.disable_progress_bar,
-                    )
-                )
+            executor = ThreadPoolExecutor(max_workers=max_workers)
+            iterator = executor.map(process_sample_worker, slices)
 
         ones = np.ones(channels)
-        for result in tqdm(results, desc="Processing results"):
+        for result in tqdm(
+            iterator,
+            total=len(slices),
+            desc="Predicting",
+            miniters=miniters,
+            disable=self.configuration.disable_progress_bar,
+        ):
             predicted_sub, (i, j, k) = result
             box_slice = (
                 slice(i, i + box_size),
@@ -100,6 +106,9 @@ class NucleoFind:
                 variance_m2[box_slice] += delta_variance * (
                     total_array[box_slice] - variance_mean[box_slice]
                 )
+
+        if max_workers != 1:
+            executor.shutdown(wait=True)
 
         predicted_array = total_array / count_array
         if self.configuration.use_raw_values:
@@ -198,7 +207,7 @@ def predict_map(
     amplitude: str = "FWT",
     phase: str = "PHWT",
     overlap: int = None,
-    nthreads: int = 1
+    nthreads: int = 1,
 ):
     """Run prediction from Python"""
     logging.info(
