@@ -25,7 +25,12 @@ def parse_arguments() -> SimpleNamespace:
     )
     parser.add_argument("-r", "--resolution", nargs="?", help="Resolution cutoff")
     parser.add_argument(
-        "-n", "--nthreads", nargs="?", default=None, type=int, help="Number of threads to use"
+        "-n",
+        "--nthreads",
+        nargs="?",
+        default=1,
+        type=int,
+        help="Number of threads to use",
     )
     parser.add_argument(
         "--amplitude", "-f", nargs="?", help="Name of amplitude column in MTZ, e.g. FWT"
@@ -50,7 +55,9 @@ def parse_arguments() -> SimpleNamespace:
         "--variance", action=argparse.BooleanOptionalAction, help="Output variance map"
     )
     parser.add_argument(
-        "--raw", action=argparse.BooleanOptionalAction, help="Output raw map (no argmax)"
+        "--raw",
+        action=argparse.BooleanOptionalAction,
+        help="Output raw map (no argmax)",
     )
     parser.add_argument(
         "--gpu", action=argparse.BooleanOptionalAction, help="Use GPU (experimental)"

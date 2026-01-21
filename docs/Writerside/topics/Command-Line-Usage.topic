@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  - Copyright (c) 2024 Jordan Dialpuri, Jon Agirre, Kevin Cowtan, Paul Bond and University of York. All rights reserved
+  - Copyright (c) 2026 Jordan Dialpuri, Jon Agirre, Kevin Cowtan, Paul Bond and University of York. All rights reserved
   -->
 
 <!DOCTYPE topic
@@ -64,7 +64,8 @@
             </def>
             <def title="-n, --nthreads">
                 <p>Number of threads to use</p>
-                <p>Default: Max available</p>
+                <p>Default: 1</p>
+                <note>Try larger values for better performance. </note>
             </def>
             <def title="-f, --amplitude">
                 Column name of structure factor amplitudes.

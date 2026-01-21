@@ -1,7 +1,5 @@
 import os
 import site
-from tkinter.constants import RAISED
-
 import sys
 import urllib
 from pathlib import Path
@@ -23,9 +21,9 @@ from .errors import (
 
 class ModelType(Enum):
     """Types of NucleoFind Model available"""
+
     nano = 1
     core = 2
-
 
 
 def calculate_sha256(file_path: Path):
@@ -215,6 +213,17 @@ def get_model_config(model_path: Path, overlap: Optional[int]) -> SimpleNamespac
     if model_type not in ModelType.__members__:
         raise RuntimeError(f"Invalid model type - {model_type}")
     model_type = ModelType[model_type]
+    match model_type:
+        case ModelType.nano:
+            return SimpleNamespace(
+                box_size=128, overlap=64 if overlap is None else overlap
+            )
+        case ModelType.core:
+            return SimpleNamespace(
+                box_size=128, overlap=64 if overlap is None else overlap
+            )
+        case _:
+            raise RuntimeError(f"Invalid model type - {model_type}")
     if model_type == ModelType.nano:
         return SimpleNamespace(box_size=128, overlap=64 if overlap is None else overlap)
     if model_type == ModelType.core:
