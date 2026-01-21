@@ -9,6 +9,7 @@ on:
 jobs:
   check_versioning:
     name: Check versions match
+    if: github.event.release.prerelease == false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,6 +25,7 @@ jobs:
 
   run_tests:
     name: Run Python tests
+    if: github.event.release.prerelease == false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -63,6 +65,7 @@ jobs:
   build_sdist:
     needs: [ check_versioning, run_tests ]
     name: Build SDist
+    if: github.event.release.prerelease == false
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -139,6 +142,7 @@ jobs:
 
   upload_all:
     name: Upload if release
+    if: github.event.release.prerelease == false
     needs: [build_wheels, build_sdist]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
