@@ -23,8 +23,9 @@ env:
 
 jobs:
   build:
+    if: github.event.release.prerelease == false
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -45,6 +46,7 @@ jobs:
           retention-days: 7
 
   deploy:
+    if: github.event.release.prerelease == false
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
