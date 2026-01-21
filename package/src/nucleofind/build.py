@@ -1,4 +1,4 @@
-#  Copyright (c) 2024 Jordan Dialpuri, Jon Agirre, Kathryn Cowtan, Paul Bond and University of York. All rights reserved
+#  Copyright (c) 2026 Jordan Dialpuri, Jon Agirre, Kathryn Cowtan, Paul Bond and University of York. All rights reserved
 
 import dataclasses
 import pathlib
