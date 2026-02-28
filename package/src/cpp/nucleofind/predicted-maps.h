@@ -9,6 +9,8 @@
 #include <clipper/minimol/minimol.h>
 #include <gemmi/ccp4.hpp>
 #include <gemmi/model.hpp>
+#include <unordered_set>
+#include <unordered_map>
 #include "nucleofind-utils.h"
 
 namespace NucleoFind {

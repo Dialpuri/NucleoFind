@@ -4,6 +4,7 @@
 #include "nautilus-util.h"
 
 #include <fstream>
+#include <algorithm>
 #include <clipper/contrib/edcalc.h>
 #include "nautilus-tools.h"
 

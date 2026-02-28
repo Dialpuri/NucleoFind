@@ -6,7 +6,9 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 if(WIN32)
   set(CMAKE_BUILD_TYPE Release)
-  set(CMAKE_GENERATOR_PLATFORM x64)
+  if (CCP4BUILD)
+    set(CMAKE_GENERATOR_PLATFORM x64)
+  endif()
 endif()
 
 project(nucleofind LANGUAGES CXX)

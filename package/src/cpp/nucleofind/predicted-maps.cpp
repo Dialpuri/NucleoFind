@@ -13,7 +13,7 @@
 #include <clipper/minimol/minimol_utils.h>
 #include <gemmi/neighbor.hpp>
 
-#include "src/cpp/nautilus-util.h"
+#include "../nautilus-util.h"
 
 
 clipper::MiniMol NucleoFind::MapToPoints::locate_peaks(clipper::Xmap<float>& xwrk, clipper::Xmap<float>& xpred,
