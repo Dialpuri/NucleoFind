@@ -13,7 +13,7 @@
 
 #include <clipper/minimol/minimol_utils.h>
 #include "fragment-library.h"
-#include "src/cpp/nucleicacid_db.h"
+#include "../nucleicacid_db.h"
 
 namespace NucleoFind {
 
