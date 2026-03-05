@@ -31,10 +31,10 @@ def update_version_in_file(file_path, old_version, new_version):
 
 def main():
     parser = argparse.ArgumentParser(description="Bump project version.")
-    parser.add_argument("-major", action=argparse.BooleanOptionalAction)
-    parser.add_argument("-dryrun", action=argparse.BooleanOptionalAction)
-    parser.add_argument("-minor", action=argparse.BooleanOptionalAction)
-    parser.add_argument("-patch", action=argparse.BooleanOptionalAction)
+    parser.add_argument("--major", action=argparse.BooleanOptionalAction)
+    parser.add_argument("--dryrun", action=argparse.BooleanOptionalAction)
+    parser.add_argument("--minor", action=argparse.BooleanOptionalAction)
+    parser.add_argument("--patch", action=argparse.BooleanOptionalAction)
     args = parser.parse_args()
 
     # Update __version__.py
