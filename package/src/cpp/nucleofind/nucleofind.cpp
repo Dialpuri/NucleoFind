@@ -5,8 +5,8 @@
 #include "nucleofind.h"
 
 #include "backbone-tracing.h"
-#include "src/cpp/nautilus-tools.h"
-#include "src/cpp/nautilus-util.h"
+#include "../nautilus-tools.h"
+#include "../nautilus-util.h"
 
 clipper::MiniMol NucleoFind::Find::find(clipper::MiniMol &mol_wrk, bool refine) {
     clipper::MiniMol phosphate_peaks = MapToPoints::locate_peaks(m_xwrk, *m_phosphate, 0.1, refine);

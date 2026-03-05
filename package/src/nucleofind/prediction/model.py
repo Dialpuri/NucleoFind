@@ -103,7 +103,7 @@ def download_model(
 ):
     """Download model from HuggingFace"""
     latest_model = get_latest_model(type)
-    nucleofind_model_dir = folder / "nucleofind_models"
+    nucleofind_model_dir = Path(folder) / "nucleofind_models"
     nucleofind_model_dir.mkdir(exist_ok=True)
     model_path = nucleofind_model_dir / f"nucleofind-{type.name}.onnx"
 
@@ -153,11 +153,8 @@ def find_all_potential_models():
         return
 
     ccp4_model_path = clibd / "nucleofind_models"
-    if not ccp4_model_path.exists() and not potential_models:
-        show_missing_model_error()
-        return
-
-    potential_models += list(ccp4_model_path.glob(model_extension))
+    if ccp4_model_path.exists():
+        potential_models += list(ccp4_model_path.glob(model_extension))
 
     if not potential_models:
         show_missing_model_error()

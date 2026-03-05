@@ -4,8 +4,8 @@
 
 #include "backbone-tracing.h"
 
-#include "src/cpp/nautilus-tools.h"
-#include "src/cpp/nautilus-util.h"
+#include "../nautilus-tools.h"
+#include "../nautilus-util.h"
 
 void NucleoFind::BackboneTracer::determine_edge(int source_atom, int target_atom,
                                                 clipper::Coord_orth &current_atom_orth,
