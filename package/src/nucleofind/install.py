@@ -46,6 +46,7 @@ def install_model(type: model.ModelType, location: str, reinstall: bool) -> bool
             return False
 
         model.download_model(type=type, folder=clibd, reinstall=reinstall)
+        download_database(folder=clibd, reinstall=reinstall)
         return True
 
     if InstallLocation[location] == InstallLocation.site_packages:
@@ -58,6 +59,7 @@ def install_model(type: model.ModelType, location: str, reinstall: bool) -> bool
         model.download_model(type=type, folder=first_sitepackages, reinstall=reinstall)
         download_database(folder=first_sitepackages, reinstall=reinstall)
         return True
+    return False
 
 
 def run():
