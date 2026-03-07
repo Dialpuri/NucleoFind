@@ -22,7 +22,7 @@ def download_database(folder: Path, reinstall: bool = False, dry_run: bool = Fal
     nucleofind_model_dir.mkdir(exist_ok=True)
     model_path = nucleofind_model_dir / f"nucleofind-database.cif"
 
-    url = f"https://raw.githubusercontent.com/Dialpuri/NucleoFind/refs/heads/new-find/package/database.cif"
+    url = f"https://raw.githubusercontent.com/Dialpuri/NucleoFind/refs/heads/master/package/src/nucleofind/data/database.cif"
     logging.debug("Downloading database from %s", url)
     if not dry_run:
         urllib.request.urlretrieve(url, model_path)
