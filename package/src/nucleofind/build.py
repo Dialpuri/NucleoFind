@@ -1,7 +1,8 @@
 #  Copyright (c) 2026 Jordan Dialpuri, Jon Agirre, Kathryn Cowtan, Paul Bond and University of York. All rights reserved
 
 import dataclasses
-import pathlib
+import os
+from pathlib import Path
 import site
 import traceback
 from importlib.metadata import PackageNotFoundError
@@ -15,16 +16,16 @@ from .prediction.predict import predict_map
 
 @dataclasses.dataclass
 class InputParameters:
-    mtzin: str | pathlib.Path = ""
-    pdbin: str | pathlib.Path = ""
-    seqin: str | pathlib.Path = ""
-    phosin: str | pathlib.Path = ""
-    sugarin: str | pathlib.Path = ""
-    basein: str | pathlib.Path = ""
-    colinfo: str | pathlib.Path = ""
-    colinphifom: str | pathlib.Path = ""
-    colinfc: str | pathlib.Path = ""
-    colinfree: str | pathlib.Path = ""
+    mtzin: str | Path = ""
+    pdbin: str | Path = ""
+    seqin: str | Path = ""
+    phosin: str | Path = ""
+    sugarin: str | Path = ""
+    basein: str | Path = ""
+    colinfo: str | Path = ""
+    colinphifom: str | Path = ""
+    colinfc: str | Path = ""
+    colinfree: str | Path = ""
     em: bool = False
     cycles: int = 3
     remove_clashing_protein: bool = True
@@ -32,16 +33,22 @@ class InputParameters:
 
 @dataclasses.dataclass
 class OutputParameters:
-    pdbout: str | pathlib.Path = ""
-    xmlout: str | pathlib.Path = ""
+    pdbout: str | Path = ""
+    xmlout: str | Path = ""
 
 
 def find_database() -> str:
     for pkg in site.getsitepackages():
-        database_path = pathlib.Path(pkg) / "nucleofind_models" / "nucleofind-database.cif"
+        database_path = Path(pkg) / "nucleofind_models" / "nucleofind-database.cif"
         if database_path.exists():
             return str(database_path)
-    return ""
+
+    clibd = os.environ.get("CLIBD", "")
+    database_path = Path(clibd)  / "nucleofind_models" / "nucleofind-database.cif"
+    if database_path.exists():
+        return str(database_path)
+
+    raise RuntimeError("Could not find the NucleoFind database. Please install NucleoFind using the install command.")
 
 def main():
     parser = argparse.ArgumentParser(description="nucleofind build")

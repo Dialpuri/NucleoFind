@@ -18,7 +18,7 @@ class InstallLocation(enum.Enum):
 
 def download_database(folder: Path, reinstall: bool = False, dry_run: bool = False):
     """Download database from GitHub"""
-    nucleofind_model_dir = folder / "nucleofind_models"
+    nucleofind_model_dir = Path(folder) / "nucleofind_models"
     nucleofind_model_dir.mkdir(exist_ok=True)
     model_path = nucleofind_model_dir / f"nucleofind-database.cif"
 
