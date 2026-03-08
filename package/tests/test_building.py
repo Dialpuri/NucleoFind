@@ -42,7 +42,7 @@ def test_example(request):
 
 
 @pytest.fixture(scope='session')
-def parameters(data_base_path, test_example):
+def parameters(data_base_path, test_example, request):
     input = nucleofind_build.InputParameters()
     data_dir = data_base_path / test_example
     input.mtzin = data_dir / "hklout.mtz"
@@ -59,9 +59,10 @@ def parameters(data_base_path, test_example):
     input.colinfc = "FWT,PHWT"
     input.colinfree = "FREE"
 
-    os.environ["CLIBD"] = str(data_base_path)
-    os.environ["LD_LIBRARY_PATH"] = str(data_base_path)
-    os.environ["CCP4"] = str(data_base_path)
+    if not request.config.getoption("--ccp4"):
+        os.environ["CLIBD"] = str(data_base_path)
+        os.environ["LD_LIBRARY_PATH"] = str(data_base_path)
+        os.environ["CCP4"] = str(data_base_path)
 
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir = Path(tmpdir)
