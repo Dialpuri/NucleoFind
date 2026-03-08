@@ -43,7 +43,11 @@ def find_database() -> str:
         if database_path.exists():
             return str(database_path)
 
-    clibd = os.environ.get("CLIBD", "")
+    clibd = os.environ.get("CLIBD")
+    if not clibd:
+        raise RuntimeError("Could not find the NucleoFind database in site-packages or the CCP4 installation."
+                           " Please install NucleoFind using the install command.")
+
     database_path = Path(clibd)  / "nucleofind_models" / "nucleofind-database.cif"
     if database_path.exists():
         return str(database_path)
