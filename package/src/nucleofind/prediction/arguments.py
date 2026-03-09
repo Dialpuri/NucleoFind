@@ -46,10 +46,10 @@ def parse_arguments() -> SimpleNamespace:
         type=int,
     )
     parser.add_argument(
-        "--use-symmetry",
+        "--use-asu-only",
         action=argparse.BooleanOptionalAction,
         default=False,
-        help="Compute predictions for the entire unit cell",
+        help="Compute predictions for only the Asymmetric Unit",
     )
     parser.add_argument(
         "--variance", action=argparse.BooleanOptionalAction, help="Output variance map"

@@ -182,7 +182,7 @@ def run():
     configuration = Configuration(
         use_gpu=args.gpu,
         disable_progress_bar=args.silent,
-        compute_entire_unit_cell=False,
+        compute_entire_unit_cell=not args.use_asu_only,
         use_raw_values=args.raw,
         compute_variance=args.variance,
         n_threads=args.nthreads,
