@@ -101,7 +101,7 @@ def predictions_cmdline_asu(parameters) -> Path:
         str: The path to the output file.
     """
     output = parameters.output.parent / ("cmd_" + parameters.output.stem)
-    cmd = f'nucleofind -i "{parameters.mtzin}" -o "{output}" -m {parameters.model_name} --use-asu-only -n 4'
+    cmd = f'nucleofind -i "{parameters.mtzin}" -o "{output}" -m {parameters.model_name} --use-asu-only'
     os.system(cmd)
     return output
 
@@ -118,13 +118,13 @@ def predictions_cmdline_unit_cell(parameters) -> Path:
         str: The path to the output file.
     """
     output = parameters.output.parent / ("cmd_" + parameters.output.stem)
-    cmd = f'nucleofind -i "{parameters.mtzin}" -o "{output}" -m {parameters.model_name} -n 4'
+    cmd = f'nucleofind -i "{parameters.mtzin}" -o "{output}" -m {parameters.model_name}'
     os.system(cmd)
     return output
 
 
 
-def test_python_prediction(predictions_python, parameters, expected_md5sums):
+def test_python_prediction(predictions_python, parameters, expected_md5sums_asu):
     """
     This function is used to test the predictions made by a Python model. It compares the MD5 sums of the predictions
     to the known MD5 sums.
@@ -137,7 +137,7 @@ def test_python_prediction(predictions_python, parameters, expected_md5sums):
     Raises:
         AssertionError: An error occurs if the calculated prediction MD5 sums do not equal the known MD5 sums.
     """
-    compare_sums(expected_md5sums, parameters, predictions_python)
+    compare_sums(expected_md5sums_asu, parameters, predictions_python)
 
 
 def test_cmdline_prediction_asu(predictions_cmdline_asu, parameters, expected_md5sums_asu):
