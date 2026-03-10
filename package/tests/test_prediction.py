@@ -104,7 +104,7 @@ def predictions_cmdline_asu(parameters) -> Path:
         str: The path to the output file.
     """
     output = parameters.output.parent / ("cmd_" + parameters.output.stem)
-    cmd = f'nucleofind -i "{parameters.mtzin}" -o "{output}" -m {parameters.model_name} --use-asu-only'
+    cmd = f'nucleofind -i "{parameters.mtzin}" -o "{output}" -m {parameters.model_name}'
     os.system(cmd)
     return output
 
@@ -121,7 +121,7 @@ def predictions_cmdline_unit_cell(parameters) -> Path:
         str: The path to the output file.
     """
     output = parameters.output.parent / ("cmd_" + parameters.output.stem)
-    cmd = f'nucleofind -i "{parameters.mtzin}" -o "{output}" -m {parameters.model_name}'
+    cmd = f'nucleofind -i "{parameters.mtzin}" -o "{output}" -m {parameters.model_name} --use-unit-cell'
     os.system(cmd)
     return output
 
