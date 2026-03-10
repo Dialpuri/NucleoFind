@@ -10,43 +10,43 @@ from types import SimpleNamespace
 from nucleofind.prediction.config import MapType
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def data_base_path():
     return Path(__file__).parent / "test_data" / "5d5w"
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def expected_md5sums_asu(model_type):
     data = {
         "nano": SimpleNamespace(
-            phosphate = "615b7f3ee576dd19f2cd3ffc762013ff",
-            sugar = "cf60e8d12058021046cad1a1f5e17e65",
-            base = "a2737fd6cc3f08a12e468d888485af16"
+            phosphate="615b7f3ee576dd19f2cd3ffc762013ff",
+            sugar="cf60e8d12058021046cad1a1f5e17e65",
+            base="a2737fd6cc3f08a12e468d888485af16",
         ),
         "core": SimpleNamespace(
-            phosphate = "7351570fa904c36d806c4d1c20681c76",
-            sugar = "fdc128322bed205b39eb7f9fc39ff8a5",
-            base = "3ddd3206e340540e1471ef6f42132266"
-        )
+            phosphate="7351570fa904c36d806c4d1c20681c76",
+            sugar="fdc128322bed205b39eb7f9fc39ff8a5",
+            base="3ddd3206e340540e1471ef6f42132266",
+        ),
     }
     return data[model_type]
 
-@pytest.fixture(scope='session')
+
+@pytest.fixture(scope="session")
 def expected_md5sums_unit_cell(model_type):
     data = {
         "nano": SimpleNamespace(
-            phosphate = "7433e3929ccd6ba285bcdf2a02e0e569",
-            sugar = "bde3684708bc8bce76435b1035b2f506",
-            base = "19ea6321ff6bfe8229c0e806d312ae5a"
+            phosphate="7433e3929ccd6ba285bcdf2a02e0e569",
+            sugar="bde3684708bc8bce76435b1035b2f506",
+            base="19ea6321ff6bfe8229c0e806d312ae5a",
         ),
         "core": SimpleNamespace(
-            phosphate = "4ad09e5f26787d3e631539cc5d2e7e53",
-            sugar = "24c3758107b9e17ed07dd3cee57f49fb",
-            base = "d3a02b665db00be3e6bbcaec0874d7e8"
-        )
+            phosphate="4ad09e5f26787d3e631539cc5d2e7e53",
+            sugar="24c3758107b9e17ed07dd3cee57f49fb",
+            base="d3a02b665db00be3e6bbcaec0874d7e8",
+        ),
     }
     return data[model_type]
-
 
 
 def pytest_generate_tests(metafunc):
@@ -56,7 +56,8 @@ def pytest_generate_tests(metafunc):
         params = ["nano", "core", "ultra"] if runslow else ["core"]
         metafunc.parametrize("model_type", params, ids=params, scope="session")
 
-@pytest.fixture(scope='session')
+
+@pytest.fixture(scope="session")
 def parameters(data_base_path, model_type):
     mtzin = data_base_path / "hklout.mtz"
     colinfc = "FWT,PHWT"
@@ -68,11 +69,11 @@ def parameters(data_base_path, model_type):
             map_types=["phosphate", "sugar", "base"],
             mtzin=str(mtzin),
             colinfc=colinfc,
-            output=tmp_directory / "prediction"
-            )
+            output=tmp_directory / "prediction",
+        )
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def predictions_python(parameters) -> Path:
     """
     Run NucleoFind using the Python API.
@@ -85,11 +86,13 @@ def predictions_python(parameters) -> Path:
     """
     output = parameters.output.parent / ("python_" + parameters.output.stem)
     fwt, phwt = parameters.colinfc.split(",")
-    p.predict_map(parameters.model_name, parameters.mtzin, output, amplitude=fwt, phase=phwt)
+    p.predict_map(
+        parameters.model_name, parameters.mtzin, output, amplitude=fwt, phase=phwt
+    )
     return output
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def predictions_cmdline_asu(parameters) -> Path:
     """
     Run NucleoFind using the command line interface with only the ASU.
@@ -106,7 +109,7 @@ def predictions_cmdline_asu(parameters) -> Path:
     return output
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def predictions_cmdline_unit_cell(parameters) -> Path:
     """
     Run NucleoFind using the command line interface with the unit cell.
@@ -121,7 +124,6 @@ def predictions_cmdline_unit_cell(parameters) -> Path:
     cmd = f'nucleofind -i "{parameters.mtzin}" -o "{output}" -m {parameters.model_name}'
     os.system(cmd)
     return output
-
 
 
 def test_python_prediction(predictions_python, parameters, expected_md5sums_asu):
@@ -140,7 +142,9 @@ def test_python_prediction(predictions_python, parameters, expected_md5sums_asu)
     compare_sums(expected_md5sums_asu, parameters, predictions_python)
 
 
-def test_cmdline_prediction_asu(predictions_cmdline_asu, parameters, expected_md5sums_asu):
+def test_cmdline_prediction_asu(
+    predictions_cmdline_asu, parameters, expected_md5sums_asu
+):
     """
     This function is used to test the predictions made by a command line interface with only the ASU. It compares the
     MD5 sums of the predictions to the known MD5 sums.
@@ -152,11 +156,14 @@ def test_cmdline_prediction_asu(predictions_cmdline_asu, parameters, expected_md
 
     Raises:
         AssertionError: An error occurs if the calculated prediction MD5 sums do not equal the known MD5 sums.
-       """
+    """
     compare_sums(expected_md5sums_asu, parameters, predictions_cmdline_asu)
 
+
 @pytest.mark.slow
-def test_cmdline_prediction_unit_cell(predictions_cmdline_unit_cell, parameters, expected_md5sums_unit_cell):
+def test_cmdline_prediction_unit_cell(
+    predictions_cmdline_unit_cell, parameters, expected_md5sums_unit_cell
+):
     """
     This function is used to test the predictions made by a command line interface with only the ASU. It compares the
     MD5 sums of the predictions to the known MD5 sums.
@@ -168,9 +175,8 @@ def test_cmdline_prediction_unit_cell(predictions_cmdline_unit_cell, parameters,
 
     Raises:
         AssertionError: An error occurs if the calculated prediction MD5 sums do not equal the known MD5 sums.
-       """
+    """
     compare_sums(expected_md5sums_unit_cell, parameters, predictions_cmdline_unit_cell)
-
 
 
 def compare_sums(md5sums, parameters, base_path):

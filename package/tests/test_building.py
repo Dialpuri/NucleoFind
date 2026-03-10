@@ -7,7 +7,7 @@ import tempfile
 from pathlib import Path
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def expected_values(test_example):
     data = {
         "1hr2": {
@@ -15,33 +15,36 @@ def expected_values(test_example):
             "fragments_built": 9,
             "residues_built": 250,
             "residues_sequenced": 150,
-            "longest_fragment": 45
+            "longest_fragment": 45,
         },
         "5d5w": {
             "time": 20,
             "fragments_built": 1,
             "residues_built": 5,
             "residues_sequenced": 4,
-            "longest_fragment": 5
-        }
+            "longest_fragment": 5,
+        },
     }
     return data[test_example]
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def data_base_path():
     return Path(__file__).parent / "test_data"
 
 
-@pytest.fixture(scope='session', params=[
-    {"pdb": "1hr2"},
-    {"pdb": "5d5w"},
-])
+@pytest.fixture(
+    scope="session",
+    params=[
+        {"pdb": "1hr2"},
+        {"pdb": "5d5w"},
+    ],
+)
 def test_example(request):
-    return request.param['pdb']
+    return request.param["pdb"]
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def parameters(data_base_path, test_example, request):
     input = nucleofind_build.InputParameters()
     data_dir = data_base_path / test_example
@@ -72,7 +75,7 @@ def parameters(data_base_path, test_example, request):
         yield input, output
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def build(parameters):
     input, output = parameters
     start = time.time()
@@ -81,7 +84,7 @@ def build(parameters):
     return end - start
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def xml(build, parameters):
     _, output = parameters
     tree = ET.parse(output.xmlout)
@@ -99,7 +102,7 @@ def test_xmlout(build, parameters):
     assert os.path.exists(str(output.xmlout))
 
 
-def test_buildtime(build,  expected_values):
+def test_buildtime(build, expected_values):
     assert build < expected_values["time"]
 
 

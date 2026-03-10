@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+
 def get_md5_sums():
     core_md5sum = "86a612ef06930355d7ac87b30e97f779"
     nano_md5sum = "bd88177bd06d593675d9eb5498c0048f"
@@ -28,7 +29,9 @@ def perform_installation_test(model_type: str):
         folder = Path(folder)
         model_directory = list(folder.glob("nucleofind_models"))
         if model_directory:
-            possible_location = folder / "nucleofind_models" / f"nucleofind-{model_type}.onnx"
+            possible_location = (
+                folder / "nucleofind_models" / f"nucleofind-{model_type}.onnx"
+            )
             if possible_location.exists():
                 found_models = True
 
@@ -53,8 +56,7 @@ def test_core_install():
 def test_nano_install():
     perform_installation_test("nano")
 
+
 @pytest.mark.slow
 def test_ultra_install():
     perform_installation_test("ultra")
-
-

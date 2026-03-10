@@ -11,6 +11,6 @@ def test_doc_version():
     assert doc_path.exists()
     xml = ET.parse(str(doc_path))
     root = xml.getroot()
-    x = root.find('instance')
-    doc_version = x.attrib['version']
+    x = root.find("instance")
+    doc_version = x.attrib["version"]
     assert nf.__version__ == doc_version
