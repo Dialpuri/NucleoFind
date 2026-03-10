@@ -75,9 +75,9 @@
                 Column name of structure factor phases.
                 <p>Default: PHWT</p>
             </def>
-             <def title="--use-asu-only">
-                <p>Predict over the asymmetric unit only. </p><p>This is faster, but depending on the spacegroup,
-                 may produce worse predictions.</p>
+             <def title="--use-unit-cell">
+                <p>Predict over the unit cell. </p><p>This may be slower depending on the spacegroup,
+                 but may produce better predictions due to averaging.</p>
             </def>
 <!--            <def title="-raw">-->
 <!--                <p>Use raw predicted values to form the output map.</p>-->

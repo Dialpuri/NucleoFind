@@ -182,7 +182,7 @@ def run():
     configuration = Configuration(
         use_gpu=args.gpu,
         disable_progress_bar=args.silent,
-        compute_entire_unit_cell=not args.use_asu_only,
+        compute_entire_unit_cell=args.use_unit_cell,
         use_raw_values=args.raw,
         compute_variance=args.variance,
         n_threads=args.nthreads,
@@ -208,6 +208,7 @@ def predict_map(
     phase: str = "PHWT",
     overlap: int = None,
     nthreads: int = 1,
+    use_unit_cell: bool = False,
 ):
     """Run prediction from Python"""
     logging.info(
@@ -218,7 +219,7 @@ def predict_map(
     configuration = Configuration(
         use_gpu=False,
         disable_progress_bar=False,
-        compute_entire_unit_cell=False,
+        compute_entire_unit_cell=use_unit_cell,
         n_threads=nthreads,
         **vars(model_configuration),
     )
