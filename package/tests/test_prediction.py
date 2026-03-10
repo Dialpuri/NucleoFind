@@ -16,7 +16,7 @@ def data_base_path():
 
 
 @pytest.fixture(scope='session')
-def expected_md5sums(model_type):
+def expected_md5sums_asu(model_type):
     data = {
         "nano": SimpleNamespace(
             phosphate = "615b7f3ee576dd19f2cd3ffc762013ff",
@@ -30,6 +30,24 @@ def expected_md5sums(model_type):
         )
     }
     return data[model_type]
+
+@pytest.fixture(scope='session')
+def expected_md5sums_unit_cell(model_type):
+    data = {
+        "nano": SimpleNamespace(
+            phosphate = "7433e3929ccd6ba285bcdf2a02e0e569",
+            sugar = "bde3684708bc8bce76435b1035b2f506",
+            base = "19ea6321ff6bfe8229c0e806d312ae5a"
+        ),
+        "core": SimpleNamespace(
+            phosphate = "4ad09e5f26787d3e631539cc5d2e7e53",
+            sugar = "24c3758107b9e17ed07dd3cee57f49fb",
+            base = "d3a02b665db00be3e6bbcaec0874d7e8"
+        )
+    }
+    return data[model_type]
+
+
 
 def pytest_generate_tests(metafunc):
     """Generate model matrix with runslow option"""
@@ -72,9 +90,9 @@ def predictions_python(parameters) -> Path:
 
 
 @pytest.fixture(scope='session')
-def predictions_cmdline(parameters) -> Path:
+def predictions_cmdline_asu(parameters) -> Path:
     """
-    Run NucleoFind using the command line interface.
+    Run NucleoFind using the command line interface with only the ASU.
 
     Args:
         parameters (SimpleNamespace): A dictionary containing the necessary input parameters.
@@ -83,12 +101,30 @@ def predictions_cmdline(parameters) -> Path:
         str: The path to the output file.
     """
     output = parameters.output.parent / ("cmd_" + parameters.output.stem)
-    cmd = f'nucleofind -i "{parameters.mtzin}" -o "{output}" -m {parameters.model_name} --no-use-symmetry'
+    cmd = f'nucleofind -i "{parameters.mtzin}" -o "{output}" -m {parameters.model_name} --use-asu-only'
     os.system(cmd)
     return output
 
 
-def test_python_prediction(predictions_python, parameters, expected_md5sums):
+@pytest.fixture(scope='session')
+def predictions_cmdline_unit_cell(parameters) -> Path:
+    """
+    Run NucleoFind using the command line interface with the unit cell.
+
+    Args:
+        parameters (SimpleNamespace): A dictionary containing the necessary input parameters.
+
+    Returns:
+        str: The path to the output file.
+    """
+    output = parameters.output.parent / ("cmd_" + parameters.output.stem)
+    cmd = f'nucleofind -i "{parameters.mtzin}" -o "{output}" -m {parameters.model_name}'
+    os.system(cmd)
+    return output
+
+
+
+def test_python_prediction(predictions_python, parameters, expected_md5sums_asu):
     """
     This function is used to test the predictions made by a Python model. It compares the MD5 sums of the predictions
     to the known MD5 sums.
@@ -101,13 +137,13 @@ def test_python_prediction(predictions_python, parameters, expected_md5sums):
     Raises:
         AssertionError: An error occurs if the calculated prediction MD5 sums do not equal the known MD5 sums.
     """
-    compare_sums(expected_md5sums, parameters, predictions_python)
+    compare_sums(expected_md5sums_asu, parameters, predictions_python)
 
 
-def test_cmdline_prediction(predictions_cmdline, parameters, expected_md5sums):
+def test_cmdline_prediction_asu(predictions_cmdline_asu, parameters, expected_md5sums_asu):
     """
-    This function is used to test the predictions made by a command line interface. It compares the MD5 sums of the
-    predictions to the known MD5 sums.
+    This function is used to test the predictions made by a command line interface with only the ASU. It compares the
+    MD5 sums of the predictions to the known MD5 sums.
 
     Parameters:
     - predictions_python (path): Path to the output model base directory.
@@ -117,7 +153,23 @@ def test_cmdline_prediction(predictions_cmdline, parameters, expected_md5sums):
     Raises:
         AssertionError: An error occurs if the calculated prediction MD5 sums do not equal the known MD5 sums.
        """
-    compare_sums(expected_md5sums, parameters, predictions_cmdline)
+    compare_sums(expected_md5sums_asu, parameters, predictions_cmdline_asu)
+
+def test_cmdline_prediction_unit_cell(predictions_cmdline_unit_cell, parameters, expected_md5sums_unit_cell):
+    """
+    This function is used to test the predictions made by a command line interface with only the ASU. It compares the
+    MD5 sums of the predictions to the known MD5 sums.
+
+    Parameters:
+    - predictions_python (path): Path to the output model base directory.
+    - parameters (SimpleNamespace): A dictionary of parameters used in the predictions.
+    - md5sums (SimpleNamespace): A dictionary of MD5 sums corresponding to the predictions.
+
+    Raises:
+        AssertionError: An error occurs if the calculated prediction MD5 sums do not equal the known MD5 sums.
+       """
+    compare_sums(expected_md5sums_unit_cell, parameters, predictions_cmdline_unit_cell)
+
 
 
 def compare_sums(md5sums, parameters, base_path):

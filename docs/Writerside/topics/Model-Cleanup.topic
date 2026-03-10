@@ -6,7 +6,7 @@
        title="Model Cleanup" id="Model-Cleanup">
 
     <p>
-        NucleoFind uses a set of pre-trained machine learning models to predict where phosphate, sugar and base
+        NucleoFind uses a pre-trained machine learning model to predict where phosphate, sugar and base
         positions could be in an electron density map. If you want to delete the NucleoFind models you can use this tool.
     </p>
 

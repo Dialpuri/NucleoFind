@@ -7,10 +7,16 @@
                  start-page="About-NucleoFind.topic">
 
     <toc-element topic="About-NucleoFind.topic"/>
-    <toc-element topic="Installation.topic"/>
-    <toc-element topic="ModelInstallation.topic"/>
-    <toc-element topic="Command-Line-Usage.topic"/>
-    <toc-element topic="Python-Usage.topic"/>
+    <toc-element toc-title="Installation">
+        <toc-element topic="ModelInstallation.topic"/>
+        <toc-element topic="Installation.topic"/>
+    </toc-element>
+    <toc-element toc-title="Usage - Predictions" >
+        <toc-element topic="Command-Line-Usage.topic"/>
+        <toc-element topic="Python-Usage.topic"/>
+    </toc-element>
+    <toc-element toc-title="Usage - Building">
+        <toc-element topic="Model-Building.topic"/>
+    </toc-element>
     <toc-element topic="Model-Cleanup.topic"/>
-    <toc-element topic="Model-Building.topic"/>
 </instance-profile>

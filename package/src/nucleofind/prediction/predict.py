@@ -2,7 +2,7 @@ import functools
 import logging
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Union, Optional
 import numpy as np
 from tqdm import tqdm
 
@@ -16,7 +16,7 @@ from .config import Configuration, MapType
 
 
 class NucleoFind:
-    def __init__(self, model_path: Path | str, configuration: Configuration):
+    def __init__(self, model_path: Union[Path, str], configuration: Configuration):
         self.model_path = model_path
         self.configuration = configuration
 
@@ -123,9 +123,9 @@ class NucleoFind:
 
     def predict(
         self,
-        density_path: Path | str,
-        column_names: List[str] | List[None],
-        resolution_cutoff: float | None = None,
+        density_path: Union[Path, str],
+        column_names: Optional[List[str]],
+        resolution_cutoff: Optional[float] = None,
     ):
         """Run a nucleofind prediction on specified density file. If density file is an MTZ, supply column names and an
         optional resolution cutoff. If density file is a MAP, these will be ignored."""
@@ -150,7 +150,7 @@ class NucleoFind:
             )
             self.predicted_grids[MapType(i)] = interpolated_index_array
 
-    def save_grid(self, type: MapType, output_path: Path | str):
+    def save_grid(self, type: MapType, output_path: Union[Path, str]):
         """Save the predicted grid to directory specified by output_path, with filename nucleofind-{type}.map."""
         output_path = Path(output_path)
         output_path.mkdir(exist_ok=True, parents=True)
@@ -182,7 +182,7 @@ def run():
     configuration = Configuration(
         use_gpu=args.gpu,
         disable_progress_bar=args.silent,
-        compute_entire_unit_cell=False,
+        compute_entire_unit_cell=not args.use_asu_only,
         use_raw_values=args.raw,
         compute_variance=args.variance,
         n_threads=args.nthreads,

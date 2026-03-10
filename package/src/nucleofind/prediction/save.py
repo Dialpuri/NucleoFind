@@ -1,8 +1,10 @@
+from typing import Union
+
 import gemmi
 from pathlib import Path
 
 
-def save_grid(grid: gemmi.FloatGrid, path: Path | str):
+def save_grid(grid: gemmi.FloatGrid, path: Union[Path, str]):
     """Save grid to CCP4 map file."""
     map = gemmi.Ccp4Map()
     map.grid = grid

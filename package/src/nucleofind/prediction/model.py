@@ -5,7 +5,7 @@ import urllib
 from pathlib import Path
 import logging
 from types import SimpleNamespace
-from typing import Tuple, List
+from typing import Tuple, List, Union, Optional
 
 import requests
 from enum import Enum
@@ -21,9 +21,9 @@ from .errors import (
 
 class ModelType(Enum):
     """Types of NucleoFind Model available"""
-
     nano = 1
     core = 2
+
 
 
 def calculate_sha256(file_path: Path):
@@ -177,7 +177,7 @@ def extract_model_names(models: List[Path]) -> List[str]:
     return model_names
 
 
-def find_model(model: ModelType | str | None) -> Path | None:
+def find_model(model: Union[ModelType, str, None]) -> Optional[Path]:
     """Search through site-packages and CCP4/lib/data for a potential model"""
     potential_models = find_all_potential_models()
     if not potential_models:
@@ -204,20 +204,18 @@ def find_model(model: ModelType | str | None) -> Path | None:
     sys.exit(1)
 
 
-def get_model_config(model_path: Path, overlap: int | None) -> SimpleNamespace:
+def get_model_config(model_path: Path, overlap: Optional[int]) -> SimpleNamespace:
     """Get model configuration from model type"""
     model_type = model_path.stem.removeprefix("nucleofind-")
     if model_type not in ModelType.__members__:
         raise RuntimeError(f"Invalid model type - {model_type}")
     model_type = ModelType[model_type]
-    match model_type:
-        case ModelType.nano:
-            return SimpleNamespace(
+    if model_type == ModelType.nano:
+        return SimpleNamespace(
                 box_size=128, overlap=64 if overlap is None else overlap
             )
-        case ModelType.core:
-            return SimpleNamespace(
+    if model_type == ModelType.core:
+        return SimpleNamespace(
                 box_size=128, overlap=64 if overlap is None else overlap
             )
-        case _:
-            raise RuntimeError(f"Invalid model type - {model_type}")
+    raise RuntimeError(f"Invalid model type - {model_type}")

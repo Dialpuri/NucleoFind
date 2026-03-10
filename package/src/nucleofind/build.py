@@ -6,7 +6,7 @@ from pathlib import Path
 import site
 import traceback
 from importlib.metadata import PackageNotFoundError
-
+from typing import Union
 
 from .nautilus_module import Input, Output, run
 import argparse
@@ -16,16 +16,16 @@ from .prediction.predict import predict_map
 
 @dataclasses.dataclass
 class InputParameters:
-    mtzin: str | Path = ""
-    pdbin: str | Path = ""
-    seqin: str | Path = ""
-    phosin: str | Path = ""
-    sugarin: str | Path = ""
-    basein: str | Path = ""
-    colinfo: str | Path = ""
-    colinphifom: str | Path = ""
-    colinfc: str | Path = ""
-    colinfree: str | Path = ""
+    mtzin: Union[Path, str] = ""
+    pdbin: Union[Path, str] = ""
+    seqin: Union[Path, str] = ""
+    phosin: Union[Path, str] = ""
+    sugarin: Union[Path, str] = ""
+    basein: Union[Path, str] = ""
+    colinfo: Union[Path, str] = ""
+    colinphifom: Union[Path, str] = ""
+    colinfc: Union[Path, str] = ""
+    colinfree: Union[Path, str] = ""
     em: bool = False
     cycles: int = 3
     remove_clashing_protein: bool = True
@@ -33,8 +33,8 @@ class InputParameters:
 
 @dataclasses.dataclass
 class OutputParameters:
-    pdbout: str | Path = ""
-    xmlout: str | Path = ""
+    pdbout: Union[Path, str] = ""
+    xmlout: Union[Path, str] = ""
 
 
 def find_database() -> str:
@@ -43,7 +43,11 @@ def find_database() -> str:
         if database_path.exists():
             return str(database_path)
 
-    clibd = os.environ.get("CLIBD", "")
+    clibd = os.environ.get("CLIBD")
+    if not clibd:
+        raise RuntimeError("Could not find the NucleoFind database in site-packages or the CCP4 installation."
+                           " Please install NucleoFind using the install command.")
+
     database_path = Path(clibd)  / "nucleofind_models" / "nucleofind-database.cif"
     if database_path.exists():
         return str(database_path)
