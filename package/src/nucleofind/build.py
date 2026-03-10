@@ -45,14 +45,19 @@ def find_database() -> str:
 
     clibd = os.environ.get("CLIBD")
     if not clibd:
-        raise RuntimeError("Could not find the NucleoFind database in site-packages or the CCP4 installation."
-                           " Please install NucleoFind using the install command.")
+        raise RuntimeError(
+            "Could not find the NucleoFind database in site-packages or the CCP4 installation."
+            " Please install NucleoFind using the install command."
+        )
 
-    database_path = Path(clibd)  / "nucleofind_models" / "nucleofind-database.cif"
+    database_path = Path(clibd) / "nucleofind_models" / "nucleofind-database.cif"
     if database_path.exists():
         return str(database_path)
 
-    raise RuntimeError("Could not find the NucleoFind database. Please install NucleoFind using the install command.")
+    raise RuntimeError(
+        "Could not find the NucleoFind database. Please install NucleoFind using the install command."
+    )
+
 
 def main():
     parser = argparse.ArgumentParser(description="nucleofind build")
@@ -70,14 +75,21 @@ def main():
     parser.add_argument("--colin-free", required=False, default="")
     parser.add_argument("--xmlout", required=False, default="")
     parser.add_argument("--cycles", required=False, default=3)
-    parser.add_argument("--em", required=False, default=False, action='store_true')
-    parser.add_argument("--remove_clashing_protein", required=False, default=False, action=argparse.BooleanOptionalAction)
+    parser.add_argument("--em", required=False, default=False, action="store_true")
+    parser.add_argument(
+        "--remove_clashing_protein",
+        required=False,
+        default=False,
+        action=argparse.BooleanOptionalAction,
+    )
     parser.add_argument("-v", "--version", action="version", version=__version__)
 
     args = parser.parse_args()
 
     if not args.phosin and not args.preddirin:
-        parser.error("Please specify a predicted map, either -phosin, -sugarin, -basein or -preddirin")
+        parser.error(
+            "Please specify a predicted map, either -phosin, -sugarin, -basein or -preddirin"
+        )
 
     if args.phosin == "auto":
         print(
@@ -113,7 +125,9 @@ def main():
         args.basein = f"{args.preddirin}/nucleofind-base.map"
 
     if not args.colin_fc and not args.colin_phifom:
-        raise ValueError("Please specify columns for the phases, either FWT,PHWT or PHI,FOM")
+        raise ValueError(
+            "Please specify columns for the phases, either FWT,PHWT or PHI,FOM"
+        )
 
     database = find_database()
 
@@ -131,7 +145,7 @@ def main():
         args.colin_free,
         args.em,
         database,
-        args.remove_clashing_protein
+        args.remove_clashing_protein,
     )
 
     output = Output(args.pdbout, args.xmlout)
@@ -159,18 +173,19 @@ def build(input_parameters: InputParameters, output_parameters: OutputParameters
         str(input_parameters.colinfree),
         input_parameters.em,
         database,
-        input_parameters.remove_clashing_protein
+        input_parameters.remove_clashing_protein,
     )
     output = Output(str(output_parameters.pdbout), str(output_parameters.xmlout))
 
-    if not all([input_parameters.phosin, input_parameters.sugarin, input_parameters.basein]):
+    if not all(
+        [input_parameters.phosin, input_parameters.sugarin, input_parameters.basein]
+    ):
         raise RuntimeError("The phosphate, sugar and base predictions are required.")
 
     try:
         run(input, output, input_parameters.cycles)
     except:
         print(traceback.format_exc())
-
 
 
 # def build(mtzin: str, seqin: str, pdbin: str, phosin: str, sugarin: str, basein: str, colin_fo: str, colin_fc: str,

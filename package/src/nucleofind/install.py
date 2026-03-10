@@ -16,6 +16,7 @@ class InstallLocation(enum.Enum):
     site_packages = 0
     ccp4 = 1
 
+
 def download_database(folder: Path, reinstall: bool = False, dry_run: bool = False):
     """Download database from GitHub"""
     nucleofind_model_dir = Path(folder) / "nucleofind_models"
@@ -26,7 +27,6 @@ def download_database(folder: Path, reinstall: bool = False, dry_run: bool = Fal
     logging.debug("Downloading database from %s", url)
     if not dry_run:
         urllib.request.urlretrieve(url, model_path)
-
 
 
 def clibd_error_msg():
