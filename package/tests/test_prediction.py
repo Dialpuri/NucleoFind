@@ -155,6 +155,7 @@ def test_cmdline_prediction_asu(predictions_cmdline_asu, parameters, expected_md
        """
     compare_sums(expected_md5sums_asu, parameters, predictions_cmdline_asu)
 
+@pytest.mark.slow
 def test_cmdline_prediction_unit_cell(predictions_cmdline_unit_cell, parameters, expected_md5sums_unit_cell):
     """
     This function is used to test the predictions made by a command line interface with only the ASU. It compares the
