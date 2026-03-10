@@ -8,6 +8,7 @@ on:
       - '**/*.py'
       - '**/*.cpp'
       - '**/*.h'
+  workflow_dispatch:
 
 jobs:
   run_unix_tests:
