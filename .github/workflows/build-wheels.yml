@@ -117,7 +117,7 @@ jobs:
         mkdir checkout
         sh ./get_sources
 
-    - uses: pypa/cibuildwheel@v2.16
+    - uses: pypa/cibuildwheel@v3.4.0
       env:
         CIBW_BEFORE_ALL: pwd && ls
         # Cross-compile on macOS
