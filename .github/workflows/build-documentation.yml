@@ -2,12 +2,10 @@ name: Build documentation
 
 on:
   workflow_dispatch:
-  release:
+  workflow_run:
+    workflows: [ "Build and upload wheels" ]
     types:
-      - published
-    paths: 
-      - ../docs
-
+      - completed
 
 permissions:
   id-token: write
