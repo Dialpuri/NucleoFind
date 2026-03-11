@@ -1,8 +1,10 @@
 import functools
+import json
 import logging
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 from pathlib import Path
 from typing import List, Tuple, Union, Optional
+import gemmi
 import numpy as np
 from tqdm import tqdm
 
@@ -21,7 +23,7 @@ class NucleoFind:
         self.configuration = configuration
 
         self.model = None
-        self.predicted_grids = {}
+        self.predicted_grids: Dict[MapType, gemmi.FloatGrid] = {}
 
     def _process_sample(
         self,
@@ -172,6 +174,42 @@ class NucleoFind:
             output_path / f"nucleofind-{type.name}{suffix}",
         )
 
+    def apply_trim_correction(self, trim_shifts_path: Path | str):
+        """Apply trim correction to the predicted grids"""
+        with open(trim_shifts_path, "r") as f:
+            data = json.load(f)
+
+        cell = data.get("cell")
+        grid = data.get("grid")
+        new_cell = data.get("new_cell")
+        new_grid = data.get("new_grid")
+        starts = data.get("starts")
+
+        if (
+            cell is None
+            or grid is None
+            or new_cell is None
+            or new_grid is None
+            or starts is None
+        ):
+            raise ValueError("Invalid trim shift file")
+
+        for type_ in MapType:
+            if type_ == MapType.all or type_ not in self.predicted_grids:
+                continue
+            new_unit_cell = gemmi.UnitCell(*cell)
+            new_array = np.pad(
+                self.predicted_grids[type_].array,
+                (
+                    (starts[0], starts[0]),
+                    (starts[1], starts[1]),
+                    (starts[2], starts[2]),
+                ),
+                mode="constant",
+            )
+            new_gemmi_grid = gemmi.FloatGrid(new_array, new_unit_cell)
+            self.predicted_grids[type_] = new_gemmi_grid
+
 
 def run():
     """Run prediction from command line arguments"""
@@ -194,6 +232,8 @@ def run():
         [args.amplitude, args.phase],
     )
     output_dir = Path(args.output)
+    if args.trim_shifts_path:
+        nucleofind.apply_trim_correction(args.trim_shifts_path)
     nucleofind.save_grid(MapType.phosphate, output_dir)
     nucleofind.save_grid(MapType.sugar, output_dir)
     nucleofind.save_grid(MapType.base, output_dir)
