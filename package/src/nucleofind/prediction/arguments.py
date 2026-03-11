@@ -72,6 +72,12 @@ def parse_arguments() -> SimpleNamespace:
         help="Turn off progress bar",
     )
     parser.add_argument("--model_path", nargs="?", help="Path to model (development)")
+    parser.add_argument(
+        "--trim_shifts_path",
+        nargs="?",
+        type=str,
+        help="Path to trim shifts (development)",
+    )
     parser.add_argument("-v", "--version", action="version", version=__version__)
     args = vars(parser.parse_args())
     return SimpleNamespace(**args)
