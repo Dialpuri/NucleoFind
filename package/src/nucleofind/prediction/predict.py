@@ -172,6 +172,8 @@ class NucleoFind:
             output_path / f"nucleofind-{type.name}{suffix}",
         )
 
+    def is_null(self):
+        return not all([np.any(x) for x in self.predicted_grids.values()])
 
 def run():
     """Run prediction from command line arguments"""
@@ -193,6 +195,10 @@ def run():
         args.input,
         [args.amplitude, args.phase],
     )
+
+    if nucleofind.is_null():
+        logging.warning("Unfortunately, no positive predictions were made for this input. The output maps will be empty.")
+
     output_dir = Path(args.output)
     nucleofind.save_grid(MapType.phosphate, output_dir)
     nucleofind.save_grid(MapType.sugar, output_dir)
