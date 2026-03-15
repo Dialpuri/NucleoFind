@@ -28,7 +28,7 @@ def parse_arguments() -> SimpleNamespace:
         "-n",
         "--nthreads",
         nargs="?",
-        default=1,
+        default=0,
         type=int,
         help="Number of threads to use",
     )
@@ -61,6 +61,12 @@ def parse_arguments() -> SimpleNamespace:
     )
     parser.add_argument(
         "--gpu", action=argparse.BooleanOptionalAction, help="Use GPU (experimental)"
+    )
+    parser.add_argument(
+        "--max-memory",
+        nargs="?",
+        help="Maximum memory to use in Gigabytes (experimental). This option is only active when nthreads is not specified.",
+        type=float,
     )
     parser.add_argument(
         "--debug", action=argparse.BooleanOptionalAction, help="Turn on debug logging"
