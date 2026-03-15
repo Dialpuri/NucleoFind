@@ -63,7 +63,8 @@ def load_onnx_model(
     if use_gpu:
         providers.insert(0, "CUDAExecutionProvider")
     sess_options = rt.SessionOptions()
-    sess_options.intra_op_num_threads = 1
+    sess_options.graph_optimization_level = rt.GraphOptimizationLevel.ORT_ENABLE_EXTENDED
+
     try:
         return rt.InferenceSession(
             str(model_path), providers=providers, sess_options=sess_options
