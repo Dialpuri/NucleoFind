@@ -13,6 +13,7 @@ from .model import find_model, get_model_config
 from .save import save_grid
 from ..logs import setup_logging
 from .config import Configuration, MapType
+from .memory import calculate_n_from_max_memory
 
 
 class NucleoFind:
@@ -188,6 +189,17 @@ def run():
         n_threads=args.nthreads,
         **vars(model_configuration),
     )
+
+    # Set number of threads
+    # Default to 1 thread if no nthreads specified and no max_memory specified
+    # If max_memory specified, calculate nthreads based on max_memory
+    if args.nthreads == 0 and args.max_memory:
+        configuration.n_threads = calculate_n_from_max_memory(args.max_memory)
+    elif args.nthreads == 0 and not args.max_memory:
+        configuration.n_threads = 1
+    else:
+        configuration.n_threads = args.nthreads
+
     nucleofind = NucleoFind(model_path, configuration)
     nucleofind.predict(
         args.input,
