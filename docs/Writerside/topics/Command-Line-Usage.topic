@@ -91,6 +91,11 @@
                 <p>Use GPU acceleration. (Linux only)</p>
                 <b>Advanced</b>
             </def>
+            <def title="--max-memory">
+                <p>Set the number of threads based on the maximum amount of memory you would like NucleoFind to use. This option is
+                only active if `nthreads` is not specified.</p>
+                <warning>This feature does not explicitly limit memory usage. Use with caution.</warning>
+            </def>
 <!--            <def title="-model_path">-->
 <!--                <p>Path to ONNX model for use with a custom model.</p>-->
 <!--                <b>Advanced</b>-->
