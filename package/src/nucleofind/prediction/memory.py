@@ -40,7 +40,7 @@ def calculate_n_from_max_memory(max_memory: float):
         )
         return 1
 
-    if max_memory < 4 :
+    if max_memory < 4:
         return 1
 
     max_cpus = (max_memory - 1.21) // 2.45
