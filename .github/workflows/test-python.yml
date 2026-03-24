@@ -16,9 +16,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.9'
 
       - name: Install Clang
         run: |
@@ -44,6 +41,11 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v7
 
+      - name: Set up Python
+        run: uv python install
+        with:
+          python-version: '3.9'
+
       - name: Install NucleoFind
         run: uv pip install .
         working-directory: ./package
@@ -57,7 +59,7 @@ jobs:
           nucleofind-install -m nano
 
       - name: Run tests
-        run: pytest tests
+        run: uv run pytest tests
         working-directory: ./package
 
   run_windows_tests:
@@ -65,9 +67,6 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
 
       - uses: TheMrMilchmann/setup-msvc-dev@v3
         with:
@@ -82,6 +81,11 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v7
 
+      - name: Set up Python
+        run: uv python install
+        with:
+          python-version: '3.9'
+
       - name: Install NucleoFind
         run: uv pip install .
         working-directory: ./package
@@ -95,7 +99,7 @@ jobs:
           nucleofind-install -m core
 
       - name: Run tests
-        run: pytest tests
+        run: uv run pytest tests
         working-directory: ./package
 
 
