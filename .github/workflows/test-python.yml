@@ -41,12 +41,15 @@ jobs:
           ./get_sources
         working-directory: ./package
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
       - name: Install NucleoFind
-        run: pip install .
+        run: uv pip install .
         working-directory: ./package
 
       - name: Install pytest
-        run: pip install pytest
+        run: uv pip install pytest
 
       - name: Install NucleoFind models
         run: |
@@ -54,7 +57,7 @@ jobs:
           nucleofind-install -m nano
 
       - name: Run tests
-        run : pytest tests
+        run: pytest tests
         working-directory: ./package
 
   run_windows_tests:
@@ -76,31 +79,34 @@ jobs:
           sh get_sources
         working-directory: ./package
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
       - name: Install NucleoFind
-        run: pip install .
+        run: uv pip install .
         working-directory: ./package
 
       - name: Install pytest
-        run: pip install pytest
+        run: uv pip install pytest
 
       - name: Install NucleoFind models
-        run:  |
+        run: |
           nucleofind-install -m nano
           nucleofind-install -m core
 
       - name: Run tests
-        run : pytest tests
+        run: pytest tests
         working-directory: ./package
 
 
   debug:
-      needs: [run_unix_tests, run_windows_tests]
-      runs-on: ubuntu-latest
-      if: ${{ failure() }}
-      steps:
-        - uses: actions/checkout@v3
-        - name: Notify chat
-          uses: teknatha136/actions-google-chat-text-message@main
-          with:
-            google-chat-webhook: ${{ secrets.WEBHOOK_URL }}
-            text-message: ${{ github.actor }} attempted to merge a change into NucleoFind, but this PR failed testing. Link ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} \n
+    needs: [ run_unix_tests, run_windows_tests ]
+    runs-on: ubuntu-latest
+    if: ${{ failure() }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Notify chat
+        uses: teknatha136/actions-google-chat-text-message@main
+        with:
+          google-chat-webhook: ${{ secrets.WEBHOOK_URL }}
+          text-message: ${{ github.actor }} attempted to merge a change into NucleoFind, but this PR failed testing. Link ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} \n
