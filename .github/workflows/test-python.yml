@@ -50,11 +50,11 @@ jobs:
         run: uv python install
 
       - name: Install NucleoFind
-        run: uv pip install .
+        run: uv pip install . --break-system-packages
         working-directory: ./package
 
       - name: Install pytest
-        run: uv pip install pytest
+        run: uv pip install pytest --break-system-packages
 
       - name: Install NucleoFind models
         run: |
@@ -93,7 +93,7 @@ jobs:
         run: uv python install
 
       - name: Install NucleoFind
-        run: uv pip install .
+        run: uv pip install . --break-system-packages
         working-directory: ./package
 
       - name: Install pytest
@@ -105,7 +105,7 @@ jobs:
           nucleofind-install -m core
 
       - name: Run tests
-        run: uv run pytest tests
+        run: uv run pytest tests --break-system-packages
         working-directory: ./package
 
 
