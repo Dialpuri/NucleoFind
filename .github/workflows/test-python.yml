@@ -12,6 +12,9 @@ on:
 
 jobs:
   run_unix_tests:
+    env:
+      UV_SYSTEM_PYTHON: 1
+
     name: Run Python tests on Ubuntu
     runs-on: ubuntu-latest
     steps:
@@ -65,6 +68,9 @@ jobs:
   run_windows_tests:
     name: Run Python tests on Windows
     runs-on: windows-latest
+    env:
+      UV_SYSTEM_PYTHON: 1
+
     steps:
       - uses: actions/checkout@v4
 
