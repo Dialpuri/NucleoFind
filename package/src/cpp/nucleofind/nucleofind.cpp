@@ -39,7 +39,8 @@ clipper::MiniMol NucleoFind::Find::aggregate_nucleic_protein(clipper::MiniMol &f
 
     std::set<std::string> backbone_atoms = {"CA", "C", "O", "N"};
     for (int c = 0; c < mol.size(); c++) {
-        clipper::MPolymer mp;;
+        clipper::MPolymer mp;
+        mp.set_id(mol[c].id());
         for (int r = 0; r < mol[c].size(); r++) {
             if (to_remove.count({c, r}) != 0) {
                 clipper::MMonomer mon;
@@ -60,11 +61,9 @@ clipper::MiniMol NucleoFind::Find::aggregate_nucleic_protein(clipper::MiniMol &f
         if (mp.size() == 0) continue;
         find_result.insert(mp);
     }
-
+    
     NucleicAcidTools::chain_label(find_result, clipper::MMDBManager::Default);
-    NucleicAcidTools::residue_label(find_result);
     find_result = NucleicAcidTools::flag_chains(find_result);
-
     return find_result;
 }
 

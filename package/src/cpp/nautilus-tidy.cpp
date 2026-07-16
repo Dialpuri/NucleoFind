@@ -15,7 +15,8 @@ std::vector<int> ModelTidy::chain_renumber( clipper::MiniMol& mol, const clipper
 {
   std::vector<int> result( mol.size(), -1 );
   for ( int c = 0; c < mol.size(); c++ )
-    result[c] = chain_renumber( mol[c], seq );
+    if ( !mol[c].exists_property( "NON-NA" ) )
+      result[c] = chain_renumber( mol[c], seq );
   return result;
 }
 
