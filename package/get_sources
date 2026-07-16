@@ -69,7 +69,7 @@ else
     echo "Unpacking fftw-$fftw3_release"
     tar xf fftw-$fftw3_release.tar.gz
     mv fftw-$fftw3_release fftw3
-    git apply ../patches/fftw3-*.patch
+    git apply --ignore-whitespace ../patches/fftw3-*.patch
 fi
 echo
 
