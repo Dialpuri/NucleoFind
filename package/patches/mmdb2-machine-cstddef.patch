@@ -1,0 +1,5 @@
+--- a/package/checkout/mmdb2/mmdb2/mmdb_machine_.h
++++ b/package/checkout/mmdb2/mmdb2/mmdb_machine_.h
+@@ -44 +44,2 @@
+ #include "mmdb_mattype.h"
++#include <stddef.h>

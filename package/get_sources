@@ -34,6 +34,11 @@ else
     curl -L http://www.ysbl.york.ac.uk/jsd523/mmdb2-2.0.22.tar.gz -o mmdb2-2.0.22.tar.gz
     tar xf mmdb2-2.0.22.tar.gz
     ln -s mmdb2-2.0.22 mmdb2
+    python3 -c "
+f=open('mmdb2/mmdb2/mmdb_machine_.h','r'); c=f.read(); f.close()
+c=c.replace('#include \"mmdb_mattype.h\"','#include \"mmdb_mattype.h\"\n#include <stddef.h>')
+f=open('mmdb2/mmdb2/mmdb_machine_.h','w'); f.write(c); f.close()
+"
     echo
 fi
 
